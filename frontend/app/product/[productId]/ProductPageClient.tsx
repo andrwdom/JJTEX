@@ -350,15 +350,15 @@ export default function ProductPageClient({ productId }: ProductPageClientProps)
                   "name": product.name,
                   "image": product.images.length > 0 ? product.images : "/placeholder.svg",
                   "description": product.description,
-                  "sku": `SHITHAA-${productId}`,
-                  "mpn": `SHITHAA-${productId}`,
+                  "sku": `JJTEXTILES-${productId}`,
+                  "mpn": `JJTEXTILES-${productId}`,
                   "brand": {
                     "@type": "Brand",
-                    "name": "Shithaa"
+                    "name": "JJTextiles"
                   },
                   "offers": {
                     "@type": "Offer",
-                    "url": `https://shithaa.in/product/${productId}`,
+                    "url": `https://jjtextiles.in/product/${productId}`,
                     "priceCurrency": "INR",
                     "price": product.price,
                     "priceValidUntil": new Date(new Date().setFullYear(new Date().getFullYear() + 1)).toISOString().split('T')[0],
@@ -366,7 +366,7 @@ export default function ProductPageClient({ productId }: ProductPageClientProps)
                     "availability": product.stock > 0 ? "https://schema.org/InStock" : "https://schema.org/OutOfStock",
                     "seller": {
                       "@type": "Organization",
-                      "name": "Shithaa"
+                      "name": "JJTextiles"
                     }
                   },
                   "aggregateRating": {
@@ -393,19 +393,19 @@ export default function ProductPageClient({ productId }: ProductPageClientProps)
                       "@type": "ListItem",
                       "position": 1,
                       "name": "Home",
-                      "item": "https://shithaa.in"
+                      "item": "https://jjtextiles.in"
                     },
                     {
                       "@type": "ListItem",
                       "position": 2,
                       "name": product.category || "Product",
-                      "item": `https://shithaa.in/collections/${(product.category || "product").toLowerCase().replace(/ /g, '-')}`
+                      "item": `https://jjtextiles.in/collections/${(product.category || "product").toLowerCase().replace(/ /g, '-')}`
                     },
                     {
                       "@type": "ListItem",
                       "position": 3,
                       "name": product.name,
-                      "item": `https://shithaa.in/product/${productId}`
+                      "item": `https://jjtextiles.in/product/${productId}`
                     }
                   ]
                 })

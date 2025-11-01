@@ -54,7 +54,7 @@ async function processPhonePeWebhook(raw) {
         // Add required shipping info with defaults
         shippingInfo: {
           fullName: 'Webhook Order',
-          email: 'webhook@shithaa.in',
+          email: 'webhook@jjtextiles.in',
           phone: '0000000000',
           addressLine1: 'Webhook Address',
           city: 'Webhook City',
@@ -63,7 +63,7 @@ async function processPhonePeWebhook(raw) {
           country: 'India'
         },
         userInfo: {
-          email: 'webhook@shithaa.in',
+          email: 'webhook@jjtextiles.in',
           name: 'Webhook Order'
         },
         meta: {
@@ -139,7 +139,7 @@ async function processRazorpayWebhook(raw) {
         // Add required shipping info with defaults
         shippingInfo: {
           fullName: 'Webhook Order',
-          email: 'webhook@shithaa.in',
+          email: 'webhook@jjtextiles.in',
           phone: '0000000000',
           addressLine1: 'Webhook Address',
           city: 'Webhook City',
@@ -148,7 +148,7 @@ async function processRazorpayWebhook(raw) {
           country: 'India'
         },
         userInfo: {
-          email: 'webhook@shithaa.in',
+          email: 'webhook@jjtextiles.in',
           name: 'Webhook Order'
         },
         meta: {

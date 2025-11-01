@@ -160,7 +160,7 @@ class WebhookSetupVerifier {
 
     const username = process.env.PHONEPE_CALLBACK_USERNAME;
     const password = process.env.PHONEPE_CALLBACK_PASSWORD;
-    const baseUrl = process.env.BASE_URL || process.env.FRONTEND_URL || 'https://shithaa.in';
+    const baseUrl = process.env.BASE_URL || process.env.FRONTEND_URL || 'https://jjtextiles.in';
 
     const expectedWebhookUrl = `${baseUrl}/api/payment/phonepe/webhook`;
 

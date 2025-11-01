@@ -71,7 +71,7 @@ export function getCookieOptions(req, options = {}) {
         sameSite: 'lax',
         secure: isProduction,
         // Set domain for same-origin requests in production
-        domain: isProduction ? '.shithaa.in' : undefined
+        domain: isProduction ? '.jjtextiles.in' : undefined
     };
 }
 

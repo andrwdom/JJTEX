@@ -4,8 +4,8 @@ import styles from '../styles/informational-pages.module.css';
 
 // SEO Metadata for shipping info page
 export const metadata: Metadata = {
-  title: "Shipping Information - Shithaa",
-  description: "Learn about Shithaa's shipping policies, delivery times, and shipping costs. Shipping costs vary by location and product category.",
+  title: "Shipping Information - JJTextiles",
+  description: "Learn about JJTextiles's shipping policies, delivery times, and shipping costs. Shipping costs vary by location and product category.",
   keywords: [
     "shipping information",
     "delivery times",
@@ -118,8 +118,8 @@ export default function ShippingInfoPage() {
         <div className={styles.footerNote}>
           <p>
             For any shipping-related questions, contact us at{" "}
-            <a href="mailto:info.shithaa@gmail.com" className={styles.link}>
-              info.shithaa@gmail.com
+            <a href="mailto:info.jjtextiles@gmail.com" className={styles.link}>
+              info.jjtextiles@gmail.com
             </a>{" "}
             or DM us on Instagram for faster response.
           </p>

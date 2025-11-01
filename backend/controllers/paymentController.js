@@ -20,7 +20,7 @@ import EnhancedLogger from '../utils/enhancedLogger.js';
 
 // Helper function to get user email for orders
 const getOrderUserEmail = (req, email) => {
-    return req.user?.email || email || `guest@${process.env.BASE_URL?.replace('https://', '').replace('http://', '') || 'shithaa.in'}`;
+    return req.user?.email || email || `guest@${process.env.BASE_URL?.replace('https://', '').replace('http://', '') || 'jjtextiles.in'}`;
 };
 
 // Enhanced UPI decline handling for Indian market
@@ -679,7 +679,7 @@ export const createPhonePeSession = async (req, res) => {
     }
 
     // Create PhonePe payment request
-    const redirectUrl = `${process.env.FRONTEND_URL || 'https://shithaa.in'}/payment/phonepe/callback?merchantTransactionId=${phonepeTransactionId}`;
+    const redirectUrl = `${process.env.FRONTEND_URL || 'https://jjtextiles.in'}/payment/phonepe/callback?merchantTransactionId=${phonepeTransactionId}`;
     
     // Calculate final amount including shipping
     const finalAmount = checkoutSession.total;
@@ -1049,7 +1049,7 @@ export const phonePeCallback = async (req, res) => {
         }
 
         // Determine redirect URL for successful payment
-        const redirectUrl = `${process.env.FRONTEND_URL || 'https://shithaa.in'}/order-success?orderId=${order.orderId}`;
+        const redirectUrl = `${process.env.FRONTEND_URL || 'https://jjtextiles.in'}/order-success?orderId=${order.orderId}`;
 
         res.json({
           success: true,
@@ -1092,7 +1092,7 @@ export const phonePeCallback = async (req, res) => {
         }
 
         // Determine redirect URL for successful payment
-        const redirectUrl = `${process.env.FRONTEND_URL || 'https://shithaa.in'}/order-success?orderId=${order.orderId}`;
+        const redirectUrl = `${process.env.FRONTEND_URL || 'https://jjtextiles.in'}/order-success?orderId=${order.orderId}`;
 
             return res.json({
           success: true,
@@ -1151,7 +1151,7 @@ export const phonePeCallback = async (req, res) => {
       await releaseStockOnPaymentFailure(paymentSession, correlationId);
 
       // Determine redirect URL for failed payment
-      const redirectUrl = `${process.env.FRONTEND_URL || 'https://shithaa.in'}/payment-failed`;
+      const redirectUrl = `${process.env.FRONTEND_URL || 'https://jjtextiles.in'}/payment-failed`;
 
       res.json({
         success: false,

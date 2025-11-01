@@ -82,7 +82,7 @@ class SimpleWebhookProcessor {
         totalAmount: amount ? amount / 100 : 0,
         shippingInfo: {
           fullName: 'Webhook Order',
-          email: 'webhook@shithaa.in',
+          email: 'webhook@jjtextiles.in',
           phone: '0000000000',
           addressLine1: 'Webhook Address',
           city: 'Webhook City',
@@ -91,7 +91,7 @@ class SimpleWebhookProcessor {
           country: 'India'
         },
         userInfo: {
-          email: 'webhook@shithaa.in',
+          email: 'webhook@jjtextiles.in',
           name: 'Webhook Order'
         },
         meta: {

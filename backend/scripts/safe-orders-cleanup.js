@@ -134,7 +134,7 @@ async function verifyFunctionality() {
 }
 
 async function main() {
-  console.log('🚀 SAFE Orders Cleanup Script for shithaa.in');
+  console.log('🚀 SAFE Orders Cleanup Script for jjtextiles.in');
   console.log('============================================');
   console.log('   This will ONLY delete orders, keeping everything else!');
   

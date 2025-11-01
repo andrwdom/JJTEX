@@ -7,7 +7,7 @@ dotenv.config();
 // SECURITY: Script to create admin user with proper credentials
 async function seedAdmin() {
   try {
-    const adminEmail = process.env.ADMIN_EMAIL || 'admin@shithaa.in';
+    const adminEmail = process.env.ADMIN_EMAIL || 'admin@jjtextiles.in';
     const adminPassword = process.env.ADMIN_PASSWORD || 'Admin@123';
     
     if (!adminEmail || !adminPassword) {

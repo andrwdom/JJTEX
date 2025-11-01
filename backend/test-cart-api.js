@@ -1,6 +1,6 @@
 import fetch from 'node-fetch';
 
-const API_BASE = 'https://shithaa.in/api';
+const API_BASE = 'https://jjtextiles.in/api';
 const TEST_TOKEN = 'your-test-token-here'; // Replace with actual test token
 
 async function testCartAPI() {

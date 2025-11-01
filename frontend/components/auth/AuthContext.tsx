@@ -29,7 +29,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             // Show welcome message for new users
             if (firebaseUser.metadata?.creationTime && 
                 new Date(firebaseUser.metadata.creationTime).getTime() > Date.now() - 60000) {
-              toast.success(`🎉 Welcome to Shithaa, ${data.data.name || firebaseUser.displayName || 'there'}!`, {
+              toast.success(`🎉 Welcome to JJTextiles, ${data.data.name || firebaseUser.displayName || 'there'}!`, {
                 description: "You've been successfully signed in. Enjoy shopping!",
                 duration: 5000,
                 position: 'top-center',

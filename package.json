@@ -1,7 +1,7 @@
 {
-  "name": "shithaa-ecommerce",
+  "name": "jjtextiles-ecommerce",
   "version": "1.0.0",
-  "description": "Shithaa - Elegant Maternity & Feeding Wear E-commerce Platform",
+  "description": "JJTextiles - Elegant Maternity & Feeding Wear E-commerce Platform",
   "main": "ecosystem.config.js",
   "scripts": {
     "deploy": "chmod +x deploy.sh && ./deploy.sh deploy",
@@ -52,6 +52,6 @@
     "mongodb",
     "pm2"
   ],
-  "author": "Shithaa Team",
+  "author": "JJTextiles Team",
   "license": "ISC"
 }

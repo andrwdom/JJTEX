@@ -40,9 +40,9 @@ export const config = {
         port: parseInt(process.env.SMTP_PORT || '465', 10),
         user: process.env.EMAIL_USER,
         pass: process.env.EMAIL_PASS,
-        from_name: process.env.SMTP_FROM_NAME || 'Shithaa',
-        from_email: process.env.SMTP_FROM_EMAIL || 'noreply@shithaa.in',
-        support_email: process.env.SUPPORT_EMAIL || 'info.shithaa@gmail.com'
+        from_name: process.env.SMTP_FROM_NAME || 'JJTextiles',
+        from_email: process.env.SMTP_FROM_EMAIL || 'noreply@jjtextiles.in',
+        support_email: process.env.SUPPORT_EMAIL || 'info.jjtextiles@gmail.com'
     },
     
     // File Upload Configuration
@@ -82,8 +82,8 @@ export const config = {
         merchant_id: process.env.PHONEPE_MERCHANT_ID || '123456789',
         api_key: process.env.PHONEPE_API_KEY || 'test_api_key',
         salt_index: parseInt(process.env.PHONEPE_SALT_INDEX || '1', 10),
-        redirect_url: process.env.PHONEPE_REDIRECT_URL || 'https://shithaa.in/payment/phonepe/callback',
-        callback_url: process.env.PHONEPE_CALLBACK_URL || 'https://shithaa.in/api/payment/phonepe/webhook',
+        redirect_url: process.env.PHONEPE_REDIRECT_URL || 'https://jjtextiles.in/payment/phonepe/callback',
+        callback_url: process.env.PHONEPE_CALLBACK_URL || 'https://jjtextiles.in/api/payment/phonepe/webhook',
     },
   
     // Frontend URL for emails

@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 
 /**
- * Production Deployment Script for Shithaa E-commerce
+ * Production Deployment Script for JJTextiles E-commerce
  * Optimized for 30k+ Instagram followers traffic
  */
 
@@ -12,7 +12,7 @@ import { fileURLToPath } from 'url';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-console.log('🚀 Starting Production Deployment for Shithaa E-commerce...\n');
+console.log('🚀 Starting Production Deployment for JJTextiles E-commerce...\n');
 
 // Production optimizations
 const optimizations = [
@@ -124,7 +124,7 @@ console.log('\n🎉 Production deployment ready!');
 console.log('\nNext steps:');
 console.log('   1. Start the application: pm2 start ecosystem.config.cjs');
 console.log('   2. Monitor logs: pm2 logs');
-console.log('   3. Check health: curl https://shithaa.in/api/health');
+console.log('   3. Check health: curl https://jjtextiles.in/api/health');
 console.log('   4. Set up log rotation and monitoring alerts');
 // // // console.log('   5. Test critical user flows (browse, add to cart, checkout)');
 

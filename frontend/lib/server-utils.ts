@@ -9,7 +9,7 @@ export function getApiUrl(): string {
       return 'http://localhost:4000';
     } else {
       // For client-side in production, use the public API URL
-      return process.env.NEXT_PUBLIC_API_URL || 'https://shithaa.in';
+      return process.env.NEXT_PUBLIC_API_URL || 'https://jjtextiles.in';
     }
   }
 
@@ -42,7 +42,7 @@ export async function serverFetch(url: string, options?: RequestInit): Promise<R
       signal: controller.signal,
       headers: {
         'Content-Type': 'application/json',
-        'User-Agent': 'Shithaa-Server/1.0',
+        'User-Agent': 'JJTextiles-Server/1.0',
         ...options?.headers,
       },
     });
@@ -57,8 +57,8 @@ export async function serverFetch(url: string, options?: RequestInit): Promise<R
 
 // Fallback metadata for when API calls fail
 export const fallbackMetadata = {
-  title: "Premium Maternity Wear - Shithaa",
-  description: "Discover elegant maternity wear and feeding essentials at Shithaa. Premium quality, comfortable designs for expecting mothers.",
+  title: "Premium Maternity Wear - JJTextiles",
+  description: "Discover elegant maternity wear and feeding essentials at JJTextiles. Premium quality, comfortable designs for expecting mothers.",
   keywords: [
     "maternity wear",
     "feeding wear", 

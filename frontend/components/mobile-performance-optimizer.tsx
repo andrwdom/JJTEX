@@ -41,7 +41,7 @@ export default function MobilePerformanceOptimizer({ children }: MobileOptimizer
     // Preconnect to important domains for faster loading
     const preconnectLinks = [
       'https://fonts.googleapis.com',
-      'https://shithaa.in',
+      'https://jjtextiles.in',
     ];
     
     preconnectLinks.forEach(href => {
@@ -54,7 +54,7 @@ export default function MobilePerformanceOptimizer({ children }: MobileOptimizer
     
     // DNS prefetch for external resources
     const dnsPrefetchLinks = [
-      'https://api.shithaa.in',
+      'https://api.jjtextiles.in',
       'https://cdnjs.cloudflare.com',
     ];
     

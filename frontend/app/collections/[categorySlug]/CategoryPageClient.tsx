@@ -360,7 +360,7 @@ export default function CategoryPageClient({ categorySlug }: CategoryPageClientP
 
   return (
     <ErrorBoundary>
-      <PageLoading loadingMessage="Loading Shithaa Collection..." minLoadingTime={1500}>
+      <PageLoading loadingMessage="Loading JJTextiles Collection..." minLoadingTime={1500}>
         <div className="min-h-screen bg-gray-50 w-full overflow-x-hidden">
         <div className="flex w-full overflow-x-hidden">
           {/* Category Sidebar - Refined Design with Proper Bounds */}

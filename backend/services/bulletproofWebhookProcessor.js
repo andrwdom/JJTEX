@@ -446,12 +446,12 @@ class BulletproofWebhookProcessor {
       total: amountInRupees,
       cartItems: [], // Will be filled manually by admin
       userInfo: {
-        email: 'emergency@shithaa.in',
+        email: 'emergency@jjtextiles.in',
         name: 'Emergency Recovery Order'
       },
       shippingInfo: {
         fullName: 'EMERGENCY ORDER - REQUIRES MANUAL PROCESSING',
-        email: 'emergency@shithaa.in',
+        email: 'emergency@jjtextiles.in',
         phone: '0000000000',
         addressLine1: 'Emergency Recovery Order',
         city: 'Manual Processing',

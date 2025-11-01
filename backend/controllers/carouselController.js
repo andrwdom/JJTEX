@@ -83,7 +83,7 @@ export const createCarouselBanner = async (req, res) => {
     }
 
     try {
-      const baseUrl = process.env.BASE_URL || 'https://shithaa.in';
+      const baseUrl = process.env.BASE_URL || 'https://jjtextiles.in';
       const imageUrl = `${baseUrl}/images/carousel/${imageFile.filename}`;
 
       const banner = new CarouselBanner({
@@ -128,7 +128,7 @@ export const updateCarouselBanner = async (req, res) => {
     };
 
     if (imageFile) {
-      const baseUrl = process.env.BASE_URL || 'https://shithaa.in';
+      const baseUrl = process.env.BASE_URL || 'https://jjtextiles.in';
       const imageUrl = `${baseUrl}/images/carousel/${imageFile.filename}`;
       updateData.image = imageUrl;
     }

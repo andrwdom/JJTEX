@@ -19,7 +19,7 @@ const TEST_CONFIG = {
 // Test order data
 const testOrderData = {
     orderId: 'TEST-' + Date.now(),
-    email: 'test@shithaa.in',
+    email: 'test@jjtextiles.in',
     customerName: 'Test Customer',
     phone: '+91 9876543210',
     paymentMethod: 'PhonePe',
@@ -36,7 +36,7 @@ const testOrderData = {
     },
     shippingInfo: {
         fullName: 'Test Customer',
-        email: 'test@shithaa.in',
+        email: 'test@jjtextiles.in',
         phone: '+91 9876543210',
         addressLine1: '123 Test Street',
         city: 'Mumbai',

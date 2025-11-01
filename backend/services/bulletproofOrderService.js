@@ -228,7 +228,7 @@ class BulletproofOrderService {
           status: 'CONFIRMED',
           orderStatus: 'CONFIRMED',
           paymentStatus: 'PAID',
-          userInfo: paymentSession.userInfo || { email: 'emergency@shithaa.in' },
+          userInfo: paymentSession.userInfo || { email: 'emergency@jjtextiles.in' },
           shippingInfo: paymentSession.shippingInfo || {},
           cartItems: paymentSession.cartItems || [],
           total: paymentData.amount ? paymentData.amount / 100 : 0,

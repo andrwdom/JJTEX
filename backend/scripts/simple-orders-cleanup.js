@@ -17,7 +17,7 @@ const __dirname = dirname(__filename);
 dotenv.config({ path: join(__dirname, '..', '.env') });
 
 async function main() {
-  console.log('🚀 Simple Orders Cleanup for shithaa.in');
+  console.log('🚀 Simple Orders Cleanup for jjtextiles.in');
   console.log('========================================');
   
   try {

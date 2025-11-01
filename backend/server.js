@@ -103,9 +103,9 @@ app.set('trust proxy', 1)
 // SECURITY: Configure CORS for Production
 const allowedOrigins = process.env.NODE_ENV === 'production'
   ? [
-      'https://shithaa.in',
-      'https://www.shithaa.in',
-      'https://admin.shithaa.in',  // Admin panel
+      'https://jjtextiles.in',
+      'https://www.jjtextiles.in',
+      'https://admin.jjtextiles.in',  // Admin panel
       // Instagram in-app browser specific origins
       'https://www.instagram.com',
       'https://instagram.com',
@@ -311,7 +311,7 @@ app.use(helmet({
             "img-src": ["'self'", "data:", "blob:", "https:", "http:"],
             "script-src": ["'self'"],
             "style-src": ["'self'", "'unsafe-inline'"],
-            "connect-src": ["'self'", "https://shithaa.in", "https://admin.shithaa.in", "https://shitha-frontend.vercel.app", "https://admin.shithaa.com", "https://shithaa.com", "http://localhost:5173", "http://localhost:5174", "http://localhost:3000", "http://localhost:3001"],
+            "connect-src": ["'self'", "https://jjtextiles.in", "https://admin.jjtextiles.in", "https://jjtextiles-frontend.vercel.app", "https://admin.jjtextiles.com", "https://jjtextiles.com", "http://localhost:5173", "http://localhost:5174", "http://localhost:3000", "http://localhost:3001"],
             "frame-ancestors": ["'none'"],
         },
     }

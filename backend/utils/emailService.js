@@ -28,7 +28,7 @@ export const sendDraftRecoveryEmail = async (emailData) => {
     const transporter = createTransporter();
     
     const mailOptions = {
-      from: process.env.EMAIL_FROM || 'noreply@shithaa.in',
+      from: process.env.EMAIL_FROM || 'noreply@jjtextiles.in',
       to: emailData.to,
       subject: `Complete Your Order - ${emailData.orderId}`,
       html: generateRecoveryEmailHTML(emailData)
@@ -152,7 +152,7 @@ const generateRecoveryEmailHTML = (emailData) => {
             Having trouble? We're here to help!
           </p>
           <p style="font-size: 14px; color: #6c757d; margin: 5px 0;">
-            📧 Email: support@shithaa.in<br>
+            📧 Email: support@jjtextiles.in<br>
             📱 WhatsApp: +91 9876543210<br>
             🕒 Support: 9 AM - 9 PM (Mon-Sat)
           </p>
@@ -181,7 +181,7 @@ export const sendOrderStatusUpdate = async (emailData) => {
     const transporter = createTransporter();
     
     const mailOptions = {
-      from: process.env.EMAIL_FROM || 'noreply@shithaa.in',
+      from: process.env.EMAIL_FROM || 'noreply@jjtextiles.in',
       to: emailData.to,
       subject: `Order ${emailData.status} - ${emailData.orderId}`,
       html: generateOrderStatusHTML(emailData)
@@ -219,7 +219,7 @@ export const sendShippingNotification = async (emailData) => {
     const transporter = createTransporter();
     
     const mailOptions = {
-      from: process.env.EMAIL_FROM || 'noreply@shithaa.in',
+      from: process.env.EMAIL_FROM || 'noreply@jjtextiles.in',
       to: emailData.to,
       subject: `Your Order Has Shipped - ${emailData.orderId}`,
       html: generateShippingNotificationHTML(emailData)
@@ -257,7 +257,7 @@ export const sendPaymentFailureEmail = async (emailData) => {
     const transporter = createTransporter();
     
     const mailOptions = {
-      from: process.env.EMAIL_FROM || 'noreply@shithaa.in',
+      from: process.env.EMAIL_FROM || 'noreply@jjtextiles.in',
       to: emailData.to,
       subject: `Payment Failed - Order ${emailData.orderId}`,
       html: generatePaymentFailureHTML(emailData)
@@ -386,7 +386,7 @@ const generateOrderStatusHTML = (emailData) => {
         
         <div style="margin-top: 30px; padding-top: 20px; border-top: 1px solid #dee2e6;">
           <p style="font-size: 14px; color: #6c757d;">
-            Need help? Contact us at support@shithaa.in or WhatsApp +91 9876543210
+            Need help? Contact us at support@jjtextiles.in or WhatsApp +91 9876543210
           </p>
         </div>
       </div>
@@ -452,7 +452,7 @@ const generateShippingNotificationHTML = (emailData) => {
         </div>
         
         <div style="text-align: center; margin: 30px 0;">
-          <a href="https://shithaa.in/track/${trackingNumber}" 
+          <a href="https://jjtextiles.in/track/${trackingNumber}" 
              style="background: #17a2b8; color: white; padding: 15px 30px; text-decoration: none; border-radius: 6px; font-size: 18px; font-weight: bold; display: inline-block;">
             Track Your Package
           </a>
@@ -460,7 +460,7 @@ const generateShippingNotificationHTML = (emailData) => {
         
         <div style="margin-top: 30px; padding-top: 20px; border-top: 1px solid #dee2e6;">
           <p style="font-size: 14px; color: #6c757d;">
-            Questions about your shipment? Contact us at support@shithaa.in
+            Questions about your shipment? Contact us at support@jjtextiles.in
           </p>
         </div>
       </div>
@@ -519,7 +519,7 @@ const generatePaymentFailureHTML = (emailData) => {
         
         <div style="margin-top: 30px; padding-top: 20px; border-top: 1px solid #dee2e6;">
           <p style="font-size: 14px; color: #6c757d;">
-            Need help? Contact us at support@shithaa.in or WhatsApp +91 9876543210
+            Need help? Contact us at support@jjtextiles.in or WhatsApp +91 9876543210
           </p>
         </div>
       </div>

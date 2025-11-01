@@ -1,4 +1,4 @@
-# Shithaa - Elegant Maternity & Feeding Wear
+# JJTextiles - Elegant Maternity & Feeding Wear
 
 A modern, production-ready e-commerce platform for premium maternity wear and feeding essentials.
 
@@ -11,7 +11,7 @@ A modern, production-ready e-commerce platform for premium maternity wear and fe
 - **Filtering Logic**: Admin panel uses all possible status fields (`status`, `orderStatus`, `paymentStatus`)
 
 ### ✅ SEO & Branding Complete
-- **Site Title**: Updated to "Shithaa" throughout
+- **Site Title**: Updated to "JJTextiles" throughout
 - **Favicon**: Set to `/shitha-logo.jpg`
 - **Comprehensive Metadata**: All pages have proper SEO metadata with targeted keywords
 - **Open Graph & Twitter Cards**: Social media sharing optimized
@@ -99,7 +99,7 @@ shitha-maternity2/
    ```bash
    # Frontend (.env.local)
    NEXT_PUBLIC_API_URL=http://localhost:5000
-   NEXT_PUBLIC_SITE_URL=https://shithaa.in
+   NEXT_PUBLIC_SITE_URL=https://jjtextiles.in
    NEXT_PUBLIC_RAZORPAY_KEY_ID=your_razorpay_key
    
    # Backend (.env)
@@ -254,7 +254,7 @@ After deployment, create an admin user:
 ```bash
 cd backend
 # Set environment variables first
-export ADMIN_EMAIL=admin@shithaa.in
+export ADMIN_EMAIL=admin@jjtextiles.in
 export ADMIN_PASSWORD=your-secure-password
 
 # Run admin seeding
@@ -272,7 +272,7 @@ For technical support or questions:
 
 ## 📄 License
 
-This project is proprietary software for Shithaa. All rights reserved.
+This project is proprietary software for JJTextiles. All rights reserved.
 
 ---
 

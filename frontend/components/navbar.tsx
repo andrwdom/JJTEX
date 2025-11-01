@@ -138,7 +138,7 @@ export default function Navbar({ onCategoriesClick }: NavbarProps) {
                 onClick={() => (window.location.href = "/")}
                 className="navbar-logo-responsive font-bold text-[rgb(71,60,102)] tracking-wider font-serif hover:text-[rgb(71,60,102)]/80 transition-colors duration-300 cursor-pointer text-xl md:text-2xl"
               >
-                SHITHAA
+                JJTEXTILES
               </button>
 
               {/* Desktop Navigation Links - Left */}

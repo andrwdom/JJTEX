@@ -1,20 +1,20 @@
 module.exports = {
   apps: [
     {
-      name: 'shithaa-backend',
+      name: 'jjtextiles-backend',
       script: 'backend/server.js',
-      cwd: '/var/www/shithaa-ecom',
+      cwd: '/var/www/jjtextiles-ecom',
       instances: 1,
       exec_mode: 'fork',
       autorestart: true,
       watch: false,
       max_memory_restart: '1G',
-      env_file: '/var/www/shithaa-ecom/backend/.env',
+      env_file: '/var/www/jjtextiles-ecom/backend/.env',
       env: {
         NODE_ENV: 'production',
         PORT: 4000,
         LOG_LEVEL: 'info',
-        LOG_DIR: '/var/log/shithaa',
+        LOG_DIR: '/var/log/jjtextiles',
         SERVICE_NAME: 'payment-service'
       },
       error_file: './backend/logs/backend-err.log',
@@ -25,10 +25,10 @@ module.exports = {
       log_date_format: 'YYYY-MM-DD HH:mm:ss Z'
     },
     {
-      name: 'shithaa-frontend',
+      name: 'jjtextiles-frontend',
       script: 'npm',
       args: 'start',
-      cwd: '/var/www/shithaa-ecom/frontend',
+      cwd: '/var/www/jjtextiles-ecom/frontend',
       instances: 1,
       exec_mode: 'fork',
       autorestart: true,
@@ -44,10 +44,10 @@ module.exports = {
       time: true
     },
     {
-      name: 'shithaa-admin',
+      name: 'jjtextiles-admin',
       script: 'npm',
       args: 'run preview',
-      cwd: '/var/www/shithaa-ecom/admin',
+      cwd: '/var/www/jjtextiles-ecom/admin',
       instances: 1,
       exec_mode: 'fork',
       autorestart: true,
@@ -64,15 +64,15 @@ module.exports = {
     },
     
     {
-      name: 'shithaa-stock-cleanup-worker',
+      name: 'jjtextiles-stock-cleanup-worker',
       script: 'backend/workers/stockCleanupWorker.js',
-      cwd: '/var/www/shithaa-ecom',
+      cwd: '/var/www/jjtextiles-ecom',
       instances: 1,
       exec_mode: 'fork',
       autorestart: true,
       watch: false,
       max_memory_restart: '500M',
-      env_file: '/var/www/shithaa-ecom/backend/.env',
+      env_file: '/var/www/jjtextiles-ecom/backend/.env',
       env: {
         NODE_ENV: 'production'
       },
@@ -82,15 +82,15 @@ module.exports = {
       time: true
     },
     {
-      name: 'shithaa-reservation-expiry-worker',
+      name: 'jjtextiles-reservation-expiry-worker',
       script: 'backend/workers/reservationExpiryWorker.js',
-      cwd: '/var/www/shithaa-ecom',
+      cwd: '/var/www/jjtextiles-ecom',
       instances: 1,
       exec_mode: 'fork',
       autorestart: true,
       watch: false,
       max_memory_restart: '500M',
-      env_file: '/var/www/shithaa-ecom/backend/.env',
+      env_file: '/var/www/jjtextiles-ecom/backend/.env',
       env: {
         NODE_ENV: 'production'
       },
@@ -99,6 +99,6 @@ module.exports = {
       log_file: './backend/logs/reservation-expiry-worker-combined.log',
       time: true
     }
-    // REMOVED: shithaa-reconcile-payments to avoid conflict with existing shithaa-reconciliation-worker
+    // REMOVED: jjtextiles-reconcile-payments to avoid conflict with existing jjtextiles-reconciliation-worker
   ]
 };
