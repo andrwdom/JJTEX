@@ -12,7 +12,7 @@ module.exports = {
       env_file: '/var/www/jjtextiles-ecom/backend/.env',
       env: {
         NODE_ENV: 'production',
-        PORT: 4000,
+        PORT: 4100,
         LOG_LEVEL: 'info',
         LOG_DIR: '/var/log/jjtextiles',
         SERVICE_NAME: 'payment-service'
@@ -36,7 +36,7 @@ module.exports = {
       max_memory_restart: '1G',
       env: {
         NODE_ENV: 'production',
-        PORT: 3000
+        PORT: 3001
       },
       error_file: './frontend/logs/frontend-err.log',
       out_file: './frontend/logs/frontend-out.log',
@@ -55,7 +55,7 @@ module.exports = {
       max_memory_restart: '1G',
       env: {
         NODE_ENV: 'production',
-        PORT: 4173
+        PORT: 4174
       },
       error_file: './admin/logs/admin-err.log',
       out_file: './admin/logs/admin-out.log',
