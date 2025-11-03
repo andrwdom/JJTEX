@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { assets } from '../assets/assets';
-import shithaLogo from '../assets/shithaa_logo.jpg'; 
+import shithaLogo from '../assets/logo1.png'; 
 
 const LoadingScreen = () => {
   const [isVisible, setIsVisible] = useState(true);
@@ -48,7 +48,7 @@ const LoadingScreen = () => {
           >
             <motion.img
               src={shithaLogo}
-              alt="Shitha Logo"
+              alt="JJTextiles Logo"
               className="w-48 mb-4"
               initial={{ y: 40, opacity: 0, scale: 0.7 }}
               animate={{ y: showLogo ? 0 : 40, opacity: showLogo ? 1 : 0, scale: showLogo ? 1 : 0.7 }}

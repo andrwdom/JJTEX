@@ -22,7 +22,7 @@ export const metadata: Metadata = {
   openGraph: {
     title: "About Shithaa - Our Story & Mission | Elegant Maternity Wear",
     description: "Discover the story behind Shithaa - founded with love and understanding for expecting mothers. Learn about our mission to create elegant maternity wear, mom wear, and feeding dresses.",
-    images: ['/shithaa-logo.jpg'],
+    images: ['/logo1.png'],
     type: 'website',
     url: 'https://shithaa.in/about',
     siteName: 'Shithaa',
@@ -31,6 +31,6 @@ export const metadata: Metadata = {
     title: "About Shithaa - Our Story & Mission | Elegant Maternity Wear",
     description: "Discover the story behind Shithaa - founded with love and understanding for expecting mothers. Learn about our mission to create elegant maternity wear, mom wear, and feeding dresses.",
     card: 'summary_large_image',
-    images: ['/shithaa-logo.jpg'],
+    images: ['/logo1.png'],
   },
 }

@@ -11,13 +11,13 @@ export const generateMetadata = async ({ params }: { params: Promise<{ productId
     openGraph: {
       title: "Premium Maternity Wear - Shithaa",
       description: "Discover elegant maternity wear and feeding essentials at Shithaa.",
-      images: ['/shithaa-logo.jpg'],
+      images: ['/logo1.png'],
       type: 'website',
     },
     twitter: {
       title: "Premium Maternity Wear - Shithaa",
       description: "Discover elegant maternity wear and feeding essentials at Shithaa.",
-      images: ['/shithaa-logo.jpg'],
+      images: ['/logo1.png'],
       card: 'summary_large_image',
     },
   }

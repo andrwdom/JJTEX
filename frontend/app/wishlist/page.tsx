@@ -19,7 +19,7 @@ export const metadata: Metadata = {
   openGraph: {
     title: "Wishlist - Shithaa Maternity Wear | Save Your Favorites",
     description: "Save your favorite maternity wear, mom wear, and feeding dresses to your wishlist. Create your dream collection of elegant pregnancy clothing.",
-    images: ['/shithaa-logo.jpg'],
+    images: ['/logo1.png'],
     type: 'website',
     url: 'https://shithaa.in/wishlist',
     siteName: 'Shithaa',
@@ -28,7 +28,7 @@ export const metadata: Metadata = {
     title: "Wishlist - Shithaa Maternity Wear | Save Your Favorites",
     description: "Save your favorite maternity wear, mom wear, and feeding dresses to your wishlist. Create your dream collection of elegant pregnancy clothing.",
     card: 'summary_large_image',
-    images: ['/shithaa-logo.jpg'],
+    images: ['/logo1.png'],
   },
 }
 

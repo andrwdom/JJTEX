@@ -36,14 +36,14 @@ export const generateMetadata = async ({ params }: { params: Promise<{ categoryS
     openGraph: {
       title: title,
       description: description,
-      images: ['/shithaa-logo.jpg'],
+      images: ['/logo1.png'],
       type: 'website',
       url: `https://shithaa.in/collections/${categorySlug}`,
     },
     twitter: {
       title: title,
       description: description,
-      images: ['/shithaa-logo.jpg'],
+      images: ['/logo1.png'],
       card: 'summary_large_image',
     },
   }

@@ -9,19 +9,19 @@
   "orientation": "portrait-primary",
   "icons": [
     {
-      "src": "/shithaa-logo.jpg",
+      "src": "/logo1.png",
       "sizes": "192x192",
       "type": "image/jpeg",
       "purpose": "any maskable"
     },
     {
-      "src": "/shithaa-logo.jpg",
+      "src": "/logo1.png",
       "sizes": "512x512",
       "type": "image/jpeg",
       "purpose": "any maskable"
     },
     {
-      "src": "/shithaa-logo.jpg",
+      "src": "/logo1.png",
       "sizes": "180x180",
       "type": "image/jpeg",
       "purpose": "any"

@@ -1,5 +1,5 @@
 import Image from "next/image";
-import logo from "@/public/shithaa-logo.jpg";
+import logo from "@/public/logo1.png";
 
 export default function Loading() {
   return (
@@ -7,7 +7,7 @@ export default function Loading() {
       <div className="mb-8">
         <Image
           src={logo}
-          alt="Shithaa - Elegant Maternity Wear"
+          alt="JJTextiles - Elegant Maternity Wear"
           width={120}
           height={120}
           className="animate-fade-pulse"

@@ -21,7 +21,7 @@ export const metadata: Metadata = {
   openGraph: {
     title: "Return Policy - Shithaa | Premium Maternity Wear Returns & Exchanges",
     description: "Learn about Shithaa's refund and exchange policy. Refunds and exchanges are only applicable for damaged products.",
-    images: ['/shithaa-logo.jpg'],
+    images: ['/logo1.png'],
   },
   twitter: {
     title: "Return Policy - Shithaa | Premium Maternity Wear Returns & Exchanges",

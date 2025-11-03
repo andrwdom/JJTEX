@@ -21,7 +21,7 @@ export const metadata: Metadata = {
   openGraph: {
     title: "Shipping Information - Shithaa",
     description: "Learn about Shithaa's shipping policies, delivery times, and shipping costs. Shipping costs vary by location and product category.",
-    images: ['/shithaa-logo.jpg'],
+    images: ['/logo1.png'],
   },
   twitter: {
     title: "Shipping Information - Shithaa",

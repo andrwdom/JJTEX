@@ -1,7 +1,7 @@
 "use client"
 
 import Image from "next/image"
-import logo from "@/public/shithaa-logo.jpg"
+import logo from "@/public/logo1.png"
 interface LoadingScreenProps {
   message?: string
 }
@@ -13,7 +13,7 @@ export default function LoadingScreen({ message = "Loading..." }: LoadingScreenP
       <div className="mb-8">
         <Image
           src={logo}
-          alt="Shithaa - Elegant Maternity Wear"
+          alt="JJTextiles - Elegant Maternity Wear"
           width={200}
           height={200}
           className="animate-fade-pulse"

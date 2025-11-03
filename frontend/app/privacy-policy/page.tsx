@@ -17,7 +17,7 @@ export const metadata: Metadata = {
   openGraph: {
     title: "Privacy Policy - Shithaa | Maternity Wear Privacy",
     description: "Read the Privacy Policy for Shithaa. Learn how we collect, use, and protect your personal information when shopping for premium maternity wear.",
-    images: ['/shithaa-logo.jpg'],
+    images: ['/logo1.png'],
   },
   twitter: {
     title: "Privacy Policy - Shithaa | Maternity Wear Privacy",

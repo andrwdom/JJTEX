@@ -21,7 +21,7 @@ export const metadata: Metadata = {
   openGraph: {
     title: "Size Guide - Shithaa Maternity Wear | Find Your Perfect Fit",
     description: "Find your perfect fit with our comprehensive size guide for maternity wear, mom wear, and zipless feeding loungewear.",
-    images: ['/shithaa-logo.jpg'],
+    images: ['/logo1.png'],
     type: 'website',
     url: 'https://shithaa.in/sizing-guide',
     siteName: 'Shithaa',
@@ -30,7 +30,7 @@ export const metadata: Metadata = {
     title: "Size Guide - Shithaa Maternity Wear | Find Your Perfect Fit",
     description: "Find your perfect fit with our comprehensive size guide for maternity wear, mom wear, and zipless feeding loungewear.",
     card: 'summary_large_image',
-    images: ['/shithaa-logo.jpg'],
+    images: ['/logo1.png'],
   },
 }
 

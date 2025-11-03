@@ -2,7 +2,7 @@ import axios from 'axios'
 import React, { useState } from 'react'
 import { toast } from 'react-toastify'
 import { assets } from '../assets/assets'
-import shithaLogo from '../assets/shithaa_logo.jpg'
+import shithaLogo from '../assets/logo1.png'
 import { backendUrl } from '../App'
 
 const Login = ({setToken}) => {
@@ -47,7 +47,7 @@ const Login = ({setToken}) => {
     <div className='min-h-screen flex items-center justify-center w-full bg-theme-50'>
         <div className='bg-white shadow-lg rounded-lg px-8 py-6 max-w-md w-full mx-4'>
             <div className="flex justify-center mb-6">
-                <img src={shithaLogo} alt="Shitha Logo" className="w-32" />
+                <img src={shithaLogo} alt="JJTextiles Logo" className="w-32" />
             </div>
             <h1 className='text-2xl font-bold mb-6 text-theme-600 text-center'>Admin Panel</h1>
             

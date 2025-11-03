@@ -24,7 +24,7 @@ export const metadata: Metadata = {
   openGraph: {
     title: "Contact Shithaa - Get in Touch | Maternity Wear Support",
     description: "Contact Shithaa for any questions about our maternity wear, mom wear, and feeding essentials. We're here to help you find the perfect pieces for your pregnancy journey.",
-    images: ['/shithaa-logo.jpg'],
+    images: ['/logo1.png'],
     type: 'website',
     url: 'https://shithaa.in/contact',
     siteName: 'Shithaa',
@@ -33,7 +33,7 @@ export const metadata: Metadata = {
     title: "Contact Shithaa - Get in Touch | Maternity Wear Support",
     description: "Contact Shithaa for any questions about our maternity wear, mom wear, and feeding essentials. We're here to help you find the perfect pieces for your pregnancy journey.",
     card: 'summary_large_image',
-    images: ['/shithaa-logo.jpg'],
+    images: ['/logo1.png'],
   },
 }
 
