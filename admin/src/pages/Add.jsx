@@ -444,7 +444,6 @@ const Add = ({token}) => {
             <p className='mb-2'>Product Price</p>
             <input onChange={(e) => setPrice(e.target.value)} value={price} className='w-full px-3 py-2' type="number" placeholder='25' required />
           </div>
-        </div>
 
         <div>
           <p className='mb-2'>Product Sizes & Stock</p>
