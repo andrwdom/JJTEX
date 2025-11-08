@@ -1,12 +1,16 @@
 import bcrypt from 'bcrypt';
 import userModel from '../models/userModel.js';
 import dotenv from 'dotenv';
+import connectDB from '../config/mongodb.js';
+import mongoose from 'mongoose';
 
 dotenv.config();
 
 // SECURITY: Script to create admin user with proper credentials
 async function seedAdmin() {
   try {
+    await connectDB();
+
     const adminEmail = process.env.ADMIN_EMAIL || 'admin@jjtextiles.in';
     const adminPassword = process.env.ADMIN_PASSWORD || 'Admin@123';
     
@@ -19,7 +23,7 @@ async function seedAdmin() {
     const existingAdmin = await userModel.findOne({ email: adminEmail, role: 'admin' });
     
     if (existingAdmin) {
-      // console.log('✅ Admin user already exists:', existingAdmin.email);
+      console.log('✅ Admin user already exists:', existingAdmin.email);
       return;
     }
 
@@ -37,14 +41,14 @@ async function seedAdmin() {
 
     await adminUser.save();
     
-    // console.log('✅ Admin user created successfully:');
+    console.log('✅ Admin user created successfully');
     console.log(`   Email: ${adminEmail}`);
-    // console.log(`   Role: ${adminUser.role}`);
-    // console.log(`   ID: ${adminUser._id}`);
-    
   } catch (error) {
     console.error('❌ Error seeding admin user:', error);
     process.exit(1);
+  } finally {
+    // Ensure process exits after connection closes
+    try { await mongoose.disconnect(); } catch {}
   }
 }
 
