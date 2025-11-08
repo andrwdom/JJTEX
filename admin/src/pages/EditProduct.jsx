@@ -3,6 +3,7 @@ import { assets } from '../assets/assets'
 import axios from 'axios'
 import { backendUrl } from '../App'
 import { toast } from 'react-toastify'
+import CategoryPicker from '../components/CategoryPicker'
 
 const EditProduct = ({ product, token, onClose, onUpdate }) => {
   const [image1, setImage1] = useState(null)
@@ -13,6 +14,7 @@ const EditProduct = ({ product, token, onClose, onUpdate }) => {
   const [description, setDescription] = useState(product.description)
   const [price, setPrice] = useState(product.price)
   const [category, setCategory] = useState(product.category)
+  const [selectedCategory, setSelectedCategory] = useState(null)
   const [bestseller, setBestseller] = useState(product.bestseller)
   const [loading, setLoading] = useState(false)
   const [stock, setStock] = useState(product.stock || 0)
@@ -33,26 +35,10 @@ const EditProduct = ({ product, token, onClose, onUpdate }) => {
     }
   }, [category]);
 
-  // Only the 4 required categories as specified
-  const CATEGORY_OPTIONS = [
-    "Maternity Feeding Wear",
-    "Zipless Feeding Lounge Wear",
-    "Non-Feeding Lounge Wear",
-    "Zipless Feeding Dupatta Lounge Wear"
-  ];
-
   const SLEEVE_TYPE_OPTIONS = ["Puff Sleeve", "Normal Sleeve"];
 
-  // Category to slug mapping
-  const getCategorySlug = (categoryName) => {
-    const categoryMap = {
-      "Maternity Feeding Wear": "maternity-feeding-wear",
-      "Zipless Feeding Lounge Wear": "zipless-feeding-lounge-wear",
-      "Non-Feeding Lounge Wear": "non-feeding-lounge-wear",
-      "Zipless Feeding Dupatta Lounge Wear": "zipless-feeding-dupatta-lounge-wear"
-    };
-    return categoryMap[categoryName] || "";
-  };
+  const getSelectedName = () => selectedCategory?.name || category || '';
+  const getSelectedSlug = () => selectedCategory?.slug || product.categorySlug || '';
 
   // Helper: all possible sizes
   const ALL_SIZES = ["S", "M", "L", "XL", "XXL"];
@@ -80,7 +66,7 @@ const EditProduct = ({ product, token, onClose, onUpdate }) => {
     if (!name.trim()) return 'Product name is required.';
     if (!description.trim()) return 'Product description is required.';
     if (!price || isNaN(Number(price)) || Number(price) <= 0) return 'Valid price is required.';
-    if (!category) return 'Product category is required.';
+    if (!getSelectedSlug()) return 'Product category is required.';
     if (!Array.isArray(sizes) || sizes.length === 0) return 'At least one size must be selected.';
     
     // Validate that at least one size has stock > 0
@@ -127,8 +113,8 @@ const EditProduct = ({ product, token, onClose, onUpdate }) => {
       formData.append("name", name)
       formData.append("description", description)
       formData.append("price", price)
-      formData.append("category", category)
-      formData.append("categorySlug", getCategorySlug(category))
+      formData.append("category", getSelectedName())
+      formData.append("categorySlug", getSelectedSlug())
       formData.append("bestseller", bestseller)
       formData.append("sizes", JSON.stringify(sizes))
       formData.append("stock", stock)
@@ -330,19 +316,18 @@ const EditProduct = ({ product, token, onClose, onUpdate }) => {
 
             <div className='grid grid-cols-1 md:grid-cols-2 gap-6'>
               <div className='space-y-2'>
-                <label className='block text-sm font-medium text-gray-700'>Category <span className="text-red-500">*</span></label>
-          <select
-            value={category}
-            onChange={e => setCategory(e.target.value)}
-                  className='w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white'
-            required
-          >
-            <option value="" disabled>Select a Category</option>
-            {CATEGORY_OPTIONS.map(option => (
-              <option key={option} value={option}>{option}</option>
-            ))}
-          </select>
-        </div>
+                <CategoryPicker
+                  backendUrl={backendUrl}
+                  token={token}
+                  initialSlug={product.categorySlug}
+                  onChange={(sel) => {
+                    setSelectedCategory(sel);
+                    setCategory(sel?.name || '');
+                  }}
+                  requiredLeaf={true}
+                  label="Category"
+                />
+              </div>
 
         {/* Sleeve Type Field - Only show for Lounge Wear categories */}
         {shouldShowSleeveType() && (

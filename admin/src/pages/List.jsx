@@ -2,6 +2,7 @@ import React, { useEffect, useState, useCallback } from 'react'
 import axios from 'axios'
 import { backendUrl, currency } from '../App'
 import { toast } from 'react-toastify'
+import CategoryPicker from '../components/CategoryPicker'
 import EditProduct from './EditProduct'
 import {
   Search, 
@@ -678,6 +679,7 @@ const List = ({ token }) => {
   // Filter state
   const [searchTerm, setSearchTerm] = useState('')
   const [categoryFilter, setCategoryFilter] = useState('')
+  const [selectedCategory, setSelectedCategory] = useState(null) // for cascade filter
   const [sizeFilter, setSizeFilter] = useState('')
   const [priceRange, setPriceRange] = useState({ min: '', max: '' })
   const [stockFilter, setStockFilter] = useState('') // 'all', 'low', 'out'
@@ -773,9 +775,8 @@ const List = ({ token }) => {
         params.append('search', debouncedSearchTerm.trim())
       }
       
-      // Use categoryFilter for filtering (simplified logic)
+      // Use categoryFilter (slug) for filtering
       if (categoryFilter) {
-        console.log('Filtering by category slug:', categoryFilter)
         params.append('categorySlug', categoryFilter)
       }
       if (sizeFilter) {
@@ -1227,20 +1228,16 @@ const List = ({ token }) => {
         </div>
 
         {/* Category Filter */}
-        <div>
-                  <label className="block text-sm font-semibold text-gray-700 mb-2">Category</label>
-          <select
-            value={categoryFilter}
-            onChange={(e) => setCategoryFilter(e.target.value)}
-                    className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 hover:border-gray-400"
-          >
-            <option value="">All Categories</option>
-            {categories.map((cat) => (
-              <option key={cat._id} value={cat.slug}>
-                {cat.name}
-              </option>
-            ))}
-          </select>
+        <div className="lg:col-span-2">
+          <CategoryPicker
+            backendUrl={backendUrl}
+            onChange={(sel) => {
+              setSelectedCategory(sel);
+              setCategoryFilter(sel?.slug || '');
+            }}
+            requiredLeaf={false}
+            label="Filter by Category (parent → child)"
+          />
         </div>
 
             {/* Size Filter */}

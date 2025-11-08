@@ -3,6 +3,7 @@ import {assets} from '../assets/assets'
 import axios from 'axios'
 import { backendUrl } from '../App'
 import { toast } from 'react-toastify'
+import CategoryPicker from '../components/CategoryPicker'
 
 /**
  * Add Product Component with Image Optimization
@@ -26,25 +27,14 @@ const Add = ({token}) => {
    const [description, setDescription] = useState("");
    const [price, setPrice] = useState("");
    const [category, setCategory] = useState("");
-   const [subcategory, setSubcategory] = useState("");
-   const [itemType, setItemType] = useState("");
+   const [selectedCategory, setSelectedCategory] = useState(null); // { name, slug, path, isLeaf, breadcrumbs }
    const [bestseller, setBestseller] = useState(false);
    const [sizes, setSizes] = useState([]);
    const [sleeveType, setSleeveType] = useState("");
 
-   // New: categories from backend
+   // Deprecated: simple categories list (kept for compatibility if needed)
    const [categories, setCategories] = useState([]);
-
-   const [selectedCategorySlug, setSelectedCategorySlug] = useState("");
    const [customId, setCustomId] = useState("");
-
-   // Only the 4 required categories as specified
-   const CATEGORY_OPTIONS = [
-     "Maternity Feeding Wear",
-     "Zipless Feeding Lounge Wear",
-     "Non-Feeding Lounge Wear",
-     "Zipless Feeding Dupatta Lounge Wear"
-   ];
 
    const SLEEVE_TYPE_OPTIONS = ["Puff Sleeve", "Normal Sleeve"];
 
@@ -183,16 +173,9 @@ const Add = ({token}) => {
      return false;
    };
 
-   // Category to slug mapping
-   const getCategorySlug = (categoryName) => {
-     const categoryMap = {
-       "Maternity Feeding Wear": "maternity-feeding-wear",
-       "Zipless Feeding Lounge Wear": "zipless-feeding-lounge-wear",
-       "Non-Feeding Lounge Wear": "non-feeding-lounge-wear",
-       "Zipless Feeding Dupatta Lounge Wear": "zipless-feeding-dupatta-lounge-wear"
-     };
-     return categoryMap[categoryName] || "";
-   };
+  // Selected category helpers
+  const getSelectedName = () => selectedCategory?.name || "";
+  const getSelectedSlug = () => selectedCategory?.slug || "";
 
    // Updated function to check if current category should show sleeve type field
    const shouldShowSleeveType = () => {
@@ -216,8 +199,8 @@ const Add = ({token}) => {
     }
     
     // Validate category selection
-    if (!category) {
-      toast.error("Please select a category");
+    if (!selectedCategory || !selectedCategory.slug) {
+      toast.error("Please select a final subcategory");
       return;
     }
 
@@ -259,8 +242,8 @@ const Add = ({token}) => {
       formData.append("name",name)
       formData.append("description",description)
       formData.append("price", Number(price))
-      formData.append("category", category); // display name
-      formData.append("categorySlug", getCategorySlug(category)); // correct slug
+      formData.append("category", getSelectedName()); // display name
+      formData.append("categorySlug", getSelectedSlug()); // slug
       formData.append("bestseller", bestseller.toString())
       formData.append("sizes", JSON.stringify(sizesWithStock))
       formData.append("availableSizes", JSON.stringify(sizesWithStock.map(s => s.size)))
@@ -280,8 +263,8 @@ const Add = ({token}) => {
       console.log('name:', name);
       console.log('description:', description);
       console.log('price:', price);
-      console.log('category:', category);
-      console.log('categorySlug:', getCategorySlug(category));
+      console.log('category:', getSelectedName());
+      console.log('categorySlug:', getSelectedSlug());
       console.log('bestseller:', bestseller);
       console.log('sizes:', sizesWithStock);
       console.log('availableSizes:', sizesWithStock.map(s => s.size));
@@ -320,7 +303,7 @@ const Add = ({token}) => {
         setImage4(false)
         setPrice('')
         setCategory('')
-        setSelectedCategorySlug("");
+        setSelectedCategory(null);
         setSizes([])
         setBestseller(false)
         setCustomId("");
@@ -426,16 +409,18 @@ const Add = ({token}) => {
           />
         </div>
 
-        <div className='grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 w-full'>
-          <div>
-            <p className='mb-2'>Category</p>
-            <select onChange={(e) => setCategory(e.target.value)} className='w-full px-3 py-2' required>
-              <option value="">Select a Category</option>
-              {CATEGORY_OPTIONS.map(option => (
-                <option key={option} value={option}>{option}</option>
-              ))}
-            </select>
-          </div>
+        <div className='w-full'>
+          <CategoryPicker
+            backendUrl={backendUrl}
+            token={token}
+            onChange={(sel) => {
+              setSelectedCategory(sel);
+              setCategory(sel?.name || '');
+            }}
+            requiredLeaf={true}
+            label="Category (select parent → subcategory)"
+          />
+        </div>
 
           {/* Sleeve Type Field - Only show for Lounge Wear categories */}
           {shouldShowSleeveType() && (
