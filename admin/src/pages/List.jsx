@@ -679,7 +679,7 @@ const List = ({ token }) => {
   // Filter state
   const [searchTerm, setSearchTerm] = useState('')
   const [categoryFilter, setCategoryFilter] = useState('')
-  const [selectedCategory, setSelectedCategory] = useState(null) // for cascade filter
+  const [selectedCategoryNode, setSelectedCategoryNode] = useState(null) // cascade picker selection
   const [sizeFilter, setSizeFilter] = useState('')
   const [priceRange, setPriceRange] = useState({ min: '', max: '' })
   const [stockFilter, setStockFilter] = useState('') // 'all', 'low', 'out'
@@ -1232,7 +1232,7 @@ const List = ({ token }) => {
           <CategoryPicker
             backendUrl={backendUrl}
             onChange={(sel) => {
-              setSelectedCategory(sel);
+              setSelectedCategoryNode(sel);
               setCategoryFilter(sel?.slug || '');
             }}
             requiredLeaf={false}
