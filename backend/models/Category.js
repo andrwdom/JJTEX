@@ -2,7 +2,7 @@ import mongoose from 'mongoose';
 
 const categorySchema = new mongoose.Schema({
 	name: { type: String, required: true },
-	slug: { type: String, required: true, unique: true },
+	slug: { type: String, required: true },
 	description: String,
 	image: String,
 
@@ -26,10 +26,10 @@ const categorySchema = new mongoose.Schema({
 });
 
 // Indexes for fast lookups and unique constraints
-categorySchema.index({ slug: 1 }, { unique: true });
 categorySchema.index({ path: 1 }, { unique: true, sparse: true });
 categorySchema.index({ parent: 1, order: 1 });
 categorySchema.index({ name: 1, parent: 1 }, { unique: true, sparse: true });
+categorySchema.index({ slug: 1, parent: 1 }, { unique: true, sparse: true, name: 'slug_parent_unique' });
 	categorySchema.index({ 'ancestors._id': 1 });
 
 export default mongoose.model('Category', categorySchema);
