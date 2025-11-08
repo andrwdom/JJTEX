@@ -165,7 +165,8 @@ export const getCategoryTree = async (req, res) => {
 	try {
 		// fetch categories and product counts in one aggregation
 		const docs = await Category.aggregate([
-			{ $match: { active: true } },
+			// Include active categories and legacy docs without the 'active' field
+			{ $match: { $or: [ { active: true }, { active: { $exists: false } } ] } },
 			{
 				$lookup: {
 					from: 'products',
