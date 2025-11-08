@@ -35,7 +35,23 @@ const CategoryPicker = ({
       setLoading(true)
       setError(null)
       try {
-        const res = await axios.get(`${backendUrl}/api/categories/tree`, { headers })
+        // Try primary URL then a small set of safe fallbacks for www/non-www
+        const candidates = Array.from(new Set([
+          `${backendUrl}`,
+          backendUrl.replace('https://www.', 'https://'),
+          backendUrl.replace('https://', 'https://www.'),
+        ]))
+        let res = null
+        let lastError = null
+        for (const base of candidates) {
+          try {
+            res = await axios.get(`${base}/api/categories/tree`, { headers })
+            break
+          } catch (err) {
+            lastError = err
+          }
+        }
+        if (!res) throw lastError || new Error('Network error')
         if (res.data?.success) {
           setTree(res.data.data || [])
         } else {
