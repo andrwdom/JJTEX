@@ -19,30 +19,24 @@ async function seedAdmin() {
       process.exit(1);
     }
 
-    // Check if admin already exists
-    const existingAdmin = await userModel.findOne({ email: adminEmail, role: 'admin' });
-    
-    if (existingAdmin) {
-      console.log('✅ Admin user already exists:', existingAdmin.email);
-      return;
-    }
-
-    // Hash admin password
+    // Upsert admin by email (idempotent)
     const salt = await bcrypt.genSalt(10);
     const hashedPassword = await bcrypt.hash(adminPassword, salt);
 
-    // Create admin user
-    const adminUser = new userModel({
-      name: 'Admin User',
-      email: adminEmail,
-      password: hashedPassword,
-      role: 'admin'
-    });
+    const result = await userModel.findOneAndUpdate(
+      { email: adminEmail },
+      { 
+        $set: { 
+          name: 'Admin User',
+          password: hashedPassword,
+          role: 'admin',
+          isAdmin: true
+        } 
+      },
+      { upsert: true, new: true, setDefaultsOnInsert: true }
+    );
 
-    await adminUser.save();
-    
-    console.log('✅ Admin user created successfully');
-    console.log(`   Email: ${adminEmail}`);
+    console.log('✅ Admin ready:', result.email);
   } catch (error) {
     console.error('❌ Error seeding admin user:', error);
     process.exit(1);

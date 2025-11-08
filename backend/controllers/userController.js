@@ -221,14 +221,23 @@ export const adminLogin = async (req, res) => {
             });
         }
 
-        // SECURITY: Check admin credentials from database instead of hardcoded values
-        const adminUser = await userModel.findOne({ email, role: 'admin' });
+		// SECURITY: Check admin credentials from database
+		const adminUser = await userModel.findOne({ email });
         if (!adminUser) {
             return res.status(401).json({
                 success: false, 
                 message: "Invalid credentials"
             });
         }
+
+		// Backward compatibility: allow either role === 'admin' or isAdmin === true
+		const isAdmin = adminUser.role === 'admin' || adminUser.isAdmin === true;
+		if (!isAdmin) {
+			return res.status(401).json({
+				success: false,
+				message: "Invalid credentials"
+			});
+		}
 
         // Verify password
         const isMatch = await bcrypt.compare(password, adminUser.password);
@@ -240,10 +249,10 @@ export const adminLogin = async (req, res) => {
         }
 
         // SECURITY: Create access and refresh tokens for admin
-        const accessToken = createToken({
+		const accessToken = createToken({
             id: adminUser._id,
             email: adminUser.email,
-            role: 'admin'
+			role: 'admin'
         }, '24h');
         
         const refreshToken = createToken({
