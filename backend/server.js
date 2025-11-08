@@ -105,7 +105,10 @@ const allowedOrigins = process.env.NODE_ENV === 'production'
   ? [
       'https://jjtextiles.in',
       'https://www.jjtextiles.in',
-      'https://admin.jjtextiles.in',  // Admin panel
+      'https://jjtextiles.com',
+      'https://www.jjtextiles.com',
+      'https://admin.jjtextiles.in',  // Admin panel (.in)
+      'https://admin.jjtextiles.com', // Admin panel (.com)
       // Instagram in-app browser specific origins
       'https://www.instagram.com',
       'https://instagram.com',

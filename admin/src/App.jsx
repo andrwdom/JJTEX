@@ -16,7 +16,7 @@ import ShippingRules from './pages/ShippingRules';
 import ProtectedRoute from './components/ProtectedRoute';
 
 
-export const backendUrl = 'https://shithaa.in'
+export const backendUrl = 'https://jjtextiles.in'
 export const currency = '₹'
 
 const App = () => {
