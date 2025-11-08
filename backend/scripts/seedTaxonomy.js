@@ -98,6 +98,13 @@ const taxonomy = [
           { name: 'Jeans' },
           { name: 'Sleepwear' }
         ]
+      },
+      {
+        name: 'Jewellery',
+        children: [
+          { name: 'Earings' },
+          { name: 'Ring' }
+        ]
       }
     ]
   }
