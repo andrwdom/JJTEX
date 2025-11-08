@@ -43,12 +43,12 @@ export default function OptimizedImage({
   useEffect(() => {
     if (src && !src.startsWith('data:')) {
       // Try to create a fallback URL through Cloudflare
-      const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://shithaa.in'
+      const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://jjtextiles.com'
       let fullSrc = src.startsWith('http') ? src : `${baseUrl}${src}`
       
       // Ensure all URLs go through Cloudflare domain
       if (fullSrc.includes('localhost:4000') || fullSrc.includes('127.0.0.1')) {
-        fullSrc = fullSrc.replace(/https?:\/\/[^\/]+/, 'https://shithaa.in')
+        fullSrc = fullSrc.replace(/https?:\/\/[^\/]+/, 'https://jjtextiles.com')
       }
       
       // If it's a hero thumbnail, try the original image path

@@ -13,13 +13,13 @@ const nextConfig = {
     remotePatterns: [
       {
         protocol: 'https',
-        hostname: 'jjtextiles.in',
+        hostname: 'jjtextiles.com',
         port: '',
         pathname: '/images/**',
       },
       {
         protocol: 'https',
-        hostname: 'jjtextiles.in',
+        hostname: 'jjtextiles.com',
         port: '',
         pathname: '/uploads/**',
       },
@@ -73,7 +73,9 @@ const nextConfig = {
   // Enable static optimization
   trailingSlash: false,
   // Fix static asset loading issues
-  assetPrefix: process.env.NODE_ENV === 'production' ? 'https://jjtextiles.in' : '',
+  assetPrefix: process.env.NODE_ENV === 'production'
+    ? (process.env.NEXT_PUBLIC_SITE_URL || 'https://jjtextiles.com')
+    : '',
   // Optimize bundle size
   webpack: (config, { dev, isServer }) => {
     if (!dev && !isServer) {

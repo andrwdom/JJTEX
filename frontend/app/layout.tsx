@@ -69,7 +69,10 @@ export const metadata: Metadata = {
     address: false,
     telephone: false,
   },
-  metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : 'https://shithaa.in'),
+  metadataBase: new URL(
+    (process.env.NEXT_PUBLIC_SITE_URL) ||
+    (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : 'https://jjtextiles.com')
+  ),
   alternates: {
     canonical: '/',
   },

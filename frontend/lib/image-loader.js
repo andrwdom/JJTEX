@@ -2,7 +2,9 @@
 export default function optimizedImageLoader({ src, width, quality }) {
   // Detect if we're in production with Cloudflare
   const isProduction = process.env.NODE_ENV === 'production'
-  const baseUrl = isProduction ? 'https://shithaa.in' : 'http://localhost:4000'
+  const baseUrl = isProduction
+    ? (process.env.NEXT_PUBLIC_SITE_URL || 'https://jjtextiles.com')
+    : 'http://localhost:4000'
   
   // Handle external URLs (already optimized)
   if (src.startsWith('http')) {

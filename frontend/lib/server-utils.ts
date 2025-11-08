@@ -9,7 +9,7 @@ export function getApiUrl(): string {
       return 'http://localhost:4000';
     } else {
       // For client-side in production, use the public API URL
-      return process.env.NEXT_PUBLIC_API_URL || 'https://jjtextiles.in';
+      return process.env.NEXT_PUBLIC_API_URL || 'https://jjtextiles.com';
     }
   }
 

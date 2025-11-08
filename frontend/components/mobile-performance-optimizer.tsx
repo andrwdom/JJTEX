@@ -41,7 +41,7 @@ export default function MobilePerformanceOptimizer({ children }: MobileOptimizer
     // Preconnect to important domains for faster loading
     const preconnectLinks = [
       'https://fonts.googleapis.com',
-      'https://jjtextiles.in',
+      (process.env.NEXT_PUBLIC_SITE_URL || 'https://jjtextiles.com'),
     ];
     
     preconnectLinks.forEach(href => {
@@ -54,7 +54,7 @@ export default function MobilePerformanceOptimizer({ children }: MobileOptimizer
     
     // DNS prefetch for external resources
     const dnsPrefetchLinks = [
-      'https://api.jjtextiles.in',
+      (process.env.NEXT_PUBLIC_API_URL || (process.env.NEXT_PUBLIC_SITE_URL || 'https://jjtextiles.com')),
       'https://cdnjs.cloudflare.com',
     ];
     
