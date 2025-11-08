@@ -13,100 +13,94 @@ function slugify(str) {
 		.replace(/^-+|-+$/g, '');
 }
 
+// Exact taxonomy from Andrew
 const taxonomy = [
-	{
-		name: 'Types For Kids',
-		slug: 'kids',
-		children: [
-			{
-				name: 'Girls Clothing',
-				children: [
-					{ name: 'Dresses & Jumpsuits' },
-					{ name: 'Tops & Tees' },
-					{ name: 'Ethnic Wear' },
-					{ name: 'Skirts & Shorts' },
-					{ name: 'Jeans' },
-					{ name: 'Clothing set' },
-					{ name: 'Innerwear' }
-				]
-			},
-			{
-				name: 'Boys clothing',
-				children: [
-					{ name: 'Tshirt' },
-					{ name: 'Clothing set' },
-					{ name: 'Ethnic Wear' },
-					{ name: 'Bottoms' },
-					{ name: 'Shirts' },
-					{ name: 'Jeans' },
-					{ name: 'Innerwear' }
-				]
-			},
-			{
-				name: 'Baby Clothing',
-				children: [
-					{ name: 'Rompers & Body Suits' },
-					{ name: 'Clothing Set' },
-					{ name: 'Dresses' },
-					{ name: 'T shirt & Tops' },
-					{ name: 'Bottoms' },
-					{ name: 'Girls set' },
-					{ name: 'Accessories' }
-				]
-			},
-			{
-				name: 'Teens',
-				children: [
-					{ name: 'T-shirt' },
-					{ name: 'Shirts' },
-					{ name: 'Jeans' },
-					{ name: 'Ethnic Wear' },
-					{ name: 'Bottoms' },
-					{ name: 'Dresses & Jumpsuit' },
-					{ name: 'Tops and tees' },
-					{ name: 'Innerwear' }
-				]
-			}
-		]
-	},
-	{
-		name: 'Types For Woman',
-		slug: 'women',
-		children: [
-			{
-				name: 'Ethnic Wear',
-				children: [
-					{ name: 'Kurtas & Kurtis' },
-					{ name: 'Kurta set' },
-					{ name: 'Traditional saree' },
-					{ name: 'Party wear saree' },
-					{ name: 'Blouses' },
-					{ name: 'Lehengas' },
-					{ name: 'Dupattas' },
-					{ name: 'Dress materials' }
-				]
-			},
-			{
-				name: 'Western Wear',
-				children: [
-					{ name: 'Tops' },
-					{ name: 'Tees' },
-					{ name: 'Dresses' },
-					{ name: 'Jumpsuit' },
-					{ name: 'Shirts' },
-					{ name: 'Jeans' },
-					{ name: 'Sleepwear' }
-				]
-			},
-			{
-				name: 'Jewellery',
-				children: [
-					{ name: 'Earings' },
-					{ name: 'Ring' }
-				]
-			}
-		]
-	}
+  {
+    name: 'Types For Kids', // keep slug simple
+    slug: 'kids',
+    children: [
+      {
+        name: 'Girls Clothing',
+        children: [
+          { name: 'Dresses & Jumpsuits' },
+          { name: 'Tops & Tees' },
+          { name: 'Ethnic Wear' },
+          { name: 'Skirts & Shorts' },
+          { name: 'Jeans' },
+          { name: 'Clothing set' },
+          { name: 'Innerwear' }
+        ]
+      },
+      {
+        name: 'Boys clothing',
+        children: [
+          { name: 'Tshirt' },
+          { name: 'Clothing set' },
+          { name: 'Ethnic Wear' },
+          { name: 'Bottoms' },
+          { name: 'Shirts' },
+          { name: 'Jeans' },
+          { name: 'Innerwear' }
+        ]
+      },
+      {
+        name: 'Baby Clothing',
+        children: [
+          { name: 'Rompers & Body Suits' },
+          { name: 'Clothing Set' },
+          { name: 'Dresses' },
+          { name: 'T shirt & Tops' },
+          { name: 'Bottoms' },
+          { name: 'Girls set' },
+          { name: 'Accessories' }
+        ]
+      },
+      {
+        name: 'Teens',
+        children: [
+          { name: 'T-shirt' },
+          { name: 'Shirts' },
+          { name: 'Jeans' },
+          { name: 'Ethnic Wear' },
+          { name: 'Bottoms' },
+          { name: 'Dresses & Jumpsuit' },
+          { name: 'Tops and tees' },
+          { name: 'Innerwear' }
+        ]
+      }
+    ]
+  },
+  {
+    name: 'TYPES FOR WOMAN',
+    slug: 'women',
+    children: [
+      {
+        name: 'Ethnic Wear',
+        children: [
+          { name: 'Kurtas & Kurtis' },
+          { name: 'Kurta set' },
+          { name: 'Traditional saree' },
+          { name: 'Party wear saree' },
+          { name: 'Blouses' },
+          { name: 'Lehengas' },
+          { name: 'Dupattas' },
+          { name: 'Dress materials' }
+        ]
+      },
+      {
+        name: 'Western Wear',
+        children: [
+          { name: 'Tops' },
+          { name: 'Tees' },
+          { name: 'Dresses' },
+          { name: 'Jumpsuit' },
+          { name: 'Shirts' },
+          { name: 'Jeans' },
+          { name: 'Sleepwear' }
+        ]
+      }
+    ]
+  }
 ];
 
 async function ensureCategory({ name, parentDoc, order }) {
