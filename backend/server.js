@@ -378,12 +378,13 @@ app.use('/uploads', express.static('uploads', {
     etag: true,
     lastModified: true
 }))
-app.use('/images', express.static('/var/www/shithaa-ecom/uploads', {
+const uploadsBase = process.env.UPLOAD_PATH || 'uploads';
+app.use('/images', express.static(uploadsBase, {
     maxAge: '1d', // Cache for 1 day
     etag: true,
     lastModified: true
 }));
-app.use('/gallery', express.static('/var/www/shithaa-ecom/uploads', {
+app.use('/gallery', express.static(uploadsBase, {
     maxAge: '1d', // Cache for 1 day
     etag: true,
     lastModified: true

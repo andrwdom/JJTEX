@@ -407,7 +407,9 @@ export const addProduct = async (req, res) => {
 
         // Optimize images
         console.log('🔄 Starting image optimization...');
-        const uploadDir = "/var/www/shithaa-ecom/uploads/products/";
+        // Resolve uploads/products directory via env/config
+        const baseUploads = process.env.UPLOAD_PATH || './uploads';
+        const uploadDir = path.join(path.isAbsolute(baseUploads) ? baseUploads : path.resolve(process.cwd(), baseUploads), 'products');
         
         let optimizationResult;
         let optimizedFiles;
@@ -608,7 +610,8 @@ export const removeProduct = async (req, res) => {
                 const match = imageUrl.match(/\/images\/products\/(.+)$/);
                 if (match && match[1]) {
                     const filename = match[1];
-                    const filePath = `/var/www/shithaa-ecom/uploads/products/${filename}`;
+                    const baseUploads = process.env.UPLOAD_PATH || './uploads';
+                    const filePath = path.join(path.isAbsolute(baseUploads) ? baseUploads : path.resolve(process.cwd(), baseUploads), 'products', filename);
                     try {
                         if (fs.existsSync(filePath)) {
                             fs.unlinkSync(filePath);
@@ -745,7 +748,8 @@ export const updateProduct = async (req, res) => {
                 try {
                     // Optimize new images
                     console.log('🔄 Starting image optimization for update...');
-                    const uploadDir = "/var/www/shithaa-ecom/uploads/products/";
+                    const baseUploads = process.env.UPLOAD_PATH || './uploads';
+                    const uploadDir = path.join(path.isAbsolute(baseUploads) ? baseUploads : path.resolve(process.cwd(), baseUploads), 'products');
                     const optimizationResult = await imageOptimizer.optimizeMultipleImages(newImages, uploadDir);
                     
                     const { optimizedFiles, results } = optimizationResult;

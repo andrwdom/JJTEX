@@ -17,10 +17,10 @@ const MAX_CACHE_SIZE = 100
 // Resolve uploads base directory preferring the server's shared path used by Nginx
 async function resolveUploadsBasePath() {
   const candidates = [
-    // Prefer the production path used by Nginx alias
-    '/var/www/shithaa-ecom/uploads',
-    // Then explicit env/config
+    // Prefer explicit env/config first
     config.uploadPath,
+    // Then the production path used by Nginx alias for JJTextiles
+    '/var/www/jjtextiles-ecom/uploads',
     // Finally fallback to project-local uploads for dev
     path.resolve(process.cwd(), 'uploads')
   ].filter(Boolean)

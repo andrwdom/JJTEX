@@ -346,7 +346,7 @@ const Add = ({token}) => {
       {/* Main Add Product Form */}
       <form onSubmit={onSubmitHandler} className='flex flex-col w-full items-start gap-3'>
         <div>
-          <p className='mb-2'>Upload Image</p>
+          <p className='mb-2'>Upload Image (JJ Textiles Upload Folder)</p>
           <div className='flex gap-2'>
             <label htmlFor="image1" className="relative">
               <img className='w-20' src={!image1 ? assets.upload_area : URL.createObjectURL(image1)} alt="" />
