@@ -96,7 +96,11 @@ export default function Home() {
 						<AlignJustify className="h-6 w-6 text-[#1f1f1f]" />
 					</button>
 					<div className="text-base font-semibold tracking-wide">
-						<span className="align-middle">JJ TEXTILE</span>
+						<img
+							src="/logo1.png"
+							alt="JJ Textiles"
+							className="h-6 w-auto mx-auto"
+						/>
 					</div>
 					<div className="flex items-center gap-3">
 						<button aria-label="Cart" className="p-2">
