@@ -6,7 +6,7 @@ const categorySchema = new mongoose.Schema({
 	description: String,
 	image: String,
 
-	// Hierarchy
+	// Hier  archy
 	parent: { type: mongoose.Schema.Types.ObjectId, ref: 'Category', default: null },
 	path: { type: String, default: '' }, // e.g., 'women/ethnic-wear/kurtas-kurtis'
 	ancestors: [{

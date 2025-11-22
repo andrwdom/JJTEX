@@ -1,182 +1,225 @@
 "use client"
 
-import { useState, useEffect, Suspense } from "react"
-import dynamic from "next/dynamic"
-import { Metadata } from "next"
-import PageLoading from "@/components/page-loading"
-import PerformanceMonitor from "@/components/performance-monitor"
-import { useCart } from "@/components/cart-context"
-import { detectDevice, getBundleStrategy } from "@/lib/mobile-detection"
+import React from "react"
+import {
+	AlignJustify,
+	ShoppingCart,
+	User,
+	Search as SearchIcon
+} from "lucide-react"
 
-// Dynamic imports with loading components - Only load when needed
-const InstantHeroSection = dynamic(() => import("@/components/instant-hero-section"), {
-  loading: () => <div className="h-96 bg-gradient-to-r from-pink-50 to-purple-50 animate-pulse" />,
-  ssr: true
-})
-
-const CategoryStrip = dynamic(() => import("@/components/category-strip"), {
-  loading: () => <div className="h-20 bg-gray-100 animate-pulse" />,
-  ssr: false // Below fold, can be client-rendered
-})
-
-const TestimonialsSection = dynamic(() => import("@/components/testimonials-section"), {
-  loading: () => <div className="h-64 bg-gray-50 animate-pulse" />,
-  ssr: false // Below fold
-})
-
-const FAQAccordion = dynamic(() => import("@/components/faq-accordion"), {
-  loading: () => <div className="h-96 bg-gray-50 animate-pulse" />,
-  ssr: false // Below fold
-})
-
-interface Product {
-  id: string
-  _id: string
-  name: string
-  price: number
-  originalPrice?: number
-  image: string
-  category: string
-  categorySlug?: string
-  isNewArrival?: boolean
-  isBestSeller?: boolean
-  sizes: { stock?: number }[]
-  stock: number
-  customId?: string // Added customId to the interface
+type Highlight = {
+	title: string
+	image: string
 }
 
+// Top highlights to show in the horizontal rail (mixed categories)
+const topHighlights: Highlight[] = [
+	{ title: "Women's Kurtas", image: "https://placehold.co/80x80?text=K" },
+	{ title: "Women's Sarees", image: "https://placehold.co/80x80?text=S" },
+	{ title: "Girls Dresses", image: "https://placehold.co/80x80?text=GD" },
+	{ title: "Boys T-Shirts", image: "https://placehold.co/80x80?text=BT" },
+	{ title: "Baby Rompers", image: "https://placehold.co/80x80?text=BR" },
+	{ title: "Teens Jeans", image: "https://placehold.co/80x80?text=TJ" },
+	{ title: "Jewellery", image: "https://placehold.co/80x80?text=J" },
+]
+
+// Full category object (exact structure)
+const categories = {
+	kids: {
+		girls: [
+			"Dresses & Jumpsuits",
+			"Tops & Tees",
+			"Ethnic Wear",
+			"Skirts & Shorts",
+			"Jeans",
+			"Clothing Set",
+			"Innerwear",
+		],
+		boys: [
+			"T-shirt",
+			"Clothing Set",
+			"Ethnic Wear",
+			"Bottoms",
+			"Shirts",
+			"Jeans",
+			"Innerwear",
+		],
+		baby: [
+			"Rompers & Body Suits",
+			"Clothing Set",
+			"Dresses",
+			"Tops",
+			"Bottoms",
+			"Accessories",
+		],
+		teens: [
+			"T-shirt",
+			"Shirts",
+			"Jeans",
+			"Ethnic Wear",
+			"Dresses",
+			"Innerwear",
+		],
+	},
+	women: {
+		ethnic: [
+			"Kurtas & Kurtis",
+			"Kurta Set",
+			"Traditional Saree",
+			"Party Wear Saree",
+			"Lehengas",
+			"Dupattas",
+		],
+		western: ["Tops", "Tees", "Dresses", "Jumpsuits", "Jeans", "Sleepwear"],
+		jewellery: ["Earrings", "Rings"],
+	},
+}
+
+const products = Array.from({ length: 6 }).map((_, i) => ({
+	id: i + 1,
+	title: ["Floral Kurta", "Classic Saree", "Girls Dress", "Boys Tee", "Baby Romper", "Teens Jeans"][i % 6],
+	price: ["₹799", "₹1,499", "₹699", "₹399", "₹499", "₹999"][i % 6],
+	image: `https://placehold.co/600x700?text=Product+${i + 1}`,
+}))
+
 export default function Home() {
-  const [products, setProducts] = useState<Product[]>([])
-  const [loading, setLoading] = useState(true)
-  const [deviceInfo, setDeviceInfo] = useState(() => detectDevice())
-  const [showBelowFold, setShowBelowFold] = useState(false)
-  const { addToCart, openCartSidebar } = useCart()
+	return (
+		<div className="min-h-screen bg-white font-sans text-gray-900">
+			{/* Light pink header with soft bottom curve */}
+			<header
+				className="relative bg-[#F4C2D7] text-[#1f1f1f] px-4 pt-3 pb-16 rounded-b-[28px]"
+				style={{ boxShadow: "0 2px 0 rgba(0,0,0,0.02) inset" }}
+			>
+				<div className="flex items-center justify-between">
+					<button aria-label="Menu" className="p-2">
+						<AlignJustify className="h-6 w-6 text-[#1f1f1f]" />
+					</button>
+					<div className="text-base font-semibold tracking-wide">
+						<span className="align-middle">JJ TEXTILE</span>
+					</div>
+					<div className="flex items-center gap-3">
+						<button aria-label="Cart" className="p-2">
+							<ShoppingCart className="h-6 w-6 text-[#1f1f1f]" />
+						</button>
+						<button aria-label="Account" className="p-2">
+							<User className="h-6 w-6 text-[#1f1f1f]" />
+						</button>
+					</div>
+				</div>
+			</header>
 
-  useEffect(() => {
-    setDeviceInfo(detectDevice())
-    
-    // For Instagram browser or slow connections, delay below-fold content
-    const delay = deviceInfo.isInstagram || deviceInfo.connectionType === 'slow' ? 2000 : 1000
-    const timer = setTimeout(() => setShowBelowFold(true), delay)
-    
-    return () => clearTimeout(timer)
-  }, [deviceInfo.isInstagram, deviceInfo.connectionType])
+			{/* Floating search bar overlapping header */}
+			<div className="-mt-8 px-4">
+				<div className="relative">
+					<div className="flex items-center gap-2 bg-white rounded-full shadow-md px-4 py-3">
+						<SearchIcon className="h-5 w-5 text-gray-500" />
+						<input
+							type="text"
+							placeholder="Search for brands and products"
+							className="w-full bg-transparent text-sm outline-none placeholder:text-gray-400"
+							aria-label="Search"
+						/>
+					</div>
+				</div>
+			</div>
 
-  useEffect(() => {
-    const fetchProducts = async () => {
-      try {
-        // Lazy load the API utility to reduce initial bundle
-        const { fetchProducts: fetchProductsAPI } = await import('@/lib/api-utils')
-        
-        const response = await fetchProductsAPI({
-          sortBy: 'displayOrder',
-          sortOrder: 'asc'
-        })
-        
-        if (!response.ok) {
-          throw new Error(`Failed to fetch products: ${response.status}`)
-        }
-        
-        const data = await response.json();
-        const products = (data.data || data.products || []).map((p: any) => ({
-          id: String(p._id),
-          _id: String(p._id),
-          name: p.name,
-          price: p.price,
-          originalPrice: p.originalPrice,
-          image: (Array.isArray(p.images) && p.images.length > 0) ? p.images[0] : '/placeholder.svg',
-          category: p.category,
-          categorySlug: p.categorySlug,
-          isNewArrival: p.isNewArrival,
-          isBestSeller: p.isBestSeller,
-          sizes: p.sizes,
-          stock: (p.sizes || []).reduce((sum: number, s: { stock?: number }) => sum + (s.stock || 0), 0),
-          customId: p.customId,
-        }));
-        setProducts(products);
-        setLoading(false);
-      } catch (error) {
-        console.error("Error fetching products:", error)
-        setLoading(false)
-      }
-    }
+			{/* Category rail */}
+			<section className="mt-4 px-3">
+				<div
+					className="no-scrollbar flex gap-3 overflow-x-auto py-1"
+					style={{ WebkitOverflowScrolling: "touch" }}
+				>
+					{topHighlights.map((item) => (
+						<div key={item.title} className="flex w-[78px] flex-col items-center shrink-0">
+							<div className="h-16 w-16 rounded-full bg-white shadow-sm ring-1 ring-gray-200 overflow-hidden">
+								<img
+									src={item.image}
+									alt={item.title}
+									className="h-full w-full object-cover"
+									loading="lazy"
+								/>
+							</div>
+							<p className="mt-2 text-center text-[11px] leading-tight text-gray-700">
+								{item.title}
+							</p>
+						</div>
+					))}
+				</div>
+			</section>
 
-    // Prioritize hero section, then load products after a short delay
-    const timer = setTimeout(fetchProducts, 200)
-    return () => clearTimeout(timer)
-  }, [])
+			{/* Hero banner */}
+			<section className="mt-4 px-4">
+				<div className="relative rounded-lg overflow-hidden">
+					<img
+						src="https://images.unsplash.com/photo-1544441893-675973e31985?q=80&w=1200&auto=format&fit=crop"
+						alt="Big Winter Bonanza"
+						className="h-40 w-full object-cover"
+					/>
+					<div className="absolute inset-0 bg-black/30" />
+					<div className="absolute left-4 top-4">
+						<p className="text-[10px] uppercase tracking-wider text-white/90">
+							Big Winter Bonanza
+						</p>
+						<h3 className="mt-1 text-xl font-extrabold text-white">40–80% OFF</h3>
+						<button className="mt-2 rounded-full bg-[#E91E63] px-3 py-1.5 text-xs font-semibold text-white">
+							Shop Now
+						</button>
+					</div>
+				</div>
+			</section>
 
-  const handleAddToCart = async (product: Product) => {
-    try {
-      // Find the first available size with stock
-      const availableSize = product.sizes?.find(s => s.stock && s.stock > 0)
-      const size = availableSize ? availableSize.size : "M"
-      const stock = availableSize?.stock || 0
+			{/* Latest Collections */}
+			<section className="mt-8 px-6">
+				<div className="flex items-center">
+					<div className="h-px flex-1 bg-gray-200" />
+					<h2 className="mx-3 text-center text-[18px] font-extrabold tracking-wide text-[#E91E63]">
+						LATEST COLLECTIONS
+					</h2>
+					<div className="h-px flex-1 bg-gray-200" />
+				</div>
+				<p className="mt-2 text-center text-[12px] text-gray-600">
+					New styles that celebrate tradition, comfort, and everyday elegance
+				</p>
+			</section>
 
-      await addToCart({
-        id: product.customId || product._id, // Use customId for routing
-        _id: product._id,
-        name: product.name,
-        price: product.price,
-        quantity: 1,
-        size: size,
-        image: product.image,
-        category: product.category,
-        categorySlug: product.categorySlug,
-      }, true, stock)
+			{/* Product grid */}
+			<section className="mt-5 px-3 pb-20">
+				<div className="grid grid-cols-2 gap-3">
+					{products.map((p) => (
+						<article
+							key={p.id}
+							className="rounded-lg border border-gray-100 overflow-hidden bg-white"
+						>
+							<div className="aspect-[3/4] w-full bg-gray-100">
+								<img
+									src={p.image}
+									alt={p.title}
+									className="h-full w-full object-cover"
+									loading="lazy"
+								/>
+							</div>
+							<div className="p-2">
+								<h3 className="line-clamp-1 text-[13px] font-medium text-gray-800">
+									{p.title}
+								</h3>
+								<p className="mt-0.5 text-[12px] font-semibold text-gray-900">{p.price}</p>
+							</div>
+						</article>
+					))}
+				</div>
+			</section>
 
-      openCartSidebar()
-    } catch (error) {
-      console.error("Error adding to cart:", error)
-    }
-  }
-
-  const handleCategorySelect = (slug: string) => {
-    window.location.href = `/collections/${slug}`
-  }
-
-  const newArrivals = products.filter((p: Product) => p.isNewArrival)
-  const bestSellers = products.filter((p: Product) => p.isBestSeller)
-
-  return (
-    <PageLoading loadingMessage="Welcome to JJTextiles" minLoadingTime={300}>
-      <main>
-        <PerformanceMonitor />
-        <div className="min-h-screen bg-white">
-          {/* Above the fold - Load immediately */}
-          <Suspense fallback={
-            <div className="h-96 bg-gradient-to-r from-pink-50 to-purple-50 animate-pulse flex items-center justify-center">
-              <div className="text-gray-500">Loading...</div>
-            </div>
-          }>
-            <InstantHeroSection />
-          </Suspense>
-          
-          {/* Below the fold - Load progressively based on device capabilities */}
-          {showBelowFold && (
-            <>
-              <Suspense fallback={<div className="h-20 bg-gray-100 animate-pulse" />}>
-                <CategoryStrip onCategoryClick={handleCategorySelect} currentCategory={undefined} />
-              </Suspense>
-              
-              <Suspense fallback={<div className="h-64 bg-gray-50 animate-pulse" />}>
-                <TestimonialsSection />
-              </Suspense>
-              
-              <Suspense fallback={<div className="h-96 bg-gray-50 animate-pulse" />}>
-                <FAQAccordion />
-              </Suspense>
-            </>
-          )}
-          
-          {/* Mobile performance indicator for slow connections */}
-          {(deviceInfo.isInstagram || deviceInfo.connectionType === 'slow') && !showBelowFold && (
-            <div className="fixed bottom-4 right-4 bg-blue-500 text-white p-2 rounded-lg text-xs z-50 transition-opacity">
-              Optimizing for your connection...
-            </div>
-          )}
-        </div>
-      </main>
-    </PageLoading>
-  )
+			{/* Hide horizontal scrollbar utility */}
+			<style jsx global>{`
+				.no-scrollbar::-webkit-scrollbar {
+					display: none;
+				}
+				.no-scrollbar {
+					-ms-overflow-style: none;
+					scrollbar-width: none;
+				}
+			`}</style>
+		</div>
+	)
 }
