@@ -88,7 +88,7 @@ export default function Home() {
 		<div className="min-h-screen bg-white font-sans text-gray-900">
 			{/* Light pink header with soft bottom curve */}
 			<header
-				className="relative bg-[#F4C2D7] text-[#1f1f1f] px-4 pt-3 pb-16 rounded-b-[28px]"
+				className="relative bg-[#FCDDF3] text-[#1f1f1f] px-4 pt-3 pb-16 rounded-b-[28px]"
 				style={{ boxShadow: "0 2px 0 rgba(0,0,0,0.02) inset" }}
 			>
 				<div className="flex items-center justify-between">
