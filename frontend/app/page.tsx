@@ -15,13 +15,13 @@ type Highlight = {
 
 // Top highlights to show in the horizontal rail (mixed categories)
 const topHighlights: Highlight[] = [
-	{ title: "Women's Kurtas", image: "https://placehold.co/80x80?text=K" },
-	{ title: "Women's Sarees", image: "https://placehold.co/80x80?text=S" },
-	{ title: "Girls Dresses", image: "https://placehold.co/80x80?text=GD" },
-	{ title: "Boys T-Shirts", image: "https://placehold.co/80x80?text=BT" },
-	{ title: "Baby Rompers", image: "https://placehold.co/80x80?text=BR" },
-	{ title: "Teens Jeans", image: "https://placehold.co/80x80?text=TJ" },
-	{ title: "Jewellery", image: "https://placehold.co/80x80?text=J" },
+	{ title: "Women's Kurtas", image: "/images/categories/maternity-feeding.webp" },
+	{ title: "Women's Sarees", image: "/images/categories/dupatta-lounge.webp" },
+	{ title: "Girls Dresses", image: "/images/categories/zipless-feeding.webp" },
+	{ title: "Boys T-Shirts", image: "/p_img4.png" },
+	{ title: "Baby Rompers", image: "/images/categories/non-feeding.webp" },
+	{ title: "Teens Jeans", image: "/p_img6.png" },
+	{ title: "Jewellery", image: "/images/placeholder.webp" },
 ]
 
 // Full category object (exact structure)
@@ -80,6 +80,7 @@ const products = Array.from({ length: 6 }).map((_, i) => ({
 	id: i + 1,
 	title: ["Floral Kurta", "Classic Saree", "Girls Dress", "Boys Tee", "Baby Romper", "Teens Jeans"][i % 6],
 	price: ["₹799", "₹1,499", "₹699", "₹399", "₹499", "₹999"][i % 6],
+	originalPrice: ["₹1,299", "₹2,499", "₹1,199", "₹699", "₹899", "₹1,799"][i % 6],
 	image: `https://placehold.co/600x700?text=Product+${i + 1}`,
 }))
 
@@ -95,11 +96,11 @@ export default function Home() {
 					<button aria-label="Menu" className="p-2">
 						<AlignJustify className="h-6 w-6 text-[#1f1f1f]" />
 					</button>
-					<div className="text-base font-semibold tracking-wide">
+					<div className="flex items-center justify-center">
 						<img
 							src="/logo1.png"
 							alt="JJ Textiles"
-							className="h-6 w-auto mx-auto"
+							className="h-10 w-auto mx-auto"
 						/>
 					</div>
 					<div className="flex items-center gap-3">
@@ -116,7 +117,7 @@ export default function Home() {
 			{/* Floating search bar overlapping header */}
 			<div className="-mt-8 px-4">
 				<div className="relative">
-					<div className="flex items-center gap-2 bg-white rounded-full shadow-md px-4 py-3">
+					<div className="flex items-center gap-2 bg-white rounded-full shadow-lg px-4 py-3">
 						<SearchIcon className="h-5 w-5 text-gray-500" />
 						<input
 							type="text"
@@ -158,7 +159,7 @@ export default function Home() {
 					<img
 						src="https://images.unsplash.com/photo-1544441893-675973e31985?q=80&w=1200&auto=format&fit=crop"
 						alt="Big Winter Bonanza"
-						className="h-40 w-full object-cover"
+						className="h-64 sm:h-72 w-full object-cover"
 					/>
 					<div className="absolute inset-0 bg-black/30" />
 					<div className="absolute left-4 top-4">
@@ -174,7 +175,7 @@ export default function Home() {
 			</section>
 
 			{/* Latest Collections */}
-			<section className="mt-8 px-6">
+			<section className="mt-12 sm:mt-16 px-6">
 				<div className="flex items-center">
 					<div className="h-px flex-1 bg-gray-200" />
 					<h2 className="mx-3 text-center text-[18px] font-extrabold tracking-wide text-[#E91E63]">
@@ -207,7 +208,14 @@ export default function Home() {
 								<h3 className="line-clamp-1 text-[13px] font-medium text-gray-800">
 									{p.title}
 								</h3>
-								<p className="mt-0.5 text-[12px] font-semibold text-gray-900">{p.price}</p>
+								<div className="mt-0.5 flex items-center gap-2">
+									<p className="text-[12px] font-bold text-gray-900">{p.price}</p>
+									{p.originalPrice && (
+										<span className="text-[11px] text-gray-400 line-through">
+											{p.originalPrice}
+										</span>
+									)}
+								</div>
 							</div>
 						</article>
 					))}
