@@ -13,9 +13,11 @@ export default function LayoutClient({ children }: { children: React.ReactNode }
 
   // Hide navbar and footer during checkout for cleaner experience
   const isCheckoutPage = pathname?.startsWith('/checkout');
+  // Hide legacy navbar/footer on the new mobile-first homepage
+  const isHomePage = pathname === '/';
   
   // Don't hide navbar during page loading - only hide during checkout
-  const shouldShowNavbar = !isCheckoutPage;
+  const shouldShowNavbar = !isCheckoutPage && !isHomePage;
 
   useEffect(() => {
     window.scrollTo({ top: 0, left: 0, behavior: "instant" });
