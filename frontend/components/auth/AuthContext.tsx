@@ -15,6 +15,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const router = useRouter();
 
   useEffect(() => {
+    // Skip Firebase auth if not available (e.g., during build time)
+    if (!auth) {
+      setLoading(false);
+      return;
+    }
+
     const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
       console.log("Auth state changed:", firebaseUser ? "User logged in" : "No user");
       setUser(firebaseUser);
@@ -109,8 +115,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         console.warn('Backend logout failed:', e);
       }
       
-      // Sign out from Firebase
-      await signOut(auth);
+      // Sign out from Firebase if available
+      if (auth) {
+        await signOut(auth);
+      }
       
       // Redirect to home page after a short delay
       setTimeout(() => {
@@ -125,8 +133,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   // Function to get ID token
   const getIdTokenFromAuth = async (forceRefresh: boolean = false) => {
-    if (!user) {
-      throw new Error('No user logged in');
+    if (!user || !auth) {
+      throw new Error('No user logged in or Firebase not available');
     }
     return await getIdToken(user, forceRefresh);
   };
