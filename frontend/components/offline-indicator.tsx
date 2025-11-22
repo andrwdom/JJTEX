@@ -11,7 +11,7 @@ export default function OfflineIndicator() {
   useEffect(() => {
     const checkOnlineStatus = async () => {
       try {
-        const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'https://jjtextiles.in'
+        const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'https://www.jjtextiles.com'
         
         // Retry up to 2 times before declaring offline
         let lastError: any = null

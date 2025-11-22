@@ -358,7 +358,7 @@ export default function ProductPageClient({ productId }: ProductPageClientProps)
                   },
                   "offers": {
                     "@type": "Offer",
-                    "url": `https://jjtextiles.in/product/${productId}`,
+                    "url": `${process.env.NEXT_PUBLIC_SITE_URL || 'https://www.jjtextiles.com'}/product/${productId}`,
                     "priceCurrency": "INR",
                     "price": product.price,
                     "priceValidUntil": new Date(new Date().setFullYear(new Date().getFullYear() + 1)).toISOString().split('T')[0],
@@ -393,19 +393,19 @@ export default function ProductPageClient({ productId }: ProductPageClientProps)
                       "@type": "ListItem",
                       "position": 1,
                       "name": "Home",
-                      "item": "https://jjtextiles.in"
+                      "item": process.env.NEXT_PUBLIC_SITE_URL || "https://www.jjtextiles.com"
                     },
                     {
                       "@type": "ListItem",
                       "position": 2,
                       "name": product.category || "Product",
-                      "item": `https://jjtextiles.in/collections/${(product.category || "product").toLowerCase().replace(/ /g, '-')}`
+                      "item": `${process.env.NEXT_PUBLIC_SITE_URL || 'https://www.jjtextiles.com'}/collections/${(product.category || "product").toLowerCase().replace(/ /g, '-')}`
                     },
                     {
                       "@type": "ListItem",
                       "position": 3,
                       "name": product.name,
-                      "item": `https://jjtextiles.in/product/${productId}`
+                      "item": `${process.env.NEXT_PUBLIC_SITE_URL || 'https://www.jjtextiles.com'}/product/${productId}`
                     }
                   ]
                 })

@@ -72,10 +72,8 @@ const nextConfig = {
   },
   // Enable static optimization
   trailingSlash: false,
-  // Fix static asset loading issues
-  assetPrefix: process.env.NODE_ENV === 'production'
-    ? (process.env.NEXT_PUBLIC_SITE_URL || 'https://jjtextiles.com')
-    : '',
+  // Removed assetPrefix to prevent CORS issues - assets should be served from same domain
+  // assetPrefix should only be used for CDN scenarios, not same-domain serving
   // Optimize bundle size
   webpack: (config, { dev, isServer }) => {
     if (!dev && !isServer) {

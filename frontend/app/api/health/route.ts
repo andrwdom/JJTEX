@@ -3,7 +3,7 @@ import { NextResponse } from 'next/server'
 export async function GET() {
   try {
     // Try to reach the main API with increased timeout and retry logic
-    const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'https://jjtextiles.in'
+    const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'https://www.jjtextiles.com'
     
     // Retry up to 3 times with exponential backoff
     let lastError: any = null
