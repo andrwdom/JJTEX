@@ -7,7 +7,7 @@ import { useCart } from "@/components/cart-context"
 import { useWishlist } from "@/components/wishlist-context"
 import { useAuth } from "@/components/auth/useAuth"
 import LoginModal from "@/components/auth/LoginModal"
-import '@/styles/banner-animation.css'
+ 
 
 interface NavbarProps {
   onCategoriesClick?: () => void
@@ -85,32 +85,6 @@ export default function Navbar({ onCategoriesClick }: NavbarProps) {
 
   return (
     <>
-      {/* Animated Top Banner */}
-      <div className="bg-[rgb(71,60,102)] text-white py-3 overflow-hidden relative">
-        <div className="banner-ticker-container">
-          <div 
-            className="banner-ticker"
-            style={{
-              transform: `translate3d(${bannerPosition}%, 0, 0)`,
-              animation: /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) ? 'none' : 'ticker 24s linear infinite'
-            }}
-          >
-            <div className="banner-message">
-              ‼ FREE DELIVERY FOR LOUNGE WEAR WITHIN TAMIL NADU & PUDUCHERRY ‼
-            </div>
-            <div className="banner-message">
-              🔥 BUY 3 LOUNGE WEAR @1299RS 🔥
-            </div>
-            <div className="banner-message">
-              🎉 PREMIUM MATERNITY WEAR - ELEGANT & COMFORTABLE 🎉
-            </div>
-            <div className="banner-message">
-              ‼ FREE DELIVERY FOR LOUNGE WEAR WITHIN TAMIL NADU & PUDUCHERRY ‼
-            </div>
-          </div>
-        </div>
-      </div>
-
       {/* Main Navbar */}
       <nav className="bg-white border-b border-gray-200 sticky top-0 z-[9999] shadow-sm">
         <div className="container-responsive">
