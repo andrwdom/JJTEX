@@ -17,7 +17,7 @@ echo ""
 cd /var/www/jjtextiles-ecom/backend
 
 echo "Installing all missing packages..."
-npm install express-pino-logger@^7.0.0 winston@^3.11.0 @sentry/node
+npm install express-pino-logger@^7.0.0 winston@^3.11.0 @sentry/node pdfkit@^0.15.0
 
 echo ""
 echo "Installing all dependencies to ensure everything is up to date..."
