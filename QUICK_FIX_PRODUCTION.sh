@@ -20,7 +20,7 @@ cd /var/www/jjtextiles-ecom/backend
 
 echo "STEP 1: Installing missing dependencies..."
 echo "----------------------------------------"
-npm install express-pino-logger@^7.0.0
+npm install express-pino-logger@^7.0.0 winston@^3.11.0
 
 # Option: Install Sentry (optional - comment out if you don't want it)
 echo ""
