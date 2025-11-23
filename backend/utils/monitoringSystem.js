@@ -279,14 +279,20 @@ export class CriticalOperationMonitor {
    */
   sendToMonitoringServices(alert) {
     try {
-      // Send to Sentry
-      Sentry.withScope((scope) => {
-        scope.setLevel(alert.severity === 'critical' ? 'error' : 'warning');
-        scope.setTag('alert_type', alert.type);
-        scope.setTag('severity', alert.severity);
-        scope.setContext('alert_context', alert.context);
-        
-        Sentry.captureMessage(`Business Alert: ${alert.type}`, alert.severity === 'critical' ? 'error' : 'warning');
+      // Send to Sentry (if available)
+      loadSentry().then(sentry => {
+        if (sentry) {
+          sentry.withScope((scope) => {
+            scope.setLevel(alert.severity === 'critical' ? 'error' : 'warning');
+            scope.setTag('alert_type', alert.type);
+            scope.setTag('severity', alert.severity);
+            scope.setContext('alert_context', alert.context);
+            
+            sentry.captureMessage(`Business Alert: ${alert.type}`, alert.severity === 'critical' ? 'error' : 'warning');
+          });
+        }
+      }).catch(err => {
+        // Sentry not available, continue without it
       });
 
       // TODO: Add integrations for:
