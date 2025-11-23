@@ -17,11 +17,14 @@ dotenv.config({ path: envPath });
 
 // Initialize Sentry for error monitoring (non-intrusive)
 let Sentry = null;
+let SentryNode = null;
 
 // Import new production-grade systems
 import { expressErrorHandler } from './utils/errorHandler.js';
 import { startPeriodicMonitoring } from './utils/monitoringSystem.js';
-import * as SentryNode from '@sentry/node';
+
+// Note: @sentry/node is imported dynamically in initializeSentry() function below
+// to prevent crashes if the package is not installed
 
 // Now import config (which also loads dotenv but won't conflict)
 import { config } from './config.js'
@@ -183,15 +186,9 @@ app.use(pinoHttp({ logger: pinoAppLogger }));
 // Emit a boot log to verify payment log stream is writable
 pinoAppLogger.info({ event: 'logger_boot', path: 'server', env: process.env.NODE_ENV }, 'pino logger initialized');
 
-// Initialize Sentry properly
-if (process.env.NODE_ENV === 'production' && process.env.SENTRY_DSN) {
-  SentryNode.init({
-    dsn: process.env.SENTRY_DSN,
-    environment: process.env.NODE_ENV || 'production'
-  });
-  Sentry = SentryNode;
-  app.use(Sentry.requestHandler());
-}
+// Initialize Sentry properly (only if available)
+// Sentry initialization is handled in initializeSentry() function below
+// This prevents crashes if @sentry/node is not installed
 
 // Connect to MongoDB
 connectDB().then(async () => {
