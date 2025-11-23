@@ -1,12 +1,16 @@
 "use client"
 
-import React from "react"
+import React, { useState } from "react"
 import {
 	AlignJustify,
 	ShoppingCart,
 	User,
 	Search as SearchIcon
 } from "lucide-react"
+import MobileMenuSidebar from "@/components/mobile-menu-sidebar"
+import { useCart } from "@/components/cart-context"
+import { useAuth } from "@/components/auth/useAuth"
+import LoginModal from "@/components/auth/LoginModal"
 
 type Highlight = {
 	title: string
@@ -85,49 +89,102 @@ const products = Array.from({ length: 6 }).map((_, i) => ({
 }))
 
 export default function Home() {
+	const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
+	const [isLoginModalOpen, setIsLoginModalOpen] = useState(false)
+	const { openCartSidebar, cartItems } = useCart()
+	const { user } = useAuth()
+
+	const cartCount = cartItems.reduce((total, item) => total + item.quantity, 0)
+
+	const handleAccountClick = () => {
+		if (user) {
+			window.location.href = "/account"
+		} else {
+			setIsLoginModalOpen(true)
+		}
+	}
+
+
 	return (
 		<div className="min-h-screen bg-white font-sans text-gray-900">
 			{/* Light pink header with soft bottom curve */}
 			<header
-				className="relative bg-[#FCDDF3] text-[#1f1f1f] px-4 pt-3 pb-16 rounded-b-[28px]"
+				className="relative bg-[#FCDDF3] text-[#1f1f1f] px-4 pt-3 pb-4 rounded-b-[28px]"
 				style={{ boxShadow: "0 2px 0 rgba(0,0,0,0.02) inset" }}
 			>
-				<div className="flex items-center justify-between">
-					<button aria-label="Menu" className="p-2">
+				<div className="flex items-center justify-between mb-4">
+					<button
+						aria-label="Menu"
+						className="p-2 hover:bg-white/30 rounded-lg transition-colors duration-200"
+						onClick={() => setIsMobileMenuOpen(true)}
+					>
 						<AlignJustify className="h-6 w-6 text-[#1f1f1f]" />
 					</button>
 					<div className="flex items-center justify-center">
-						<img
-							src="/logo1.png"
-							alt="JJ Textiles"
-							className="h-10 w-auto mx-auto"
-						/>
+						<button
+							onClick={() => (window.location.href = "/")}
+							className="cursor-pointer"
+						>
+							<img
+								src="/logo1.png"
+								alt="JJ Textiles"
+								className="h-10 w-auto mx-auto"
+							/>
+						</button>
 					</div>
 					<div className="flex items-center gap-3">
-						<button aria-label="Cart" className="p-2">
+						<button
+							aria-label="Cart"
+							className="p-2 hover:bg-white/30 rounded-lg transition-colors duration-200 relative"
+							onClick={openCartSidebar}
+						>
 							<ShoppingCart className="h-6 w-6 text-[#1f1f1f]" />
+							{cartCount > 0 && (
+								<span className="absolute top-0 right-0 bg-[#E91E63] text-white text-[10px] font-bold rounded-full h-5 w-5 flex items-center justify-center">
+									{cartCount > 9 ? "9+" : cartCount}
+								</span>
+							)}
 						</button>
-						<button aria-label="Account" className="p-2">
+						<button
+							aria-label="Account"
+							className="p-2 hover:bg-white/30 rounded-lg transition-colors duration-200"
+							onClick={handleAccountClick}
+						>
 							<User className="h-6 w-6 text-[#1f1f1f]" />
 						</button>
 					</div>
 				</div>
-			</header>
 
-			{/* Floating search bar overlapping header */}
-			<div className="-mt-8 px-4">
-				<div className="relative">
-					<div className="flex items-center gap-2 bg-white rounded-full shadow-lg px-4 py-3">
-						<SearchIcon className="h-5 w-5 text-gray-500" />
-						<input
-							type="text"
-							placeholder="Search for brands and products"
-							className="w-full bg-transparent text-sm outline-none placeholder:text-gray-400"
-							aria-label="Search"
-						/>
+				{/* Search bar inside pink header */}
+				<div className="px-0 pb-2">
+					<div className="relative">
+						<div className="flex items-center gap-2 bg-white rounded-full shadow-lg px-4 py-3">
+							<SearchIcon className="h-5 w-5 text-gray-500" />
+							<input
+								type="text"
+								placeholder="Search for brands and products"
+								className="w-full bg-transparent text-sm outline-none placeholder:text-gray-400"
+								aria-label="Search"
+							/>
+						</div>
 					</div>
 				</div>
-			</div>
+			</header>
+
+			{/* Mobile Menu Sidebar */}
+			<MobileMenuSidebar
+				isOpen={isMobileMenuOpen}
+				onClose={() => setIsMobileMenuOpen(false)}
+			/>
+
+			{/* Login Modal */}
+			<LoginModal
+				open={isLoginModalOpen}
+				onClose={() => setIsLoginModalOpen(false)}
+				onSuccess={() => {
+					setIsLoginModalOpen(false)
+				}}
+			/>
 
 			{/* Category rail */}
 			<section className="mt-4 px-3">
