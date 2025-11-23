@@ -263,8 +263,11 @@ export default function CategoryPageClient({ categorySlug }: CategoryPageClientP
     setFilteredProducts(filtered)
   }, [products, searchQuery, sortBy, sleeveTypeFilter])
 
-  const handleProductClick = (productId: string) => {
-    window.location.href = `/product/${productId}`
+  const handleProductClick = async (productId: string, productCategorySlug?: string) => {
+    // Use new URL structure: /[category-name]/product/[product-id]
+    const { getProductUrl } = await import('@/lib/product-url-utils')
+    const url = getProductUrl(productId, productCategorySlug || categorySlug)
+    window.location.href = url
   }
 
   const handleCategorySelect = (slug: string) => {
@@ -814,7 +817,7 @@ export default function CategoryPageClient({ categorySlug }: CategoryPageClientP
                     <div
                       key={product.id}
                       className="group cursor-pointer"
-                      onClick={() => handleProductClick(product.id)}
+                      onClick={() => handleProductClick(product.id, product.categorySlug || categorySlug)}
                     >
                       {/* Clean Product Image */}
                       <div className="relative aspect-[2/3] bg-gray-100 rounded-lg overflow-hidden mb-4">

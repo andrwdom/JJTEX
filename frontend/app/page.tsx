@@ -1,6 +1,6 @@
 "use client"
 
-import React, { useState } from "react"
+import React, { useState, useEffect } from "react"
 import {
 	AlignJustify,
 	ShoppingCart,
@@ -11,14 +11,17 @@ import MobileMenuSidebar from "@/components/mobile-menu-sidebar"
 import { useCart } from "@/components/cart-context"
 import { useAuth } from "@/components/auth/useAuth"
 import LoginModal from "@/components/auth/LoginModal"
+import { fetchCategoryTree, getLeafCategories, CategoryTree } from "@/lib/category-utils"
+import { useRouter } from "next/navigation"
 
 type Highlight = {
 	title: string
 	image: string
+	slug?: string // Category slug for navigation
 }
 
-// Top highlights to show in the horizontal rail (mixed categories)
-const topHighlights: Highlight[] = [
+// Fallback highlights if categories aren't loaded yet
+const fallbackHighlights: Highlight[] = [
 	{ title: "Women's Kurtas", image: "/p_img1.png" },
 	{ title: "Women's Sarees", image: "/p_img5.png" },
 	{ title: "Girls Dresses", image: "/p_img3.png" },
@@ -27,9 +30,6 @@ const topHighlights: Highlight[] = [
 	{ title: "Teens Jeans", image: "/p_img6.png" },
 	{ title: "Jewellery", image: "/p_img8.png" },
 ]
-
-// Categories are now fetched dynamically from backend API
-// See mobile-menu-sidebar.tsx for category navigation
 
 const products = Array.from({ length: 6 }).map((_, i) => {
 	const productImages = ["/p_img1.png", "/p_img2.png", "/p_img3.png", "/p_img4.png", "/p_img5.png", "/p_img6.png"]
@@ -45,16 +45,63 @@ const products = Array.from({ length: 6 }).map((_, i) => {
 export default function Home() {
 	const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
 	const [isLoginModalOpen, setIsLoginModalOpen] = useState(false)
+	const [highlights, setHighlights] = useState<Highlight[]>(fallbackHighlights)
+	const [categoriesLoading, setCategoriesLoading] = useState(true)
 	const { openCartSidebar, cartItems } = useCart()
 	const { user } = useAuth()
+	const router = useRouter()
 
 	const cartCount = cartItems.reduce((total, item) => total + item.quantity, 0)
+
+	// Fetch categories and create highlights
+	useEffect(() => {
+		async function loadCategories() {
+			setCategoriesLoading(true)
+			try {
+				const tree = await fetchCategoryTree()
+				const leafCategories = getLeafCategories(tree)
+				
+				// Map leaf categories to highlights (take first 7 or use fallback)
+				if (leafCategories.length > 0) {
+					const categoryHighlights: Highlight[] = leafCategories.slice(0, 7).map(cat => ({
+						title: cat.name,
+						image: "/p_img1.png", // Default image, can be enhanced later with category images
+						slug: cat.slug
+					}))
+					setHighlights(categoryHighlights)
+				} else {
+					// Use fallback if no categories found
+					setHighlights(fallbackHighlights)
+				}
+			} catch (error) {
+				console.error('Failed to load categories:', error)
+				// Use fallback on error
+				setHighlights(fallbackHighlights)
+			} finally {
+				setCategoriesLoading(false)
+			}
+		}
+		loadCategories()
+	}, [])
 
 	const handleAccountClick = () => {
 		if (user) {
 			window.location.href = "/account"
 		} else {
 			setIsLoginModalOpen(true)
+		}
+	}
+
+	const handleHighlightClick = (highlight: Highlight) => {
+		if (highlight.slug) {
+			// Navigate to category page using slug
+			router.push(`/collections/${highlight.slug}`)
+		} else {
+			// Fallback: try to generate slug from title
+			const slug = highlight.title.toLowerCase()
+				.replace(/'/g, '')
+				.replace(/\s+/g, '-')
+			router.push(`/collections/${slug}`)
 		}
 	}
 
@@ -146,8 +193,12 @@ export default function Home() {
 					className="no-scrollbar flex gap-3 overflow-x-auto py-1"
 					style={{ WebkitOverflowScrolling: "touch" }}
 				>
-					{topHighlights.map((item) => (
-						<div key={item.title} className="flex w-[78px] flex-col items-center shrink-0">
+					{highlights.map((item) => (
+						<button
+							key={item.title}
+							onClick={() => handleHighlightClick(item)}
+							className="flex w-[78px] flex-col items-center shrink-0 cursor-pointer hover:opacity-80 transition-opacity"
+						>
 							<div className="h-16 w-16 rounded-full bg-white shadow-sm ring-1 ring-gray-200 overflow-hidden">
 								<img
 									src={item.image}
@@ -159,7 +210,7 @@ export default function Home() {
 							<p className="mt-2 text-center text-[11px] leading-tight text-gray-700">
 								{item.title}
 							</p>
-						</div>
+						</button>
 					))}
 				</div>
 			</section>
