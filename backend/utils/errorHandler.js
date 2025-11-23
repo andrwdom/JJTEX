@@ -3,7 +3,22 @@
  * Provides structured error handling, logging, and monitoring
  */
 
-import * as Sentry from '@sentry/node';
+// Sentry is optional - will be loaded dynamically if available
+let Sentry = null;
+
+// Lazy load Sentry (optional dependency)
+async function loadSentry() {
+  if (Sentry !== null) return Sentry; // Already loaded or attempted
+  
+  try {
+    const sentryModule = await import('@sentry/node');
+    Sentry = sentryModule;
+    return Sentry;
+  } catch (err) {
+    Sentry = false; // Mark as unavailable
+    return null;
+  }
+}
 
 // Error severity levels
 export const ErrorSeverity = {
@@ -181,8 +196,10 @@ export class ErrorHandler {
     // Log the error
     this.logError(appError);
     
-    // Report to monitoring services
-    this.reportError(appError);
+    // Report to monitoring services (async, don't wait)
+    this.reportError(appError).catch(err => {
+      console.error('Error reporting to monitoring:', err);
+    });
     
     return appError;
   }
@@ -276,24 +293,27 @@ export class ErrorHandler {
   /**
    * Report error to monitoring services
    */
-  reportError(error) {
+  async reportError(error) {
     if (this.enableSentry && error.severity !== ErrorSeverity.LOW) {
-      try {
-        Sentry.withScope((scope) => {
-          scope.setLevel(this.severityToSentryLevel(error.severity));
-          scope.setTag('category', error.category);
-          scope.setTag('canRetry', error.canRetry);
-          
-          if (error.correlationId) {
-            scope.setTag('correlationId', error.correlationId);
-          }
-          
-          scope.setContext('error_details', error.context);
-          
-          Sentry.captureException(error);
-        });
-      } catch (sentryError) {
-        console.error('Failed to report error to Sentry:', sentryError);
+      const sentry = await loadSentry();
+      if (sentry) {
+        try {
+          sentry.withScope((scope) => {
+            scope.setLevel(this.severityToSentryLevel(error.severity));
+            scope.setTag('category', error.category);
+            scope.setTag('canRetry', error.canRetry);
+            
+            if (error.correlationId) {
+              scope.setTag('correlationId', error.correlationId);
+            }
+            
+            scope.setContext('error_details', error.context);
+            
+            sentry.captureException(error);
+          });
+        } catch (sentryError) {
+          console.error('Failed to report error to Sentry:', sentryError);
+        }
       }
     }
   }

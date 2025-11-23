@@ -5,7 +5,22 @@
  * for critical business operations
  */
 
-import * as Sentry from '@sentry/node';
+// Sentry is optional - will be loaded dynamically if available
+let Sentry = null;
+
+// Lazy load Sentry (optional dependency)
+async function loadSentry() {
+  if (Sentry !== null) return Sentry; // Already loaded or attempted
+  
+  try {
+    const sentryModule = await import('@sentry/node');
+    Sentry = sentryModule;
+    return Sentry;
+  } catch (err) {
+    Sentry = false; // Mark as unavailable
+    return null;
+  }
+}
 import { circuitBreakerManager } from './circuitBreaker.js';
 import { globalErrorHandler } from './errorHandler.js';
 import { atomicStockManager } from './atomicStockManager.js';
