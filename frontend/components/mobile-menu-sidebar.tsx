@@ -1,64 +1,13 @@
 "use client"
 
-import React, { useState } from "react"
+import React, { useState, useEffect } from "react"
 import { X, Home, List, Info, Mail, LogIn, LogOut, User, ChevronDown, ChevronRight } from "lucide-react"
 import { Sheet, SheetContent } from "@/components/ui/sheet"
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible"
 import { useAuth } from "@/components/auth/useAuth"
 import LoginModal from "@/components/auth/LoginModal"
 import { useRouter } from "next/navigation"
-
-// Categories data structure matching page.tsx
-const categories = {
-	kids: {
-		girls: [
-			"Dresses & Jumpsuits",
-			"Tops & Tees",
-			"Ethnic Wear",
-			"Skirts & Shorts",
-			"Jeans",
-			"Clothing Set",
-			"Innerwear",
-		],
-		boys: [
-			"T-shirt",
-			"Clothing Set",
-			"Ethnic Wear",
-			"Bottoms",
-			"Shirts",
-			"Jeans",
-			"Innerwear",
-		],
-		baby: [
-			"Rompers & Body Suits",
-			"Clothing Set",
-			"Dresses",
-			"Tops",
-			"Bottoms",
-			"Accessories",
-		],
-		teens: [
-			"T-shirt",
-			"Shirts",
-			"Jeans",
-			"Ethnic Wear",
-			"Dresses",
-			"Innerwear",
-		],
-	},
-	women: {
-		ethnic: [
-			"Kurtas & Kurtis",
-			"Kurta Set",
-			"Traditional Saree",
-			"Party Wear Saree",
-			"Lehengas",
-			"Dupattas",
-		],
-		western: ["Tops", "Tees", "Dresses", "Jumpsuits", "Jeans", "Sleepwear"],
-		jewellery: ["Earrings", "Rings"],
-	},
-}
+import { fetchCategoryTree, CategoryTree } from "@/lib/category-utils"
 
 interface MobileMenuSidebarProps {
 	isOpen: boolean
@@ -75,7 +24,25 @@ export default function MobileMenuSidebar({
 	const [isCategoriesOpen, setIsCategoriesOpen] = useState(false)
 	const [openMainGroups, setOpenMainGroups] = useState<Record<string, boolean>>({})
 	const [openSubGroups, setOpenSubGroups] = useState<Record<string, boolean>>({})
+	const [categoryTree, setCategoryTree] = useState<CategoryTree[]>([])
+	const [categoriesLoading, setCategoriesLoading] = useState(true)
 	const router = useRouter()
+
+	// Fetch categories from backend
+	useEffect(() => {
+		async function loadCategories() {
+			setCategoriesLoading(true)
+			try {
+				const tree = await fetchCategoryTree()
+				setCategoryTree(tree)
+			} catch (error) {
+				console.error('Failed to load categories:', error)
+			} finally {
+				setCategoriesLoading(false)
+			}
+		}
+		loadCategories()
+	}, [])
 
 	const handleLogout = () => {
 		logout()
@@ -97,10 +64,9 @@ export default function MobileMenuSidebar({
 		onClose()
 	}
 
-	const handleCategoryClick = (mainGroup: string, subGroup: string, item: string) => {
-		// Generate slug from the category item
-		const slug = item.toLowerCase().replace(/\s+/g, "-").replace(/&/g, "and")
-		router.push(`/collections/${slug}`)
+	const handleCategoryClick = (categorySlug: string) => {
+		// Use the actual slug from backend
+		router.push(`/collections/${categorySlug}`)
 		onClose()
 	}
 
@@ -205,115 +171,94 @@ export default function MobileMenuSidebar({
 
 								<CollapsibleContent className="overflow-hidden data-[state=closed]:animate-collapsible-up data-[state=open]:animate-collapsible-down">
 									<div className="bg-gray-50/50 pb-2">
-										{/* Women Category */}
-										<Collapsible
-											open={openMainGroups.women}
-											onOpenChange={() => toggleMainGroup("women")}
-										>
-											<CollapsibleTrigger asChild>
-												<button className="w-full flex items-center justify-between px-6 pl-14 py-2.5 text-left hover:bg-pink-100/50 transition-colors duration-200">
-													<span className="font-semibold text-gray-900">Women</span>
-													<ChevronDown
-														className={`h-4 w-4 text-gray-500 transition-transform duration-200 ${
-															openMainGroups.women ? "rotate-180" : ""
-														}`}
-													/>
-												</button>
-											</CollapsibleTrigger>
-											<CollapsibleContent className="overflow-hidden data-[state=closed]:animate-collapsible-up data-[state=open]:animate-collapsible-down">
-												{Object.entries(categories.women).map(([subKey, items]) => {
-													const subGroupKey = `women-${subKey}`
-													const isSubOpen = openSubGroups[subGroupKey] || false
-													const subLabel = subKey.charAt(0).toUpperCase() + subKey.slice(1) + " Wear"
+										{categoriesLoading ? (
+											<div className="px-6 py-4 text-sm text-gray-500">Loading categories...</div>
+										) : categoryTree.length === 0 ? (
+											<div className="px-6 py-4 text-sm text-gray-500">No categories available</div>
+										) : (
+											categoryTree.map((rootCategory) => {
+												const mainGroupKey = rootCategory.slug
+												const isMainOpen = openMainGroups[mainGroupKey] || false
 
-													return (
-														<div key={subKey}>
-															<Collapsible
-																open={isSubOpen}
-																onOpenChange={() => toggleSubGroup(subGroupKey)}
-															>
-																<CollapsibleTrigger asChild>
-																	<button className="w-full flex items-center justify-between px-6 pl-20 py-2 text-left hover:bg-pink-100/30 transition-colors duration-200">
-																		<span className="text-sm font-medium text-gray-800">{subLabel}</span>
-																		<ChevronDown
-																			className={`h-4 w-4 text-gray-400 transition-transform duration-200 ${
-																				isSubOpen ? "rotate-180" : ""
-																			}`}
-																		/>
+												return (
+													<Collapsible
+														key={rootCategory._id}
+														open={isMainOpen}
+														onOpenChange={() => toggleMainGroup(mainGroupKey)}
+													>
+														<CollapsibleTrigger asChild>
+															<button className="w-full flex items-center justify-between px-6 pl-14 py-2.5 text-left hover:bg-pink-100/50 transition-colors duration-200">
+																<span className="font-semibold text-gray-900">{rootCategory.name}</span>
+																<ChevronDown
+																	className={`h-4 w-4 text-gray-500 transition-transform duration-200 ${
+																		isMainOpen ? "rotate-180" : ""
+																	}`}
+																/>
+															</button>
+														</CollapsibleTrigger>
+														<CollapsibleContent className="overflow-hidden data-[state=closed]:animate-collapsible-up data-[state=open]:animate-collapsible-down">
+															{rootCategory.children && rootCategory.children.length > 0 ? (
+																rootCategory.children.map((subCategory) => {
+																	const subGroupKey = `${mainGroupKey}-${subCategory.slug}`
+																	const isSubOpen = openSubGroups[subGroupKey] || false
+
+																	return (
+																		<div key={subCategory._id}>
+																			{subCategory.children && subCategory.children.length > 0 ? (
+																				<Collapsible
+																					open={isSubOpen}
+																					onOpenChange={() => toggleSubGroup(subGroupKey)}
+																				>
+																					<CollapsibleTrigger asChild>
+																						<button className="w-full flex items-center justify-between px-6 pl-20 py-2 text-left hover:bg-pink-100/30 transition-colors duration-200">
+																							<span className="text-sm font-medium text-gray-800">{subCategory.name}</span>
+																							<ChevronDown
+																								className={`h-4 w-4 text-gray-400 transition-transform duration-200 ${
+																									isSubOpen ? "rotate-180" : ""
+																								}`}
+																							/>
+																						</button>
+																					</CollapsibleTrigger>
+																					<CollapsibleContent className="overflow-hidden data-[state=closed]:animate-collapsible-up data-[state=open]:animate-collapsible-down">
+																						{subCategory.children.map((leafCategory) => (
+																							<button
+																								key={leafCategory._id}
+																								onClick={() => handleCategoryClick(leafCategory.slug)}
+																								className="w-full px-6 pl-24 py-2 text-left text-sm text-gray-700 hover:bg-pink-100/40 hover:text-pink-600 transition-colors duration-200"
+																							>
+																								{leafCategory.name}
+																							</button>
+																						))}
+																					</CollapsibleContent>
+																				</Collapsible>
+																			) : (
+																				// If no children, make it clickable directly
+																				<button
+																					onClick={() => handleCategoryClick(subCategory.slug)}
+																					className="w-full px-6 pl-20 py-2 text-left text-sm font-medium text-gray-800 hover:bg-pink-100/40 hover:text-pink-600 transition-colors duration-200"
+																				>
+																					{subCategory.name}
+																				</button>
+																			)}
+																		</div>
+																	)
+																})
+															) : (
+																// If root category has no children but is a leaf, make it clickable
+																rootCategory.isLeaf && (
+																	<button
+																		onClick={() => handleCategoryClick(rootCategory.slug)}
+																		className="w-full px-6 pl-20 py-2 text-left text-sm font-medium text-gray-800 hover:bg-pink-100/40 hover:text-pink-600 transition-colors duration-200"
+																	>
+																		{rootCategory.name}
 																	</button>
-																</CollapsibleTrigger>
-																<CollapsibleContent className="overflow-hidden data-[state=closed]:animate-collapsible-up data-[state=open]:animate-collapsible-down">
-																	{items.map((item) => (
-																		<button
-																			key={item}
-																			onClick={() => handleCategoryClick("women", subKey, item)}
-																			className="w-full px-6 pl-24 py-2 text-left text-sm text-gray-700 hover:bg-pink-100/40 hover:text-pink-600 transition-colors duration-200"
-																		>
-																			{item}
-																		</button>
-																	))}
-																</CollapsibleContent>
-															</Collapsible>
-														</div>
-													)
-												})}
-											</CollapsibleContent>
-										</Collapsible>
-
-										{/* Kids Category */}
-										<Collapsible
-											open={openMainGroups.kids}
-											onOpenChange={() => toggleMainGroup("kids")}
-										>
-											<CollapsibleTrigger asChild>
-												<button className="w-full flex items-center justify-between px-6 pl-14 py-2.5 text-left hover:bg-pink-100/50 transition-colors duration-200">
-													<span className="font-semibold text-gray-900">Kids</span>
-													<ChevronDown
-														className={`h-4 w-4 text-gray-500 transition-transform duration-200 ${
-															openMainGroups.kids ? "rotate-180" : ""
-														}`}
-													/>
-												</button>
-											</CollapsibleTrigger>
-											<CollapsibleContent className="overflow-hidden data-[state=closed]:animate-collapsible-up data-[state=open]:animate-collapsible-down">
-												{Object.entries(categories.kids).map(([subKey, items]) => {
-													const subGroupKey = `kids-${subKey}`
-													const isSubOpen = openSubGroups[subGroupKey] || false
-													const subLabel = subKey.charAt(0).toUpperCase() + subKey.slice(1)
-
-													return (
-														<div key={subKey}>
-															<Collapsible
-																open={isSubOpen}
-																onOpenChange={() => toggleSubGroup(subGroupKey)}
-															>
-																<CollapsibleTrigger asChild>
-																	<button className="w-full flex items-center justify-between px-6 pl-20 py-2 text-left hover:bg-pink-100/30 transition-colors duration-200">
-																		<span className="text-sm font-medium text-gray-800">{subLabel}</span>
-																		<ChevronDown
-																			className={`h-4 w-4 text-gray-400 transition-transform duration-200 ${
-																				isSubOpen ? "rotate-180" : ""
-																			}`}
-																		/>
-																	</button>
-																</CollapsibleTrigger>
-																<CollapsibleContent className="overflow-hidden data-[state=closed]:animate-collapsible-up data-[state=open]:animate-collapsible-down">
-																	{items.map((item) => (
-																		<button
-																			key={item}
-																			onClick={() => handleCategoryClick("kids", subKey, item)}
-																			className="w-full px-6 pl-24 py-2 text-left text-sm text-gray-700 hover:bg-pink-100/40 hover:text-pink-600 transition-colors duration-200"
-																		>
-																			{item}
-																		</button>
-																	))}
-																</CollapsibleContent>
-															</Collapsible>
-														</div>
-													)
-												})}
-											</CollapsibleContent>
-										</Collapsible>
+																)
+															)}
+														</CollapsibleContent>
+													</Collapsible>
+												)
+											})
+										)}
 									</div>
 								</CollapsibleContent>
 							</Collapsible>

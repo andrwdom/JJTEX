@@ -19,74 +19,28 @@ type Highlight = {
 
 // Top highlights to show in the horizontal rail (mixed categories)
 const topHighlights: Highlight[] = [
-	{ title: "Women's Kurtas", image: "/images/categories/maternity-feeding.webp" },
-	{ title: "Women's Sarees", image: "/images/categories/dupatta-lounge.webp" },
-	{ title: "Girls Dresses", image: "/images/categories/zipless-feeding.webp" },
+	{ title: "Women's Kurtas", image: "/p_img1.png" },
+	{ title: "Women's Sarees", image: "/p_img5.png" },
+	{ title: "Girls Dresses", image: "/p_img3.png" },
 	{ title: "Boys T-Shirts", image: "/p_img4.png" },
-	{ title: "Baby Rompers", image: "/images/categories/non-feeding.webp" },
+	{ title: "Baby Rompers", image: "/p_img7.png" },
 	{ title: "Teens Jeans", image: "/p_img6.png" },
-	{ title: "Jewellery", image: "/images/placeholder.webp" },
+	{ title: "Jewellery", image: "/p_img8.png" },
 ]
 
-// Full category object (exact structure)
-const categories = {
-	kids: {
-		girls: [
-			"Dresses & Jumpsuits",
-			"Tops & Tees",
-			"Ethnic Wear",
-			"Skirts & Shorts",
-			"Jeans",
-			"Clothing Set",
-			"Innerwear",
-		],
-		boys: [
-			"T-shirt",
-			"Clothing Set",
-			"Ethnic Wear",
-			"Bottoms",
-			"Shirts",
-			"Jeans",
-			"Innerwear",
-		],
-		baby: [
-			"Rompers & Body Suits",
-			"Clothing Set",
-			"Dresses",
-			"Tops",
-			"Bottoms",
-			"Accessories",
-		],
-		teens: [
-			"T-shirt",
-			"Shirts",
-			"Jeans",
-			"Ethnic Wear",
-			"Dresses",
-			"Innerwear",
-		],
-	},
-	women: {
-		ethnic: [
-			"Kurtas & Kurtis",
-			"Kurta Set",
-			"Traditional Saree",
-			"Party Wear Saree",
-			"Lehengas",
-			"Dupattas",
-		],
-		western: ["Tops", "Tees", "Dresses", "Jumpsuits", "Jeans", "Sleepwear"],
-		jewellery: ["Earrings", "Rings"],
-	},
-}
+// Categories are now fetched dynamically from backend API
+// See mobile-menu-sidebar.tsx for category navigation
 
-const products = Array.from({ length: 6 }).map((_, i) => ({
-	id: i + 1,
-	title: ["Floral Kurta", "Classic Saree", "Girls Dress", "Boys Tee", "Baby Romper", "Teens Jeans"][i % 6],
-	price: ["₹799", "₹1,499", "₹699", "₹399", "₹499", "₹999"][i % 6],
-	originalPrice: ["₹1,299", "₹2,499", "₹1,199", "₹699", "₹899", "₹1,799"][i % 6],
-	image: `https://placehold.co/600x700?text=Product+${i + 1}`,
-}))
+const products = Array.from({ length: 6 }).map((_, i) => {
+	const productImages = ["/p_img1.png", "/p_img2.png", "/p_img3.png", "/p_img4.png", "/p_img5.png", "/p_img6.png"]
+	return {
+		id: i + 1,
+		title: ["Floral Kurta", "Classic Saree", "Girls Dress", "Boys Tee", "Baby Romper", "Teens Jeans"][i % 6],
+		price: ["₹799", "₹1,499", "₹699", "₹399", "₹499", "₹999"][i % 6],
+		originalPrice: ["₹1,299", "₹2,499", "₹1,199", "₹699", "₹899", "₹1,799"][i % 6],
+		image: productImages[i % productImages.length],
+	}
+})
 
 export default function Home() {
 	const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
@@ -214,7 +168,7 @@ export default function Home() {
 			<section className="mt-4 px-4">
 				<div className="relative rounded-lg overflow-hidden">
 					<img
-						src="https://images.unsplash.com/photo-1544441893-675973e31985?q=80&w=1200&auto=format&fit=crop"
+						src="/hero_img.png"
 						alt="Big Winter Bonanza"
 						className="h-64 sm:h-72 w-full object-cover"
 					/>
