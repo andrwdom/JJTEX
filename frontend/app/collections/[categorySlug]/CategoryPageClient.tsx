@@ -29,6 +29,7 @@ interface Product {
   image: string
   images?: string[]
   category: string
+  categorySlug?: string
   description: string
   sizes: any[] // Can be string[] or { size: string, stock: number }[]
   bestseller: boolean
@@ -195,8 +196,16 @@ export default function CategoryPageClient({ categorySlug }: CategoryPageClientP
         }
 
         const data = await response.json();
+        // Handle multiple backend response shapes:
+        // - { products: [...] }  (GET /api/products)
+        // - { success: true, products: [...] } (admin list)
+        // - { data: [...] } (some wrappers)
+        const rawProducts = Array.isArray(data)
+          ? data
+          : (data?.products || data?.data?.products || data?.data || []);
+
         // Map backend fields to frontend
-        const mappedProducts = (data.products || []).map((p: any) => ({
+        const mappedProducts = (rawProducts || []).map((p: any) => ({
           id: String(p.customId || p._id), // Use customId for routing, fallback to _id
           _id: String(p._id),
           customId: String(p.customId || p._id),
@@ -206,6 +215,7 @@ export default function CategoryPageClient({ categorySlug }: CategoryPageClientP
           image: (Array.isArray(p.images) && p.images.length > 0) ? p.images[0] : '/placeholder.svg',
           images: Array.isArray(p.images) ? p.images : [p.image || '/placeholder.svg'],
           category: p.category,
+          categorySlug: p.categorySlug || (typeof p.category === 'string' ? p.category.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '') : undefined),
           description: p.description,
           sizes: p.sizes || [],
           bestseller: p.bestseller,

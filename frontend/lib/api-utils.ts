@@ -549,8 +549,16 @@ export async function fetchProducts(
   } catch (error) {
     console.warn(`Failed to fetch products, using fallback data:`, error)
     
-    // Return a mock response with fallback data
-    return new Response(JSON.stringify(FALLBACK_PRODUCTS), {
+    // Return a mock response that matches the backend shape: { products: [...] }
+    return new Response(JSON.stringify({
+      success: true,
+      products: FALLBACK_PRODUCTS,
+      total: FALLBACK_PRODUCTS.length,
+      pages: 1,
+      page: 1,
+      limit: FALLBACK_PRODUCTS.length,
+      fallback: true
+    }), {
       status: 200,
       headers: {
         'Content-Type': 'application/json',

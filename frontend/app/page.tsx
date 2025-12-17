@@ -22,13 +22,14 @@ type Highlight = {
 
 // Fallback highlights if categories aren't loaded yet
 const fallbackHighlights: Highlight[] = [
-	{ title: "Women's Kurtas", image: "/p_img1.png" },
-	{ title: "Women's Sarees", image: "/p_img5.png" },
-	{ title: "Girls Dresses", image: "/p_img3.png" },
-	{ title: "Boys T-Shirts", image: "/p_img4.png" },
-	{ title: "Baby Rompers", image: "/p_img7.png" },
-	{ title: "Teens Jeans", image: "/p_img6.png" },
-	{ title: "Jewellery", image: "/p_img8.png" },
+	// These slugs match the backend taxonomy seeding (`backend/scripts/seedTaxonomy.js`)
+	{ title: "Women's Kurtas", image: "/p_img1.png", slug: "kurtas-kurtis" },
+	{ title: "Women's Sarees", image: "/p_img5.png", slug: "traditional-saree" },
+	{ title: "Girls Dresses", image: "/p_img3.png", slug: "dresses-jumpsuits" },
+	{ title: "Boys T-Shirts", image: "/p_img4.png", slug: "tshirt" },
+	{ title: "Baby Rompers", image: "/p_img7.png", slug: "rompers-body-suits" },
+	{ title: "Teens Jeans", image: "/p_img6.png", slug: "jeans" },
+	{ title: "Jewellery", image: "/p_img8.png", slug: "jewellery" },
 ]
 
 const products = Array.from({ length: 6 }).map((_, i) => {

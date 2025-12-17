@@ -10,35 +10,30 @@ export const generateMetadata = async ({ params }: { params: Promise<{ categoryS
     .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
     .join(" ")
 
-  // Enhanced SEO title and description with more targeted keywords
-  const title = `${categoryName} Maternity Collection - Premium Maternity Wear | Shithaa`;
-  const description = `Shop our premium ${categoryName.toLowerCase()} maternity collection. Comfortable, stylish designs for expecting mothers. Zipless feeding wear, elegant maternity dresses & more.`;
+  const siteName = "JJ Textiles"
+  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://jjtextiles.in"
+
+  // Keep metadata generic (this project was migrated from a different site)
+  const title = `${categoryName} Collection | ${siteName}`
+  const description = `Shop ${categoryName} at ${siteName}. Browse the latest products in this category.`
 
   return {
     title: title,
     description: description,
     keywords: [
       categoryName.toLowerCase(),
-      "maternity wear",
-      "feeding wear",
-      "pregnancy clothes",
-      "Shithaa collection",
-      "maternity fashion",
-      "nursing wear",
-      "zipless feeding wear",
-      "maternity dresses",
-      "maternity clothing online",
-      "premium maternity wear",
-      "comfortable maternity clothes",
-      "stylish maternity fashion",
-      "maternity lounge wear"
+      "jj textiles",
+      "online shopping",
+      "fashion",
+      "clothing",
+      "collections"
     ],
     openGraph: {
       title: title,
       description: description,
       images: ['/logo1.png'],
       type: 'website',
-      url: `https://shithaa.in/collections/${categorySlug}`,
+      url: `${siteUrl}/collections/${categorySlug}`,
     },
     twitter: {
       title: title,
@@ -57,6 +52,8 @@ export default async function CategoryPage({ params }: { params: Promise<{ categ
     .split("-")
     .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
     .join(" ")
+
+  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://jjtextiles.in"
   
   return (
     <>
@@ -73,13 +70,13 @@ export default async function CategoryPage({ params }: { params: Promise<{ categ
                 "@type": "ListItem",
                 "position": 1,
                 "name": "Home",
-                "item": "https://shithaa.in"
+                "item": siteUrl
               },
               {
                 "@type": "ListItem",
                 "position": 2,
                 "name": categoryName,
-                "item": `https://shithaa.in/collections/${categorySlug}`
+                "item": `${siteUrl}/collections/${categorySlug}`
               }
             ]
           })
@@ -94,16 +91,16 @@ export default async function CategoryPage({ params }: { params: Promise<{ categ
           __html: JSON.stringify({
             "@context": "https://schema.org",
             "@type": "CollectionPage",
-            "name": `${categoryName} Collection - Shithaa`,
-            "description": `Shop our premium ${categoryName.toLowerCase()} maternity collection. Comfortable, stylish designs for expecting mothers.`,
-            "url": `https://shithaa.in/collections/${categorySlug}`,
+            "name": `${categoryName} Collection - JJ Textiles`,
+            "description": `Browse products in ${categoryName}.`,
+            "url": `${siteUrl}/collections/${categorySlug}`,
             "mainEntity": {
               "@type": "ItemList",
               "itemListElement": [
                 {
                   "@type": "ListItem",
                   "position": 1,
-                  "url": `https://shithaa.in/collections/${categorySlug}`
+                  "url": `${siteUrl}/collections/${categorySlug}`
                 }
               ]
             }
