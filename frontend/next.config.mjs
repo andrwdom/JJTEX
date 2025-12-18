@@ -210,6 +210,21 @@ const nextConfig = {
       },
     ]
   },
+  // Dev-only: proxy same-origin /api/* calls to the backend server to avoid browser blockers
+  // and to keep client requests same-origin in local development.
+  rewrites: async () => {
+    if (process.env.NODE_ENV !== 'development') return []
+
+    const backend = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000'
+    const backendOrigin = backend.replace(/\/$/, '')
+
+    return [
+      {
+        source: '/api/:path*',
+        destination: `${backendOrigin}/api/:path*`,
+      },
+    ]
+  },
 }
 
 // Wrap with Sentry configuration (non-intrusive)

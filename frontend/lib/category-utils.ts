@@ -22,22 +22,21 @@ export interface CategoryTree extends CategoryNode {
  * @returns Category tree array
  */
 export async function fetchCategoryTree(forceRefresh: boolean = false): Promise<CategoryTree[]> {
-  const baseUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000'
-  const url = new URL(`${baseUrl}/api/categories/tree`)
-  
-  // Add cache busting parameter when force refresh is requested
-  if (forceRefresh) {
-    url.searchParams.append('_t', Date.now().toString())
-  }
-  
-  const cacheKey = `categories-tree${forceRefresh ? '-fresh' : ''}`
-  const cacheTTL = forceRefresh ? 0 : 10 * 60 * 1000 // No cache when force refresh, 10 minutes otherwise
+  // Prefer same-origin in the browser to avoid adblock/privacy tools blocking localhost:4000 calls.
+  // If you deploy frontend + backend on different origins, set NEXT_PUBLIC_API_URL.
+  const baseUrl = process.env.NEXT_PUBLIC_API_URL || ''
+  const basePath = baseUrl ? `${baseUrl.replace(/\/$/, '')}/api/categories/tree` : '/api/categories/tree'
+
+  const params = new URLSearchParams()
+  if (forceRefresh) params.set('_t', Date.now().toString())
+
+  const fullUrl = params.toString() ? `${basePath}?${params.toString()}` : basePath
   
   try {
     // Use safeFetch from api-health for better error handling
     const { safeFetch } = await import('@/lib/api-health')
     
-    const response = await safeFetch(url.toString(), {
+    const response = await safeFetch(fullUrl, {
       method: 'GET',
       headers: {
         'Accept': 'application/json'
