@@ -26,9 +26,34 @@ const nextConfig = {
       },
       {
         protocol: 'https',
+        hostname: 'www.jjtextiles.com',
+        port: '',
+        pathname: '/images/**',
+      },
+      {
+        protocol: 'https',
         hostname: 'jjtextiles.com',
         port: '',
         pathname: '/uploads/**',
+      },
+      {
+        protocol: 'https',
+        hostname: 'www.jjtextiles.com',
+        port: '',
+        pathname: '/uploads/**',
+      },
+      // Some backend deployments still generate image URLs on jjtextiles.in
+      {
+        protocol: 'https',
+        hostname: 'jjtextiles.in',
+        port: '',
+        pathname: '/images/**',
+      },
+      {
+        protocol: 'https',
+        hostname: 'www.jjtextiles.in',
+        port: '',
+        pathname: '/images/**',
       },
       {
         protocol: 'http',

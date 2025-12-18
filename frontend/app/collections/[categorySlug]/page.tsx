@@ -11,7 +11,7 @@ export const generateMetadata = async ({ params }: { params: Promise<{ categoryS
     .join(" ")
 
   const siteName = "JJ Textiles"
-  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://jjtextiles.in"
+  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://jjtextiles.com"
 
   // Keep metadata generic (this project was migrated from a different site)
   const title = `${categoryName} Collection | ${siteName}`
@@ -53,7 +53,7 @@ export default async function CategoryPage({ params }: { params: Promise<{ categ
     .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
     .join(" ")
 
-  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://jjtextiles.in"
+  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://jjtextiles.com"
   
   return (
     <>

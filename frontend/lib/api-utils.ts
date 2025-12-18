@@ -394,7 +394,16 @@ export async function fetchHeroImages(
   device: 'mobile' | 'desktop' = 'desktop', 
   limit: number = 6
 ): Promise<Response> {
-  const baseUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000'
+  // IMPORTANT:
+  // In production, if NEXT_PUBLIC_API_URL isn't set (misconfigured deploy), defaulting to
+  // localhost breaks storefront fetching and triggers placeholder fallbacks.
+  // Prefer same-origin / NEXT_PUBLIC_SITE_URL so products added via admin reflect on the frontend.
+  const baseUrl =
+    process.env.NEXT_PUBLIC_API_URL ||
+    (process.env.NODE_ENV === 'production'
+      ? (process.env.NEXT_PUBLIC_SITE_URL ||
+          (typeof window !== 'undefined' ? window.location.origin : 'https://jjtextiles.com'))
+      : 'http://localhost:4000')
   const url = new URL(`${baseUrl}/api/hero-images`)
   url.searchParams.append('categoryId', categoryId)
   url.searchParams.append('device', device)
@@ -477,7 +486,14 @@ export async function fetchProducts(
   params: Record<string, string> = {},
   forceRefresh: boolean = false
 ): Promise<Response> {
-  const baseUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000'
+  // IMPORTANT: Do NOT default to localhost in production.
+  // If env vars are missing, use same-origin / NEXT_PUBLIC_SITE_URL so live products render.
+  const baseUrl =
+    process.env.NEXT_PUBLIC_API_URL ||
+    (process.env.NODE_ENV === 'production'
+      ? (process.env.NEXT_PUBLIC_SITE_URL ||
+          (typeof window !== 'undefined' ? window.location.origin : 'https://jjtextiles.com'))
+      : 'http://localhost:4000')
   const url = new URL(`${baseUrl}/api/products`)
   
   // Add query parameters
