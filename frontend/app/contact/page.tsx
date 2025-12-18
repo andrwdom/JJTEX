@@ -5,33 +5,25 @@ import ContactPageClient from "./ContactPageClient"
 
 // SEO Metadata
 export const metadata: Metadata = {
-  title: "Contact Shithaa - Get in Touch | Maternity Wear Support",
-  description: "Contact Shithaa for any questions about our maternity wear, mom wear, and feeding essentials. We're here to help you find the perfect pieces for your pregnancy journey.",
+  title: "Contact JJTextiles - Get in Touch",
+  description: "Contact JJTextiles for any questions about our products and services. We're here to help.",
   keywords: [
-    "contact Shithaa",
-    "maternity wear contact",
-    "feeding wear support",
-    "Shithaa customer service",
-    "pregnancy clothing help",
-    "Shithaa contact information",
-    "mom wear support",
-    "feeding dresses help",
-    "maternity fashion contact",
-    "pregnancy clothing customer service",
-    "nursing wear support",
-    "maternity wear India contact"
+    "contact jjtextiles",
+    "customer service",
+    "support",
+    "contact information"
   ],
   openGraph: {
-    title: "Contact Shithaa - Get in Touch | Maternity Wear Support",
-    description: "Contact Shithaa for any questions about our maternity wear, mom wear, and feeding essentials. We're here to help you find the perfect pieces for your pregnancy journey.",
+    title: "Contact JJTextiles - Get in Touch",
+    description: "Contact JJTextiles for any questions about our products and services.",
     images: ['/logo1.png'],
     type: 'website',
-    url: 'https://shithaa.in/contact',
-    siteName: 'Shithaa',
+    url: 'https://jjtextiles.com/contact',
+    siteName: 'JJTextiles',
   },
   twitter: {
-    title: "Contact Shithaa - Get in Touch | Maternity Wear Support",
-    description: "Contact Shithaa for any questions about our maternity wear, mom wear, and feeding essentials. We're here to help you find the perfect pieces for your pregnancy journey.",
+    title: "Contact JJTextiles - Get in Touch",
+    description: "Contact JJTextiles for any questions about our products and services.",
     card: 'summary_large_image',
     images: ['/logo1.png'],
   },

@@ -233,11 +233,6 @@ export const addCategory = async (req, res) => {
         }
 		const finalSlug = slug ? slugify(slug) : slugify(name);
 
-		const exists = await Category.findOne({ slug: finalSlug });
-        if (exists) {
-            return errorResponse(res, 400, 'Category with this slug already exists');
-        }
-
 		let parent = null;
 		let ancestors = [];
 		let path = finalSlug;
@@ -247,6 +242,12 @@ export const addCategory = async (req, res) => {
 			if (!parent) return errorResponse(res, 400, 'Invalid parent category');
 			ancestors = [ ...(parent.ancestors || []), { _id: parent._id, name: parent.name, slug: parent.slug } ];
 			path = parent.path ? `${parent.path}/${finalSlug}` : `${parent.slug}/${finalSlug}`;
+		}
+
+		// Slug uniqueness is scoped to parent (Option A taxonomy relies on slug+parent uniqueness)
+		const exists = await Category.findOne({ slug: finalSlug, parent: parent ? parent._id : null });
+		if (exists) {
+			return errorResponse(res, 400, 'Category with this slug already exists under the selected parent');
 		}
 
 		const category = new Category({ 

@@ -1,35 +1,26 @@
 import { Metadata } from "next"
 
 export const metadata: Metadata = {
-  title: "About Shithaa - Our Story & Mission | Elegant Maternity Wear",
-  description: "Discover the story behind Shithaa - founded with love and understanding for expecting mothers. Learn about our mission to create elegant maternity wear, mom wear, and feeding dresses that honor the mother-child bond.",
+  title: "About JJTextiles - Our Story & Mission",
+  description: "Discover the story behind JJTextiles and our mission to deliver premium apparel and textiles.",
   keywords: [
-    "Shithaa story",
-    "maternity wear founder",
-    "pregnancy clothing mission",
-    "mother-child bond",
-    "maternity fashion",
-    "feeding wear story",
-    "Shithaa about us",
-    "maternity wear India",
-    "mom wear brand",
-    "feeding dresses story",
-    "pregnancy fashion mission",
-    "elegant maternity clothing",
-    "maternity wear company",
-    "nursing wear brand"
+    "jjtextiles story",
+    "about jjtextiles",
+    "our mission",
+    "apparel",
+    "textiles"
   ],
   openGraph: {
-    title: "About Shithaa - Our Story & Mission | Elegant Maternity Wear",
-    description: "Discover the story behind Shithaa - founded with love and understanding for expecting mothers. Learn about our mission to create elegant maternity wear, mom wear, and feeding dresses.",
+    title: "About JJTextiles - Our Story & Mission",
+    description: "Discover the story behind JJTextiles and our mission to deliver premium apparel and textiles.",
     images: ['/logo1.png'],
     type: 'website',
-    url: 'https://shithaa.in/about',
-    siteName: 'Shithaa',
+    url: 'https://jjtextiles.com/about',
+    siteName: 'JJTextiles',
   },
   twitter: {
-    title: "About Shithaa - Our Story & Mission | Elegant Maternity Wear",
-    description: "Discover the story behind Shithaa - founded with love and understanding for expecting mothers. Learn about our mission to create elegant maternity wear, mom wear, and feeding dresses.",
+    title: "About JJTextiles - Our Story & Mission",
+    description: "Discover the story behind JJTextiles and our mission to deliver premium apparel and textiles.",
     card: 'summary_large_image',
     images: ['/logo1.png'],
   },

@@ -15,9 +15,9 @@ export default function HeroDemoPage() {
   // Sample images for preloading demo
   const sampleImages = [
     '/blue-dress.JPG',
-    '/zipless-feeding-lounge-wear.JPG',
-    '/maternity-feeding-wear.JPG',
-    '/zipless-feeding-lounge-wear-2.JPG'
+    '/placeholders/hero1.JPG',
+    '/placeholders/hero2.JPG',
+    '/placeholders/hero3.JPG'
   ]
   
   const { isPreloading, progress, isComplete } = useImagePreloader(sampleImages)

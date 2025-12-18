@@ -3,8 +3,8 @@ import OrderSuccessClient from "./OrderSuccessClient";
 
 // SEO Metadata for order success page
 export const metadata: Metadata = {
-  title: "Order Confirmed - Shithaa | Premium Maternity Wear",
-  description: "Your order has been successfully placed. Thank you for choosing Shithaa for your premium maternity wear needs.",
+  title: "Order Confirmed - JJTextiles",
+  description: "Your order has been successfully placed. Thank you for choosing JJTextiles.",
   robots: {
     index: false,
     follow: false,

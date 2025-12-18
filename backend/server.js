@@ -68,6 +68,7 @@ import admin from 'firebase-admin'
 import orderModel from './models/orderModel.js'
 import Category from './models/Category.js'
 import productModel from './models/productModel.js'
+import { seedCategories } from './lib/seedCategories.js'
 import { randomBytes } from 'crypto'
 import { createRequire } from 'module'
 import correlationId from './middleware/correlationId.js'
@@ -194,15 +195,12 @@ pinoAppLogger.info({ event: 'logger_boot', path: 'server', env: process.env.NODE
 connectDB().then(async () => {
   Logger.info('mongodb_connected', { timestamp: Date.now() });
   
-  // Auto-seed default categories if none exist
+  // Auto-seed taxonomy categories if none exist
   const count = await Category.countDocuments();
   if (count === 0) {
-    await Category.create([
-      { name: 'Maternity feeding wear', slug: 'maternity-feeding-wear', description: 'Feeding-friendly maternity wear for mothers.' },
-      { name: 'Zipless feeding lounge wear', slug: 'zipless-feeding-lounge-wear', description: 'Lounge wear for feeding without zips.' },
-      { name: 'Non feeding lounge wear', slug: 'non-feeding-lounge-wear', description: 'Lounge wear for non-feeding mothers.' }
-    ]);
-    Logger.info('categories_seeded', { count: 3 });
+    await seedCategories({ reset: false, logger: Logger });
+    const newCount = await Category.countDocuments();
+    Logger.info('categories_seeded', { count: newCount });
   }
   else {
     Logger.info('categories_exist', { count });
@@ -727,7 +725,7 @@ try {
     } else if (process.env.NODE_ENV === 'development') {
       // For development, try to initialize with project ID only
       admin.initializeApp({
-        projectId: process.env.FIREBASE_PROJECT_ID || 'maternity-test',
+        projectId: process.env.FIREBASE_PROJECT_ID || 'jjtextiles',
       });
       console.log('Firebase Admin SDK initialized with project ID only (development mode)');
     } else {

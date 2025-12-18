@@ -213,11 +213,11 @@ export default function AccountPageClient() {
 
   if (showLogin) {
     return (
-      <PageLoading loadingMessage="Welcome to Shithaa..." minLoadingTime={1000}>
+      <PageLoading loadingMessage="Welcome to JJTextiles..." minLoadingTime={1000}>
         <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
           <div className="w-full max-w-md">
             <div className="text-center mb-8">
-              <h2 className="text-3xl font-bold text-[#473C66] mb-3">Welcome to Shithaa</h2>
+              <h2 className="text-3xl font-bold text-[#473C66] mb-3">Welcome to JJTextiles</h2>
               <p className="text-gray-600 text-lg">Sign in to access your account</p>
             </div>
             <LoginModal open={true} onClose={() => setShowLogin(false)} onSuccess={handleLoginSuccess} />
@@ -362,9 +362,9 @@ export default function AccountPageClient() {
                   <Package className="w-12 h-12 text-[#473C66]" />
                 </div>
                 <h3 className="text-2xl font-bold text-gray-900 mb-4">No orders yet</h3>
-                <p className="text-gray-600 mb-8 max-w-md mx-auto text-lg">Start shopping to see your order history here. We have beautiful maternity wear waiting for you!</p>
+                <p className="text-gray-600 mb-8 max-w-md mx-auto text-lg">Start shopping to see your order history here.</p>
                 <a 
-                  href="/collections/maternity-feeding-wear" 
+                  href="/collections/women-dresses" 
                   className="inline-flex items-center px-8 py-4 bg-[#473C66] text-white font-semibold rounded-2xl hover:bg-[#3a3054] transition-all duration-200 shadow-lg hover:shadow-xl text-lg"
                 >
                   Start Shopping

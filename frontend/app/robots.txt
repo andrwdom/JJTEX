@@ -2,7 +2,7 @@ User-agent: *
 Allow: /
 
 # Sitemap
-Sitemap: https://shithaa.in/sitemap.xml
+Sitemap: https://jjtextiles.com/sitemap.xml
 
 # Crawl-delay
 Crawl-delay: 1

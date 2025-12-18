@@ -1,7 +1,7 @@
 import { MetadataRoute } from 'next'
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://shithaa.in'
+  const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://jjtextiles.com'
   
   // Static pages
   const staticPages = [
@@ -55,39 +55,14 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     },
   ]
 
-  // Category pages
-  const categoryPages = [
-    {
-      url: `${baseUrl}/collections/maternity-feeding-wear`,
-      lastModified: new Date(),
-      changeFrequency: 'weekly' as const,
-      priority: 0.9,
-    },
-    {
-      url: `${baseUrl}/collections/zipless-feeding-lounge-wear`,
-      lastModified: new Date(),
-      changeFrequency: 'weekly' as const,
-      priority: 0.9,
-    },
-    {
-      url: `${baseUrl}/collections/zipless-feeding-dupatta-lounge-wear`,
-      lastModified: new Date(),
-      changeFrequency: 'weekly' as const,
-      priority: 0.9,
-    },
-    {
-      url: `${baseUrl}/collections/new-arrivals`,
-      lastModified: new Date(),
-      changeFrequency: 'daily' as const,
-      priority: 0.9,
-    },
-  ]
+  // Category pages are generated dynamically elsewhere (or can be added by fetching /api/categories/tree)
+  const categoryPages: MetadataRoute.Sitemap = []
 
   // Dynamic product pages
   let productPages: MetadataRoute.Sitemap = []
   
   try {
-    const apiUrl = (process.env.NEXT_PUBLIC_API_URL || 'https://shithaa.in') + '/api/products';
+    const apiUrl = (process.env.NEXT_PUBLIC_API_URL || 'https://jjtextiles.com') + '/api/products';
     const res = await fetch(apiUrl);
     const data = await res.json();
     const products = data.data || data.products || [];

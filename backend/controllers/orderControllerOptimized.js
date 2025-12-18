@@ -458,7 +458,7 @@ export const getOrderAnalytics = async (req, res) => {
  * IMPORTANT: This maintains compatibility with existing checkout flow:
  * - totalPrice includes shipping calculated by shippingController.js
  * - Shipping rules: Tamil Nadu free, other states ₹39-₹105 based on quantity
- * - Special handling for Maternity Feeding Wear category
+ * - No category-specific shipping exceptions
  */
 const placeOrder = async (req, res) => {
     try {

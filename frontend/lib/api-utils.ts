@@ -374,56 +374,18 @@ export async function authenticatedFetchJson<T = any>(
   return response.json();
 }
 
-// Fallback hero images data when API is unavailable - using actual placeholder images
-const FALLBACK_HERO_IMAGES = {
-  'maternity-feeding-wear': {
-    mobile: [
-      { productId: 'fallback-1', productName: 'Maternity Feeding Wear', productSlug: 'maternity-feeding-wear', thumbUrl: '/placeholders/hero1.JPG', originalUrl: '/placeholders/hero1.JPG', lqip: '', width: 400, height: 600 },
-      { productId: 'fallback-2', productName: 'Maternity Feeding Wear', productSlug: 'maternity-feeding-wear', thumbUrl: '/placeholders/hero1.JPG', originalUrl: '/placeholders/hero1.JPG', lqip: '', width: 400, height: 600 },
-      { productId: 'fallback-3', productName: 'Maternity Feeding Wear', productSlug: 'maternity-feeding-wear', thumbUrl: '/placeholders/hero1.JPG', originalUrl: '/placeholders/hero1.JPG', lqip: '', width: 400, height: 600 },
-    ],
-    desktop: [
-      { productId: 'fallback-1', productName: 'Maternity Feeding Wear', productSlug: 'maternity-feeding-wear', thumbUrl: '/placeholders/hero1.JPG', originalUrl: '/placeholders/hero1.JPG', lqip: '', width: 400, height: 600 },
-      { productId: 'fallback-2', productName: 'Maternity Feeding Wear', productSlug: 'maternity-feeding-wear', thumbUrl: '/placeholders/hero1.JPG', originalUrl: '/placeholders/hero1.JPG', lqip: '', width: 400, height: 600 },
-      { productId: 'fallback-3', productName: 'Maternity Feeding Wear', productSlug: 'maternity-feeding-wear', thumbUrl: '/placeholders/hero1.JPG', originalUrl: '/placeholders/hero1.JPG', lqip: '', width: 400, height: 600 },
-    ]
-  },
-  'zipless-feeding-lounge-wear': {
-    mobile: [
-      { productId: 'fallback-1', productName: 'Zipless Feeding Lounge Wear', productSlug: 'zipless-feeding-lounge-wear', thumbUrl: '/placeholders/hero2.JPG', originalUrl: '/placeholders/hero2.JPG', lqip: '', width: 400, height: 600 },
-      { productId: 'fallback-2', productName: 'Zipless Feeding Lounge Wear', productSlug: 'zipless-feeding-lounge-wear', thumbUrl: '/placeholders/hero2.JPG', originalUrl: '/placeholders/hero2.JPG', lqip: '', width: 400, height: 600 },
-      { productId: 'fallback-3', productName: 'Zipless Feeding Lounge Wear', productSlug: 'zipless-feeding-lounge-wear', thumbUrl: '/placeholders/hero2.JPG', originalUrl: '/placeholders/hero2.JPG', lqip: '', width: 400, height: 600 },
-    ],
-    desktop: [
-      { productId: 'fallback-1', productName: 'Zipless Feeding Lounge Wear', productSlug: 'zipless-feeding-lounge-wear', thumbUrl: '/placeholders/hero2.JPG', originalUrl: '/placeholders/hero2.JPG', lqip: '', width: 400, height: 600 },
-      { productId: 'fallback-2', productName: 'Zipless Feeding Lounge Wear', productSlug: 'zipless-feeding-lounge-wear', thumbUrl: '/placeholders/hero2.JPG', originalUrl: '/placeholders/hero2.JPG', lqip: '', width: 400, height: 600 },
-      { productId: 'fallback-3', productName: 'Zipless Feeding Lounge Wear', productSlug: 'zipless-feeding-lounge-wear', thumbUrl: '/placeholders/hero2.JPG', originalUrl: '/placeholders/hero2.JPG', lqip: '', width: 400, height: 600 },
-    ]
-  },
-  'non-feeding-lounge-wear': {
-    mobile: [
-      { productId: 'fallback-1', productName: 'Non-Feeding Lounge Wear', productSlug: 'non-feeding-lounge-wear', thumbUrl: '/placeholders/hero3.JPG', originalUrl: '/placeholders/hero3.JPG', lqip: '', width: 400, height: 600 },
-      { productId: 'fallback-2', productName: 'Non-Feeding Lounge Wear', productSlug: 'non-feeding-lounge-wear', thumbUrl: '/placeholders/hero3.JPG', originalUrl: '/placeholders/hero3.JPG', lqip: '', width: 400, height: 600 },
-      { productId: 'fallback-3', productName: 'Non-Feeding Lounge Wear', productSlug: 'non-feeding-lounge-wear', thumbUrl: '/placeholders/hero3.JPG', originalUrl: '/placeholders/hero3.JPG', lqip: '', width: 400, height: 600 },
-    ],
-    desktop: [
-      { productId: 'fallback-1', productName: 'Non-Feeding Lounge Wear', productSlug: 'non-feeding-lounge-wear', thumbUrl: '/placeholders/hero3.JPG', originalUrl: '/placeholders/hero3.JPG', lqip: '', width: 400, height: 600 },
-      { productId: 'fallback-2', productName: 'Non-Feeding Lounge Wear', productSlug: 'non-feeding-lounge-wear', thumbUrl: '/placeholders/hero3.JPG', originalUrl: '/placeholders/hero3.JPG', lqip: '', width: 400, height: 600 },
-      { productId: 'fallback-3', productName: 'Non-Feeding Lounge Wear', productSlug: 'non-feeding-lounge-wear', thumbUrl: '/placeholders/hero3.JPG', originalUrl: '/placeholders/hero3.JPG', lqip: '', width: 400, height: 600 },
-    ]
-  },
-  'zipless-feeding-dupatta-lounge-wear': {
-    mobile: [
-      { productId: 'fallback-1', productName: 'Zipless Feeding Dupatta Lounge Wear', productSlug: 'zipless-feeding-dupatta-lounge-wear', thumbUrl: '/placeholders/hero4.JPG', originalUrl: '/placeholders/hero4.JPG', lqip: '', width: 400, height: 600 },
-      { productId: 'fallback-2', productName: 'Zipless Feeding Dupatta Lounge Wear', productSlug: 'zipless-feeding-dupatta-lounge-wear', thumbUrl: '/placeholders/hero4.JPG', originalUrl: '/placeholders/hero4.JPG', lqip: '', width: 400, height: 600 },
-      { productId: 'fallback-3', productName: 'Zipless Feeding Dupatta Lounge Wear', productSlug: 'zipless-feeding-dupatta-lounge-wear', thumbUrl: '/placeholders/hero4.JPG', originalUrl: '/placeholders/hero4.JPG', lqip: '', width: 400, height: 600 },
-    ],
-    desktop: [
-      { productId: 'fallback-1', productName: 'Zipless Feeding Dupatta Lounge Wear', productSlug: 'zipless-feeding-dupatta-lounge-wear', thumbUrl: '/placeholders/hero4.JPG', originalUrl: '/placeholders/hero4.JPG', lqip: '', width: 400, height: 600 },
-      { productId: 'fallback-2', productName: 'Zipless Feeding Dupatta Lounge Wear', productSlug: 'zipless-feeding-dupatta-lounge-wear', thumbUrl: '/placeholders/hero4.JPG', originalUrl: '/placeholders/hero4.JPG', lqip: '', width: 400, height: 600 },
-      { productId: 'fallback-3', productName: 'Zipless Feeding Dupatta Lounge Wear', productSlug: 'zipless-feeding-dupatta-lounge-wear', thumbUrl: '/placeholders/hero4.JPG', originalUrl: '/placeholders/hero4.JPG', lqip: '', width: 400, height: 600 },
-    ]
-  }
+// Fallback hero images data when API is unavailable (generic)
+const FALLBACK_HERO_IMAGES_DEFAULT = {
+  mobile: [
+    { productId: 'fallback-1', productName: 'Featured Collection', productSlug: 'featured', thumbUrl: '/placeholders/hero1.JPG', originalUrl: '/placeholders/hero1.JPG', lqip: '', width: 400, height: 600 },
+    { productId: 'fallback-2', productName: 'Featured Collection', productSlug: 'featured', thumbUrl: '/placeholders/hero2.JPG', originalUrl: '/placeholders/hero2.JPG', lqip: '', width: 400, height: 600 },
+    { productId: 'fallback-3', productName: 'Featured Collection', productSlug: 'featured', thumbUrl: '/placeholders/hero3.JPG', originalUrl: '/placeholders/hero3.JPG', lqip: '', width: 400, height: 600 },
+  ],
+  desktop: [
+    { productId: 'fallback-1', productName: 'Featured Collection', productSlug: 'featured', thumbUrl: '/placeholders/hero1.JPG', originalUrl: '/placeholders/hero1.JPG', lqip: '', width: 400, height: 600 },
+    { productId: 'fallback-2', productName: 'Featured Collection', productSlug: 'featured', thumbUrl: '/placeholders/hero2.JPG', originalUrl: '/placeholders/hero2.JPG', lqip: '', width: 400, height: 600 },
+    { productId: 'fallback-3', productName: 'Featured Collection', productSlug: 'featured', thumbUrl: '/placeholders/hero3.JPG', originalUrl: '/placeholders/hero3.JPG', lqip: '', width: 400, height: 600 },
+  ]
 }
 
 // Specialized fetch for hero images with longer cache TTL and fallback
@@ -459,7 +421,7 @@ export async function fetchHeroImages(
     console.warn(`Failed to fetch hero images for ${categoryId}, using fallback data:`, error)
     
     // Return a mock response with fallback data in the correct format
-    const fallbackData = FALLBACK_HERO_IMAGES[categoryId as keyof typeof FALLBACK_HERO_IMAGES]?.[device] || []
+    const fallbackData = FALLBACK_HERO_IMAGES_DEFAULT[device] || []
     const limitedData = fallbackData.slice(0, limit)
     
     return new Response(JSON.stringify({
@@ -483,28 +445,28 @@ export async function fetchHeroImages(
 const FALLBACK_PRODUCTS = [
   {
     id: 'fallback-1',
-    name: 'Maternity Feeding Dress',
-    description: 'Comfortable feeding dress for new mothers',
-    price: 2999,
-    category: 'maternity-feeding-wear',
+    name: 'Featured Product',
+    description: 'Quality styles from JJTextiles',
+    price: 999,
+    category: 'featured',
     images: ['/placeholders/hero1.JPG'],
     inStock: true
   },
   {
     id: 'fallback-2',
-    name: 'Zipless Lounge Wear',
-    description: 'Revolutionary comfort for everyday wear',
-    price: 2499,
-    category: 'zipless-feeding-lounge-wear',
+    name: 'Featured Product',
+    description: 'Quality styles from JJTextiles',
+    price: 999,
+    category: 'featured',
     images: ['/placeholders/hero2.JPG'],
     inStock: true
   },
   {
     id: 'fallback-3',
-    name: 'Casual Lounge Wear',
-    description: 'Elegant casual wear for comfort',
-    price: 1999,
-    category: 'non-feeding-lounge-wear',
+    name: 'Featured Product',
+    description: 'Quality styles from JJTextiles',
+    price: 999,
+    category: 'featured',
     images: ['/placeholders/hero3.JPG'],
     inStock: true
   }

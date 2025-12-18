@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { toast } from 'react-hot-toast';
 import { FiEdit, FiTrash2, FiPlus, FiSave, FiX } from 'react-icons/fi';
+import { backendUrl } from '../App';
+import CategoryPicker from '../components/CategoryPicker';
 
 const ShippingRules = () => {
   const [rules, setRules] = useState([]);
@@ -29,12 +31,7 @@ const ShippingRules = () => {
     }
   });
 
-  const categories = [
-    { value: 'maternity-feeding-wear', label: 'Maternity Feeding Wear' },
-    { value: 'zipless-feeding-lounge-wear', label: 'Zipless Feeding Lounge Wear' },
-    { value: 'non-feeding-lounge-wear', label: 'Non-Feeding Lounge Wear' },
-    { value: 'zipless-feeding-dupatta-lounge-wear', label: 'Zipless Feeding Dupatta Lounge Wear' }
-  ];
+  const [selectedCategoryNode, setSelectedCategoryNode] = useState(null);
 
   useEffect(() => {
     fetchRules();
@@ -42,7 +39,7 @@ const ShippingRules = () => {
 
   const fetchRules = async () => {
     try {
-      const response = await fetch(`${import.meta.env.VITE_API_URL || 'https://shithaa.in'}/api/shipping-rules`, {
+      const response = await fetch(`${backendUrl}/api/shipping-rules`, {
         headers: {
           'token': localStorage.getItem('token')
         }
@@ -69,8 +66,8 @@ const ShippingRules = () => {
   const handleSaveRule = async (ruleData) => {
     try {
       const url = editingRule 
-        ? `${import.meta.env.VITE_API_URL || 'https://shithaa.in'}/api/shipping-rules/${editingRule.category}`
-        : `${import.meta.env.VITE_API_URL || 'https://shithaa.in'}/api/shipping-rules`;
+        ? `${backendUrl}/api/shipping-rules/${editingRule.category}`
+        : `${backendUrl}/api/shipping-rules`;
       
       const method = editingRule ? 'PUT' : 'POST';
       
@@ -127,7 +124,7 @@ const ShippingRules = () => {
     if (!confirm('Are you sure you want to delete this shipping rule?')) return;
     
     try {
-      const response = await fetch(`${import.meta.env.VITE_API_URL || 'https://shithaa.in'}/api/shipping-rules/${category}`, {
+      const response = await fetch(`${backendUrl}/api/shipping-rules/${category}`, {
         method: 'DELETE',
         headers: {
           'token': localStorage.getItem('token')
@@ -161,6 +158,7 @@ const ShippingRules = () => {
         otherStates: new Map(Object.entries(rule.rules.otherStates))
       }
     });
+    setSelectedCategoryNode({ name: rule.categoryName, slug: rule.category });
     setShowAddForm(true);
   };
 
@@ -188,6 +186,7 @@ const ShippingRules = () => {
         ])
       }
     });
+    setSelectedCategoryNode(null);
   };
 
   const updateRulePrice = (state, quantity, price) => {
@@ -274,19 +273,29 @@ const ShippingRules = () => {
                   <label className="block text-sm font-medium text-gray-700 mb-2">
                     Category
                   </label>
-                  <select
-                    value={newRule.category}
-                    onChange={(e) => setNewRule(prev => ({ ...prev, category: e.target.value }))}
-                    className="select select-bordered w-full"
-                    disabled={!!editingRule}
-                  >
-                    <option value="">Select Category</option>
-                    {categories.map(cat => (
-                      <option key={cat.value} value={cat.value}>
-                        {cat.label}
-                      </option>
-                    ))}
-                  </select>
+                  {editingRule ? (
+                    <input
+                      type="text"
+                      value={`${newRule.categoryName} (${newRule.category})`}
+                      className="input input-bordered w-full"
+                      disabled
+                    />
+                  ) : (
+                    <CategoryPicker
+                      backendUrl={backendUrl}
+                      token={localStorage.getItem('token')}
+                      requiredLeaf={true}
+                      label="Select Category (must be a final subcategory)"
+                      onChange={(sel) => {
+                        setSelectedCategoryNode(sel);
+                        setNewRule(prev => ({
+                          ...prev,
+                          category: sel?.slug || '',
+                          categoryName: sel?.name || ''
+                        }));
+                      }}
+                    />
+                  )}
                 </div>
 
                 <div>
@@ -298,7 +307,7 @@ const ShippingRules = () => {
                     value={newRule.categoryName}
                     onChange={(e) => setNewRule(prev => ({ ...prev, categoryName: e.target.value }))}
                     className="input input-bordered w-full"
-                    placeholder="e.g., Maternity Feeding Wear"
+                    placeholder="e.g., Kurtas & Kurtis"
                   />
                 </div>
               </div>

@@ -145,7 +145,7 @@ export default function Home() {
   const bestSellers = products.filter((p: Product) => p.isBestSeller)
 
   return (
-    <PageLoading loadingMessage="Welcome to Shithaa" minLoadingTime={1500}>
+    <PageLoading loadingMessage="Welcome to JJTextiles" minLoadingTime={1500}>
       <main>
         <PerformanceMonitor />
         <div className="min-h-screen bg-white">

@@ -1,15 +1,15 @@
 {
   "@context": "https://schema.org",
   "@type": "Organization",
-  "name": "Shithaa",
-  "alternateName": "Shithaa Maternity Wear",
-  "url": "https://shithaa.in",
+  "name": "JJTextiles",
+  "alternateName": "JJTextiles",
+  "url": "https://jjtextiles.com",
   "logo": "https://jjtextiles.com/logo1.png",
-  "description": "Elegant maternity wear, mom wear, and feeding essentials. Premium quality, comfortable designs for expecting mothers.",
+  "description": "Premium apparel and textiles.",
   "foundingDate": "2024",
   "founder": {
     "@type": "Person",
-    "name": "Shithaa Founder"
+    "name": "JJTextiles"
   },
   "address": {
     "@type": "PostalAddress",
@@ -18,38 +18,37 @@
   "contactPoint": {
     "@type": "ContactPoint",
     "contactType": "customer service",
-    "url": "https://shithaa.in/contact"
+    "url": "https://jjtextiles.com/contact"
   },
   "sameAs": [
-    "https://instagram.com/shithaa",
-    "https://facebook.com/shithaa"
+    "https://instagram.com/jjtextiles"
   ],
   "hasOfferCatalog": {
     "@type": "OfferCatalog",
-    "name": "Maternity Wear Collection",
+    "name": "Collections",
     "itemListElement": [
       {
         "@type": "Offer",
         "itemOffered": {
           "@type": "Product",
-          "name": "Maternity Feeding Wear",
-          "description": "Elegant maternity feeding dresses and tops"
+          "name": "Women",
+          "description": "Women's collections"
         }
       },
       {
         "@type": "Offer",
         "itemOffered": {
           "@type": "Product",
-          "name": "Zipless Feeding Lounge Wear",
-          "description": "Comfortable zipless feeding lounge wear for new mothers"
+          "name": "Kids",
+          "description": "Kids collections"
         }
       },
       {
         "@type": "Offer",
         "itemOffered": {
           "@type": "Product",
-          "name": "Non-Feeding Lounge Wear",
-          "description": "Stylish non-feeding lounge wear for expecting mothers"
+          "name": "New Arrivals",
+          "description": "Latest products"
         }
       }
     ]

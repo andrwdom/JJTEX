@@ -57,15 +57,15 @@ export async function serverFetch(url: string, options?: RequestInit): Promise<R
 
 // Fallback metadata for when API calls fail
 export const fallbackMetadata = {
-  title: "Premium Maternity Wear - JJTextiles",
-  description: "Discover elegant maternity wear and feeding essentials at JJTextiles. Premium quality, comfortable designs for expecting mothers.",
+  title: "Premium Apparel & Textiles - JJTextiles",
+  description: "Discover quality apparel and textiles at JJTextiles. Curated collections, great comfort, and reliable service.",
   keywords: [
-    "maternity wear",
-    "feeding wear", 
-    "pregnancy clothes",
-    "maternity fashion",
-    "nursing wear",
-    "maternity dresses",
-    "comfortable maternity clothes"
+    "jjtextiles",
+    "apparel",
+    "textiles",
+    "fashion",
+    "online shopping",
+    "clothing",
+    "quality garments"
   ]
 };

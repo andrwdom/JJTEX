@@ -14,32 +14,11 @@ export interface ShippingCalculation {
 
 /**
  * Calculate shipping cost based on cart items and shipping location
- * 
- * SHIPPING LOGIC IMPLEMENTATION:
- * 
- * 1. For all categories EXCEPT "Maternity Feeding Wear":
- *    - Tamil Nadu: FREE shipping
- *    - Other states:
- *       - 1 dress → ₹39
- *       - 2 dresses → ₹59
- *       - 3 dresses → ₹89
- *       - More than 3 dresses → ₹105 (max cap)
- * 
- * 2. For "Maternity Feeding Wear" category (special case):
- *    - Tamil Nadu:
- *       - 1 dress → ₹39
- *       - 2 dresses → ₹49
- *       - 3 dresses → ₹59
- *       - 4 dresses → ₹69
- *       - 5 dresses → ₹79
- *       - 6 dresses → ₹89
- *       - 7+ dresses → ₹99
- *    - Other states: Same logic as above
- * 
- * 3. Mixed Cart Handling (Tamil Nadu):
- *    - Only count quantities from PAID shipping categories
- *    - Ignore quantities from FREE shipping categories (Lounge Wear, etc.)
- *    - Example: 4 Maternity Feeding + 4 Lounge Wear = Only 4 items count for shipping
+ *
+ * NOTE: Maternity-specific logic has been removed.
+ * Fallback shipping rule:
+ * - Tamil Nadu / Puducherry: Free shipping
+ * - Other states: 1→₹39, 2→₹59, 3→₹89, 4+→₹105
  */
 export function calculateShippingCost(
   cartItems: CartItem[],
@@ -69,124 +48,20 @@ export function calculateShippingCost(
 
   const isTamilNadu = ['tamilnadu', 'tamilnaadu', 'tamil', 'puducherry', 'pondicherry', 'pondichery', 'pudhucherry'].includes(normalizedState);
 
-  // Helper function to identify ONLY paid shipping categories in Tamil Nadu
-  const isPaidMaternityCategoryInTN = (item: any) => {
-      if (!isTamilNadu) return false;
-      const category = (item.category || '').toLowerCase().trim();
-      const categorySlug = (item.categorySlug || '').toLowerCase().trim();
-      return category === 'maternity feeding wear' || categorySlug === 'maternity-feeding-wear';
-  };
-
-  // Separate items into paid and free groups
-  const itemsForShippingCalculation = cartItems.filter(item => !isTamilNadu || isPaidMaternityCategoryInTN(item));
-  const freeShippingItems = cartItems.filter(item => isTamilNadu && !isPaidMaternityCategoryInTN(item));
-
-  const totalDressesForShipping = itemsForShippingCalculation.reduce((sum, item) => sum + item.quantity, 0);
-  const hasMaternityFeedingWear = itemsForShippingCalculation.some(item =>
-      (item.category || '').toLowerCase().trim() === 'maternity feeding wear' ||
-      (item.categorySlug || '').toLowerCase().trim() === 'maternity-feeding-wear'
-  );
+  const totalItems = cartItems.reduce((sum, item) => sum + (item.quantity || 0), 0);
 
   let shippingCost = 0;
-  let isFreeShipping = false;
-  let shippingMessage = "";
-
-  if (hasMaternityFeedingWear) {
-    // New shipping rules for Maternity Feeding Wear
-    if (isTamilNadu) {
-      // Tamil Nadu rules - only count paid shipping items
-      if (totalDressesForShipping === 1) {
-        shippingCost = 39;
-        shippingMessage = "₹39 shipping for 1 maternity feeding item";
-      } else if (totalDressesForShipping === 2) {
-        shippingCost = 49;
-        shippingMessage = "₹49 shipping for 2 maternity feeding items";
-      } else if (totalDressesForShipping === 3) {
-        shippingCost = 59;
-        shippingMessage = "₹59 shipping for 3 maternity feeding items";
-      } else if (totalDressesForShipping === 4) {
-        shippingCost = 69;
-        shippingMessage = "₹69 shipping for 4 maternity feeding items";
-      } else if (totalDressesForShipping === 5) {
-        shippingCost = 79;
-        shippingMessage = "₹79 shipping for 5 maternity feeding items";
-      } else if (totalDressesForShipping === 6) {
-        shippingCost = 89;
-        shippingMessage = "₹89 shipping for 6 maternity feeding items";
-      } else {
-        shippingCost = 99;
-        shippingMessage = "₹99 shipping for 7+ maternity feeding items";
-      }
-      
-      // Add free shipping message if there are free shipping items
-      if (freeShippingItems.length > 0) {
-        shippingMessage += `, ${freeShippingItems.length} lounge wear item${freeShippingItems.length > 1 ? 's' : ''} free`;
-      }
-      
-      // Set isFreeShipping based on whether there are any paid shipping items
-      isFreeShipping = totalDressesForShipping === 0;
-    } else {
-      // Other states rules - all items count
-      if (totalDressesForShipping === 1) {
-        shippingCost = 49;
-        shippingMessage = "₹49 shipping for 1 item";
-      } else if (totalDressesForShipping === 2) {
-        shippingCost = 69;
-        shippingMessage = "₹69 shipping for 2 items";
-      } else if (totalDressesForShipping === 3) {
-        shippingCost = 89;
-        shippingMessage = "₹89 shipping for 3 items";
-      } else {
-        shippingCost = 109;
-        shippingMessage = "₹109 shipping for 4+ items";
-      }
-      
-      // Other states are never free shipping for maternity feeding wear
-      isFreeShipping = false;
-    }
-  } else {
-    // Regular categories
-    if (isTamilNadu) {
-      // Free shipping for Tamil Nadu (all non-maternity items)
-      shippingCost = 0;
-      isFreeShipping = true;
-      const totalItems = cartItems.reduce((sum, item) => sum + item.quantity, 0);
-      if (totalItems > 0) {
-        shippingMessage = `Free shipping for ${totalItems} item${totalItems > 1 ? 's' : ''} within Tamil Nadu & Puducherry!`;
-      } else {
-        shippingMessage = "Free shipping within Tamil Nadu & Puducherry!";
-      }
-    } else {
-      // Other states - charge shipping based on total items that require shipping
-      if (totalDressesForShipping === 1) {
-        shippingCost = 39;
-        shippingMessage = "₹39 shipping for 1 item";
-      } else if (totalDressesForShipping === 2) {
-        shippingCost = 59;
-        shippingMessage = "₹59 shipping for 2 items";
-      } else if (totalDressesForShipping === 3) {
-        shippingCost = 89;
-        shippingMessage = "₹89 shipping for 3 items";
-      } else if (totalDressesForShipping > 3) {
-        shippingCost = 105;
-        shippingMessage = "₹105 shipping for 4+ items";
-      }
-      
-      // Other states are never free shipping for regular categories
-      isFreeShipping = false;
-    }
+  if (!isTamilNadu) {
+    if (totalItems === 1) shippingCost = 39;
+    else if (totalItems === 2) shippingCost = 59;
+    else if (totalItems === 3) shippingCost = 89;
+    else if (totalItems >= 4) shippingCost = 105;
   }
 
-  // 🔑 DEBUG: Log final calculation result
-  console.log('[ShippingCalculator] ✅ Final Result:', {
-    shippingCost,
-    isFreeShipping,
-    shippingMessage,
-    totalDressesForShipping,
-    freeShippingItemsCount: freeShippingItems.length,
-    hasMaternityFeedingWear,
-    isTamilNadu
-  });
+  const isFreeShipping = shippingCost === 0;
+  const shippingMessage = isFreeShipping
+    ? `Free shipping for ${totalItems} item${totalItems > 1 ? 's' : ''}!`
+    : `₹${shippingCost} shipping for ${totalItems} item${totalItems > 1 ? 's' : ''}`;
   
   return {
     shippingCost,

@@ -7,7 +7,7 @@ export default function Loading() {
       <div className="mb-8">
         <Image
           src={logo}
-          alt="JJTextiles - Elegant Maternity Wear"
+          alt="JJTextiles"
           width={120}
           height={120}
           className="animate-fade-pulse"

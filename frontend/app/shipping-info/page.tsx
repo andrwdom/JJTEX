@@ -10,8 +10,7 @@ export const metadata: Metadata = {
     "shipping information",
     "delivery times",
     "shipping policy",
-    "maternity wear shipping",
-    "Shithaa delivery",
+    "jjtextiles delivery",
     "shipping costs",
     "Tamil Nadu shipping",
     "Puducherry shipping",
@@ -19,13 +18,13 @@ export const metadata: Metadata = {
     "India shipping"
   ],
   openGraph: {
-    title: "Shipping Information - Shithaa",
-    description: "Learn about Shithaa's shipping policies, delivery times, and shipping costs. Shipping costs vary by location and product category.",
+    title: "Shipping Information - JJTextiles",
+    description: "Learn about JJTextiles' shipping policies, delivery times, and shipping costs.",
     images: ['/logo1.png'],
   },
   twitter: {
-    title: "Shipping Information - Shithaa",
-    description: "Learn about Shithaa's shipping policies, delivery times, and shipping costs. Shipping costs vary by location and product category.",
+    title: "Shipping Information - JJTextiles",
+    description: "Learn about JJTextiles' shipping policies, delivery times, and shipping costs.",
   },
 }
 
@@ -56,7 +55,7 @@ export default function ShippingInfoPage() {
             </div>
             <p className={styles.cardContent}>
               <span className={styles.emphasis}>Free shipping</span> for most categories within Tamil Nadu and Puducherry/Pondicherry. 
-              Maternity Feeding Wear has tiered shipping costs based on quantity.
+              Shipping costs may vary by total quantity for other states.
             </p>
           </div>
           

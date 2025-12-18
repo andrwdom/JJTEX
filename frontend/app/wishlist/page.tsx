@@ -2,31 +2,26 @@ import { Metadata } from "next"
 import WishlistPageClient from "./WishlistPageClient"
 
 export const metadata: Metadata = {
-  title: "Wishlist - Shithaa Maternity Wear | Save Your Favorites",
-  description: "Save your favorite maternity wear, mom wear, and feeding dresses to your wishlist. Create your dream collection of elegant pregnancy clothing at Shithaa.",
+  title: "Wishlist - JJTextiles | Save Your Favorites",
+  description: "Save your favorite items to your wishlist and build your JJTextiles collection.",
   keywords: [
-    "maternity wear wishlist",
-    "mom wear favorites",
-    "feeding dresses wishlist",
-    "pregnancy clothing favorites",
-    "maternity fashion wishlist",
-    "nursing wear wishlist",
-    "maternity maxi wishlist",
-    "feeding wear favorites",
-    "maternity gown wishlist",
-    "pregnancy clothing collection"
+    "wishlist",
+    "favorites",
+    "jjtextiles",
+    "save items",
+    "shopping"
   ],
   openGraph: {
-    title: "Wishlist - Shithaa Maternity Wear | Save Your Favorites",
-    description: "Save your favorite maternity wear, mom wear, and feeding dresses to your wishlist. Create your dream collection of elegant pregnancy clothing.",
+    title: "Wishlist - JJTextiles | Save Your Favorites",
+    description: "Save your favorite items to your wishlist and build your JJTextiles collection.",
     images: ['/logo1.png'],
     type: 'website',
-    url: 'https://shithaa.in/wishlist',
-    siteName: 'Shithaa',
+    url: 'https://jjtextiles.com/wishlist',
+    siteName: 'JJTextiles',
   },
   twitter: {
-    title: "Wishlist - Shithaa Maternity Wear | Save Your Favorites",
-    description: "Save your favorite maternity wear, mom wear, and feeding dresses to your wishlist. Create your dream collection of elegant pregnancy clothing.",
+    title: "Wishlist - JJTextiles | Save Your Favorites",
+    description: "Save your favorite items to your wishlist and build your JJTextiles collection.",
     card: 'summary_large_image',
     images: ['/logo1.png'],
   },

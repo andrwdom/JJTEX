@@ -5,27 +5,24 @@ import styles from '../styles/informational-pages.module.css'
 
 // SEO Metadata for return policy page
 export const metadata: Metadata = {
-  title: "Return Policy - Shithaa | Premium Maternity Wear Returns & Exchanges",
-  description: "Learn about Shithaa's refund and exchange policy. Refunds and exchanges are only applicable for damaged products. Contact us via Instagram DM or email.",
+  title: "Return Policy - JJTextiles | Returns & Exchanges",
+  description: "Learn about JJTextiles' refund and exchange policy. Refunds and exchanges are only applicable for damaged products. Contact us via Instagram DM or email.",
   keywords: [
     "return policy",
     "refund policy",
     "exchange policy",
     "damaged products",
     "product returns",
-    "Shithaa returns",
-    "maternity wear returns",
-    "maternity clothing returns",
     "premium clothing returns"
   ],
   openGraph: {
-    title: "Return Policy - Shithaa | Premium Maternity Wear Returns & Exchanges",
-    description: "Learn about Shithaa's refund and exchange policy. Refunds and exchanges are only applicable for damaged products.",
+    title: "Return Policy - JJTextiles | Returns & Exchanges",
+    description: "Learn about JJTextiles' refund and exchange policy. Refunds and exchanges are only applicable for damaged products.",
     images: ['/logo1.png'],
   },
   twitter: {
-    title: "Return Policy - Shithaa | Premium Maternity Wear Returns & Exchanges",
-    description: "Learn about Shithaa's refund and exchange policy. Refunds and exchanges are only applicable for damaged products.",
+    title: "Return Policy - JJTextiles | Returns & Exchanges",
+    description: "Learn about JJTextiles' refund and exchange policy. Refunds and exchanges are only applicable for damaged products.",
   },
 }
 
@@ -36,7 +33,7 @@ export default function ReturnPolicyPage() {
         <h1 className={styles.pageTitle}>Return & Exchange Policy</h1>
         
         <p className={styles.pageDescription}>
-          At Shithaa, we are committed to providing you with the highest quality maternity wear. 
+          At JJTextiles, we are committed to providing you with the highest quality products. 
           Our refund and exchange policy is designed to ensure customer satisfaction while maintaining 
           the integrity of our products.
         </p>
@@ -137,12 +134,12 @@ export default function ReturnPolicyPage() {
           </ol>
           <p className={styles.cardContent}>
             Contact us via Instagram direct message at{" "}
-            <a href="https://www.instagram.com/shithaa.in" className={styles.link} target="_blank" rel="noopener noreferrer">
-              @shithaa.in
+            <a href="https://www.instagram.com/jjtextiles" className={styles.link} target="_blank" rel="noopener noreferrer">
+              @jjtextiles
             </a>{" "}
             (preferred method) or email us at{" "}
-            <a href="mailto:info.shithaa@gmail.com" className={styles.link}>
-              info.shithaa@gmail.com
+            <a href="mailto:info.jjtextiles@gmail.com" className={styles.link}>
+              info.jjtextiles@gmail.com
             </a>
           </p>
         </div>

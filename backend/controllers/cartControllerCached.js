@@ -510,31 +510,9 @@ export const calculateCartTotal = async (req, res) => {
             productMap[product._id.toString()] = product;
         });
 
-        // Separate all loungewear category items
-        const loungewearCategoryItems = [];
-        const otherItems = [];
-        
-        validation.validatedItems.forEach(item => {
-            const product = productMap[item._id];
-            if (product && product.categorySlug === 'zipless-feeding-lounge-wear') {
-                loungewearCategoryItems.push(item);
-            } else {
-                otherItems.push(item);
-            }
-        });
-
-        // Calculate totals
-        const loungewearSubtotal = loungewearCategoryItems.reduce((sum, item) => sum + (item.price * item.quantity), 0);
-        const otherSubtotal = otherItems.reduce((sum, item) => sum + (item.price * item.quantity), 0);
-        const subtotal = loungewearSubtotal + otherSubtotal;
-
-        // Apply loungewear offer: Buy 2 Get 1 Free
-        let loungewearDiscount = 0;
-        if (loungewearCategoryItems.length >= 2) {
-            // Find the cheapest item for free
-            const sortedByPrice = loungewearCategoryItems.sort((a, b) => a.price - b.price);
-            loungewearDiscount = sortedByPrice[0].price;
-        }
+        // Calculate totals (legacy category-specific offers removed)
+        const subtotal = validation.validatedItems.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+        const loungewearDiscount = 0;
 
         // Calculate delivery charge
         const deliveryCharge = subtotal >= 500 ? 0 : 10;
@@ -546,12 +524,12 @@ export const calculateCartTotal = async (req, res) => {
             success: true,
             items: validation.validatedItems,
             subtotal: subtotal,
-            loungewearSubtotal: loungewearSubtotal,
+            loungewearSubtotal: 0,
             loungewearDiscount: loungewearDiscount,
             deliveryCharge: deliveryCharge,
             total: total,
             itemCount: validation.itemCount,
-            offerApplied: loungewearDiscount > 0 ? 'Buy 2 Get 1 Free on Zipless Feeding Lounge Wear' : null
+            offerApplied: null
         };
 
         // Cache the result

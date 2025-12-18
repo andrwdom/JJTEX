@@ -151,21 +151,7 @@ export default function CategoryPageClient({ categorySlug }: CategoryPageClientP
     .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
     .join(" ")
 
-  const shouldShowSleeveFilter = () => {
-    // Show sleeve filter for all lounge wear and feeding wear categories
-    return categorySlug === "zipless-feeding-lounge-wear" ||
-           categorySlug === "non-feeding-lounge-wear" ||
-           categorySlug === "maternity-feeding-wear" ||
-           categorySlug === "zipless-feeding-dupatta-lounge-wear";
-  };
-
-  // Fetch available sleeve types for the current category
-  useEffect(() => {
-    // Use default sleeve types since the API endpoint doesn't exist
-    if (shouldShowSleeveFilter()) {
-      setAvailableSleeveTypes(['Puff Sleeve', 'Normal Sleeve']);
-    }
-  }, [categorySlug]);
+  // Sleeve filter availability is derived from the fetched products (no category hardcoding)
 
   useEffect(() => {
     async function getProducts() {
@@ -224,6 +210,16 @@ export default function CategoryPageClient({ categorySlug }: CategoryPageClientP
           dateAdded: p.createdAt,
         }));
         setProducts(mappedProducts);
+
+        // Derive sleeve types from products in this category
+        const sleeveTypes = Array.from(
+          new Set(
+            (mappedProducts || [])
+              .map((p: any) => p?.sleeveType)
+              .filter((t: any) => typeof t === 'string' && t.trim().length > 0)
+          )
+        ) as string[];
+        setAvailableSleeveTypes(sleeveTypes);
       } catch (err) {
         if (process.env.NODE_ENV === 'development') {
           console.error('Error fetching products:', err);
@@ -385,98 +381,8 @@ export default function CategoryPageClient({ categorySlug }: CategoryPageClientP
                 </div>
 
                 <div className="space-y-4">
-                  {[
-                    {
-                      icon: Baby,
-                      title: "Maternity Feeding Wear",
-                      slug: "maternity-feeding-wear",
-                      description: "Comfortable feeding essentials",
-                      bgColor: "bg-blue-50/80",
-                      hoverBgColor: "hover:bg-blue-100/80",
-                      borderColor: "border-blue-100",
-                      hoverBorderColor: "hover:border-blue-300",
-                      iconBgColor: "bg-blue-100",
-                      activeIconBgColor: "bg-blue-500",
-                    },
-                    {
-                      icon: Heart,
-                      title: "Zipless Feeding Lounge Wear",
-                      slug: "zipless-feeding-lounge-wear",
-                      description: "Revolutionary zipless design",
-                      bgColor: "bg-pink-50/80",
-                      hoverBgColor: "hover:bg-pink-100/80",
-                      borderColor: "border-pink-100",
-                      hoverBorderColor: "hover:border-pink-300",
-                      iconBgColor: "bg-pink-100",
-                      activeIconBgColor: "bg-pink-500",
-                    },
-                    {
-                      icon: Shirt,
-                      title: "Non-Feeding Lounge Wear",
-                      slug: "non-feeding-lounge-wear",
-                      description: "Elegant everyday comfort",
-                      bgColor: "bg-green-50/80",
-                      hoverBgColor: "hover:bg-green-100/80",
-                      borderColor: "border-green-100",
-                      hoverBorderColor: "hover:border-green-300",
-                      iconBgColor: "bg-green-100",
-                      activeIconBgColor: "bg-green-500",
-                    },
-                    {
-                      icon: Heart,
-                      title: "Zipless Feeding Dupatta Lounge Wear",
-                      slug: "zipless-feeding-dupatta-lounge-wear",
-                      description: "Zipless design with attached dupatta for comfort",
-                      bgColor: "bg-yellow-50/80",
-                      hoverBgColor: "hover:bg-yellow-100/80",
-                      borderColor: "border-yellow-100",
-                      hoverBorderColor: "hover:border-yellow-300",
-                      iconBgColor: "bg-yellow-100",
-                      activeIconBgColor: "bg-yellow-500",
-                    },
-                  ].map((category) => {
-                    const Icon = category.icon
-                    const isActive = categorySlug === category.slug
-
-                    return (
-                      <button
-                        key={category.slug}
-                        onClick={() => handleCategorySelect(category.slug)}
-                        className={`w-full text-left p-4 rounded-2xl border-2 transition-all duration-300 transform hover:scale-[1.02] hover:shadow-lg ${
-                          isActive
-                            ? `${category.borderColor} ${category.activeIconBgColor.replace("bg-", "bg-").replace("-500", "-50")} border-opacity-80 shadow-lg scale-[1.02]`
-                            : `${category.bgColor} ${category.hoverBgColor} ${category.borderColor} ${category.hoverBorderColor} border-opacity-40 hover:border-opacity-60`
-                        }`}
-                      >
-                        <div className="flex items-start space-x-4">
-                                              <div
-                      className={`p-3 rounded-xl ${isActive ? category.activeIconBgColor : category.iconBgColor} transition-all duration-300 ${isActive ? 'shadow-md' : ''}`}
-                    >
-                      <Icon className={`h-5 w-5 ${isActive ? "text-white" : "text-gray-600"} ${isActive ? 'drop-shadow-sm' : ''}`} />
-                    </div>
-                          <div className="flex-1">
-                            <h3
-                              className={`font-semibold text-base mb-1 ${isActive ? "text-gray-900" : "text-gray-800"} ${isActive ? 'font-bold' : ''}`}
-                            >
-                              {category.title}
-                            </h3>
-                            <p className={`text-sm leading-relaxed ${isActive ? "text-gray-700" : "text-gray-600"}`}>{category.description}</p>
-                          </div>
-                        </div>
-                      </button>
-                    )
-                  })}
-
-                  {/* More Categories Coming Soon */}
-                  <div className="mt-8 p-6 bg-gradient-to-br from-purple-50/80 to-pink-50/80 rounded-2xl border-2 border-purple-200/60 text-center shadow-md hover:shadow-lg transition-all duration-300">
-                    <div className="w-12 h-12 mx-auto mb-4 bg-gradient-to-br from-purple-200 to-pink-200 rounded-full flex items-center justify-center shadow-sm">
-                      <div className="text-2xl">✨</div>
-                    </div>
-                    <h3 className="font-bold text-gray-900 mb-2 font-serif">More Categories Coming Soon!</h3>
-                    <p className="text-sm text-gray-600 leading-relaxed">
-                      We're working on exciting new collections to make your motherhood journey even more beautiful.
-                    </p>
-                    <div className="mt-4 text-xs text-gray-500">Stay tuned for updates 💕</div>
+                  <div className="p-4 rounded-2xl border border-gray-200 bg-gray-50 text-sm text-gray-700">
+                    Browse categories using the main navigation.
                   </div>
                 </div>
               </div>
@@ -511,96 +417,10 @@ export default function CategoryPageClient({ categorySlug }: CategoryPageClientP
                   {categoryName}
                 </h1>
                 <p className="text-base lg:text-lg text-gray-600 max-w-3xl">
-                  Discover our carefully curated collection of premium maternity wear designed for your comfort and
-                  style.
+                  Discover our carefully curated collection—quality you can feel, styles you’ll love.
                 </p>
               </div>
-
-              {/* Loungewear Offer Banner */}
-              {(categorySlug === "zipless-feeding-lounge-wear" || 
-                categorySlug === "non-feeding-lounge-wear") && (
-                <div className="mb-6 p-4 bg-gradient-to-r from-pink-50 to-purple-50 border border-pink-200 rounded-lg">
-                  <div className="flex items-center gap-3">
-                    <div className="flex-shrink-0">
-                      <div className="w-8 h-8 bg-pink-100 rounded-full flex items-center justify-center">
-                        <span className="text-pink-600 text-sm font-bold">🔥</span>
-                      </div>
-                    </div>
-                    <div className="flex-1">
-                      <p className="font-semibold text-pink-800 text-sm">
-                        Buy 3 Loungewear for ₹1299!
-                      </p>
-                      <p className="text-xs text-pink-600 mt-1">
-                        Add any 3 loungewear items to your cart to unlock this special bundle offer
-                      </p>
-                    </div>
-                  </div>
-                </div>
-              )}
-
-              {/* Mobile Category Navigation - Only visible on mobile */}
-              <div className="lg:hidden px-0 pb-6 w-full">
-                <div className="flex gap-3 overflow-x-auto pb-2 scrollbar-hide w-full">
-                  {[
-                    {
-                      icon: Baby,
-                      title: "Feeding Wear",
-                      slug: "maternity-feeding-wear",
-                      bgColor: "bg-blue-50",
-                      borderColor: "border-blue-200",
-                      textColor: "text-blue-700",
-                      activeBgColor: "bg-blue-100",
-                      activeBorderColor: "border-blue-400",
-                    },
-                    {
-                      icon: Heart,
-                      title: "Zipless Lounge",
-                      slug: "zipless-feeding-lounge-wear",
-                      bgColor: "bg-pink-50",
-                      borderColor: "border-pink-200",
-                      textColor: "text-pink-700",
-                      activeBgColor: "bg-pink-100",
-                      activeBorderColor: "border-pink-400",
-                    },
-                    {
-                      icon: Shirt,
-                      title: "Casual Wear",
-                      slug: "non-feeding-lounge-wear",
-                      bgColor: "bg-green-50",
-                      borderColor: "border-green-200",
-                      textColor: "text-green-700",
-                      activeBgColor: "bg-green-100",
-                      activeBorderColor: "border-green-400",
-                    },
-                    {
-                      icon: Heart,
-                      title: "Dupatta Lounge",
-                      slug: "zipless-feeding-dupatta-lounge-wear",
-                      bgColor: "bg-yellow-50",
-                      borderColor: "border-yellow-200",
-                      textColor: "text-yellow-700",
-                      activeBgColor: "bg-yellow-100",
-                      activeBorderColor: "border-yellow-400",
-                    },
-                  ].map(category => {
-                    const isActive = categorySlug === category.slug;
-                    return (
-                      <button
-                        key={category.slug}
-                        onClick={() => handleCategorySelect(category.slug)}
-                        className={`flex-shrink-0 flex items-center gap-2 px-4 py-2 rounded-full border-2 transition-all duration-300 font-medium text-sm
-                          ${isActive
-                            ? `${category.activeBgColor} ${category.activeBorderColor} ${category.textColor}`
-                            : `${category.bgColor} ${category.borderColor} ${category.textColor}`
-                          }`}
-                      >
-                        <category.icon className="h-5 w-5" />
-                        {category.title}
-                      </button>
-                    );
-                  })}
-                </div>
-              </div>
+              {/* Mobile category navigation is handled via main navigation */}
 
               {/* Search and Filter Bar */}
               <div className="flex flex-col gap-2 mb-6 lg:mb-8 w-full max-w-full px-0 sm:px-0">
@@ -620,8 +440,8 @@ export default function CategoryPageClient({ categorySlug }: CategoryPageClientP
                       />
                     </div>
                   </div>
-                  {/* Sleeve Type Filter - Show next to sort on desktop */}
-                  {shouldShowSleeveFilter() && (
+                  {/* Sleeve Type Filter (only if products in this category have sleeveType) */}
+                  {availableSleeveTypes.length > 0 && (
                     <div className="flex-shrink-0 hidden sm:block">
                       <Select value={sleeveTypeFilter} onValueChange={setSleeveTypeFilter}>
                         <SelectTrigger className="w-48 h-12 border-2 border-gray-200 focus:border-[rgb(71,60,102)] rounded-lg">
@@ -640,7 +460,7 @@ export default function CategoryPageClient({ categorySlug }: CategoryPageClientP
                           onCloseAutoFocus={(e: any) => e.preventDefault()}
                         >
                           <SelectItem value="all">All Sleeve Types</SelectItem>
-                          {(availableSleeveTypes.length > 0 ? availableSleeveTypes : ['Puff Sleeve', 'Normal Sleeve']).map((sleeveType) => (
+                          {availableSleeveTypes.map((sleeveType) => (
                             <SelectItem key={sleeveType} value={sleeveType}>
                               {sleeveType}
                             </SelectItem>
@@ -704,7 +524,7 @@ export default function CategoryPageClient({ categorySlug }: CategoryPageClientP
                 </div>
 
                 {/* Sleeve Type Filter - Mobile version (full width) */}
-                {shouldShowSleeveFilter() && (
+                {availableSleeveTypes.length > 0 && (
                   <div className="flex w-full gap-2 mt-2 sm:hidden">
                     <div className="flex-1">
                       <Select value={sleeveTypeFilter} onValueChange={setSleeveTypeFilter}>
@@ -724,7 +544,7 @@ export default function CategoryPageClient({ categorySlug }: CategoryPageClientP
                           onCloseAutoFocus={(e: any) => e.preventDefault()}
                         >
                           <SelectItem value="all">All Sleeve Types</SelectItem>
-                          {(availableSleeveTypes.length > 0 ? availableSleeveTypes : ['Puff Sleeve', 'Normal Sleeve']).map((sleeveType) => (
+                          {availableSleeveTypes.map((sleeveType) => (
                             <SelectItem key={sleeveType} value={sleeveType}>
                               {sleeveType}
                             </SelectItem>

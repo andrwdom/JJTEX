@@ -6,17 +6,17 @@ import PageErrorBoundary from "@/components/page-error-boundary"
 export const generateMetadata = async ({ params }: { params: Promise<{ productId: string }> }): Promise<Metadata> => {
   // Return static metadata to prevent server-side rendering errors
   return {
-    title: "Premium Maternity Wear - Shithaa",
-    description: "Discover elegant maternity wear and feeding essentials at Shithaa. Premium quality, comfortable designs for expecting mothers.",
+    title: "Product Details - JJTextiles",
+    description: "Explore product details from JJTextiles.",
     openGraph: {
-      title: "Premium Maternity Wear - Shithaa",
-      description: "Discover elegant maternity wear and feeding essentials at Shithaa.",
+      title: "Product Details - JJTextiles",
+      description: "Explore product details from JJTextiles.",
       images: ['/logo1.png'],
       type: 'website',
     },
     twitter: {
-      title: "Premium Maternity Wear - Shithaa",
-      description: "Discover elegant maternity wear and feeding essentials at Shithaa.",
+      title: "Product Details - JJTextiles",
+      description: "Explore product details from JJTextiles.",
       images: ['/logo1.png'],
       card: 'summary_large_image',
     },

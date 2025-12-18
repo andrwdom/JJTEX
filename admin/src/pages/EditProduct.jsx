@@ -28,12 +28,7 @@ const EditProduct = ({ product, token, onClose, onUpdate }) => {
     console.log('Token comparison:', token === localStorage.getItem('token'));
   }, [token]);
 
-  // Clear sleeveType when category doesn't require it
-  useEffect(() => {
-    if (!shouldShowSleeveType()) {
-      setSleeveType("");
-    }
-  }, [category]);
+  // Sleeve type is optional (legacy category-specific requirement removed)
 
   const SLEEVE_TYPE_OPTIONS = ["Puff Sleeve", "Normal Sleeve"];
 
@@ -43,13 +38,7 @@ const EditProduct = ({ product, token, onClose, onUpdate }) => {
   // Helper: all possible sizes
   const ALL_SIZES = ["S", "M", "L", "XL", "XXL"];
 
-  // Updated function to check if current category should show sleeve type field
-  const shouldShowSleeveType = () => {
-    return category === "Zipless Feeding Lounge Wear" || 
-           category === "Non-Feeding Lounge Wear" || 
-           category === "Zipless Feeding Dupatta Lounge Wear" ||
-           category === "Lounge Wear";
-  };
+  // Sleeve type is optional (no category gating)
 
   // Parse initial sizes: support both ["S", ...] and [{ size, stock }]
   function parseInitialSizes(sizes) {
@@ -82,10 +71,7 @@ const EditProduct = ({ product, token, onClose, onUpdate }) => {
       return 'At least one image is required.';
     }
     
-    // Validate sleeveType only if category requires it
-    if (shouldShowSleeveType() && !sleeveType) {
-      return 'Sleeve type is required for this category.';
-    }
+    // Sleeve type is optional
     
     return null;
   };
@@ -120,11 +106,10 @@ const EditProduct = ({ product, token, onClose, onUpdate }) => {
       formData.append("stock", stock)
       formData.append("customId", customId)
       
-      // Add sleeve type only if applicable
-      if (shouldShowSleeveType() && sleeveType) {
+      // Add sleeve type if provided
+      if (sleeveType) {
         formData.append("sleeveType", sleeveType);
       }
-      // Don't send sleeveType at all for non-sleeve categories
 
       if (image1) formData.append("image1", image1)
       if (image2) formData.append("image2", image2)
@@ -329,23 +314,20 @@ const EditProduct = ({ product, token, onClose, onUpdate }) => {
                 />
               </div>
 
-        {/* Sleeve Type Field - Only show for Lounge Wear categories */}
-        {shouldShowSleeveType() && (
-          <div>
-            <p className='mb-2'>Sleeve Type</p>
-            <select
-              value={sleeveType}
-              onChange={e => setSleeveType(e.target.value)}
-              className='w-full px-3 py-2 border rounded bg-white text-gray-900'
-              required
-            >
-              <option value="">Select Sleeve Type</option>
-              {SLEEVE_TYPE_OPTIONS.map(option => (
-                <option key={option} value={option}>{option}</option>
-              ))}
-            </select>
-          </div>
-        )}
+        {/* Sleeve Type (Optional) */}
+        <div>
+          <p className='mb-2'>Sleeve Type (optional)</p>
+          <select
+            value={sleeveType}
+            onChange={e => setSleeveType(e.target.value)}
+            className='w-full px-3 py-2 border rounded bg-white text-gray-900'
+          >
+            <option value="">Select Sleeve Type</option>
+            {SLEEVE_TYPE_OPTIONS.map(option => (
+              <option key={option} value={option}>{option}</option>
+            ))}
+          </select>
+        </div>
 
         <div>
           <p className='mb-2'>Product Price</p>

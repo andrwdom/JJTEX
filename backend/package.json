@@ -7,7 +7,10 @@
     "start": "node server.js",
     "server": "nodemon server.js",
     "check-setup": "node scripts/check-server-setup.js",
-    "seed-admin": "node scripts/seed-admin.js"
+    "seed-admin": "node scripts/seed-admin.js",
+    "seed-categories": "node scripts/seedTaxonomy.js",
+    "seed-categories:reset": "node scripts/seedTaxonomy.js --reset",
+    "cleanup-legacy-maternity": "node scripts/cleanupLegacyMaternity.js"
   },
   "author": "",
   "license": "ISC",

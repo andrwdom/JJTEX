@@ -62,7 +62,7 @@ export default function NotFound() {
               </h2>
               <p className="text-lg text-gray-600 leading-relaxed max-w-md mx-auto">
                 The page you're looking for seems to have wandered off. Don't worry though - 
-                our beautiful maternity wear collection is still here waiting for you!
+                our latest collection is still here waiting for you!
               </p>
             </motion.div>
 
@@ -86,7 +86,7 @@ export default function NotFound() {
                 size="lg"
                 variant="outline"
                 className="border-2 border-[#473C66] text-[#473C66] hover:bg-[#473C66] hover:text-white rounded-full px-8 py-3 font-semibold transition-all duration-300"
-                onClick={() => window.location.href = '/collections/maternity-feeding-wear'}
+                onClick={() => window.location.href = '/collections/women-dresses'}
               >
                 <Heart className="w-5 h-5 mr-2" />
                 Shop Collection
@@ -103,16 +103,16 @@ export default function NotFound() {
               <p className="text-sm text-gray-500 mb-4">Looking for something specific?</p>
               <div className="flex flex-wrap justify-center gap-4 text-sm">
                 <Link 
-                  href="/collections/maternity-feeding-wear"
+                  href="/collections/women-dresses"
                   className="text-[#473C66] hover:text-purple-600 transition-colors duration-200"
                 >
-                  Maternity Wear
+                  Women
                 </Link>
                 <Link 
-                  href="/collections/zipless-feeding-lounge-wear"
+                  href="/collections/dresses-jumpsuits"
                   className="text-[#473C66] hover:text-purple-600 transition-colors duration-200"
                 >
-                  Feeding Wear
+                  Kids
                 </Link>
                 <Link 
                   href="/about"

@@ -29,41 +29,22 @@ const inter = Inter({
 
 export const metadata: Metadata = {
   title: {
-    default: "Shithaa - Elegant Maternity & Feeding Wear | Premium Mother & Baby Clothing",
-    template: "%s | Shithaa"
+    default: "JJTextiles - Premium Apparel & Textiles",
+    template: "%s | JJTextiles"
   },
-  description: "Discover elegant maternity wear, mom wear, and feeding essentials at Shithaa. Premium quality, comfortable designs for expecting mothers. Shop the latest collection of maternity feeding wear, zipless lounge wear, and more.",
+  description: "Discover premium apparel and textiles at JJTextiles. Curated collections, great comfort, and reliable service.",
   keywords: [
-    "maternity wear",
-    "mom wear",
-    "feeding dresses",
-    "maternity clothing",
-    "pregnancy clothes",
-    "nursing wear",
-    "zipless feeding wear",
-    "maternity lounge wear",
-    "mother and baby clothing",
-    "pregnancy fashion",
-    "nursing clothes",
-    "maternity dresses",
-    "feeding essentials",
-    "Shithaa",
-    "Shithaa clothing",
-    "best maternity wear",
-    "premium maternity clothing",
-    "comfortable maternity dresses",
-    "stylish maternity fashion",
-    "maternity wear online",
-    "maternity gowns",
-    "maternity maxi",
-    "elegant maternity clothing",
-    "pregnancy fashion online",
-    "nursing dresses",
-    "maternity fashion India"
+    "jjtextiles",
+    "apparel",
+    "textiles",
+    "clothing",
+    "fashion",
+    "online shopping",
+    "india"
   ],
-  authors: [{ name: "Shithaa" }, { name: "Elev8Max" }],
-  creator: "Shithaa",
-  publisher: "Shithaa",
+  authors: [{ name: "JJTextiles" }],
+  creator: "JJTextiles",
+  publisher: "JJTextiles",
   formatDetection: {
     email: false,
     address: false,
@@ -80,25 +61,25 @@ export const metadata: Metadata = {
     type: 'website',
     locale: 'en_IN',
     url: '/',
-    siteName: 'Shithaa',
-    title: 'Shithaa - Elegant Maternity & Feeding Wear | Premium Maternity Clothing',
-    description: 'Discover elegant maternity wear, mom wear, and feeding essentials at Shithaa. Premium quality, comfortable designs for expecting mothers. Best maternity clothing online.',
+    siteName: 'JJTextiles',
+    title: 'JJTextiles - Premium Apparel & Textiles',
+    description: 'Discover premium apparel and textiles at JJTextiles. Curated collections, great comfort, and reliable service.',
     images: [
       {
         url: '/logo1.png',
         width: 1200,
         height: 630,
-        alt: 'Shithaa - Elegant Maternity & Feeding Wear - Premium Maternity Clothing',
+        alt: 'JJTextiles - Premium Apparel & Textiles',
       },
     ],
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'Shithaa - Elegant Maternity & Feeding Wear | Premium Maternity Clothing',
-    description: 'Discover elegant maternity wear, mom wear, and feeding essentials at Shithaa. Premium quality, comfortable designs for expecting mothers. Best maternity clothing online.',
+    title: 'JJTextiles - Premium Apparel & Textiles',
+    description: 'Discover premium apparel and textiles at JJTextiles.',
     images: ['/logo1.png'],
-    creator: '@shithaa',
-    site: '@shithaa',
+    creator: '@jjtextiles',
+    site: '@jjtextiles',
   },
   robots: {
     index: true,
@@ -115,7 +96,7 @@ export const metadata: Metadata = {
     google: process.env.GOOGLE_SITE_VERIFICATION,
   },
   category: 'fashion',
-  classification: 'Maternity & Baby Clothing Store',
+  classification: 'Apparel & Textiles Store',
 }
 
 export default function RootLayout({
@@ -153,10 +134,10 @@ export default function RootLayout({
             __html: JSON.stringify({
               "@context": "https://schema.org",
               "@type": "Organization",
-              "name": "Shithaa",
-              "url": "https://shithaa.in",
+              "name": "JJTextiles",
+              "url": "https://jjtextiles.com",
               "logo": "https://jjtextiles.com/logo1.png",
-              "description": "Elegant Maternity & Feeding Wear - Premium Maternity Clothing",
+              "description": "Premium apparel and textiles",
               "address": {
                 "@type": "PostalAddress",
                 "addressCountry": "IN"
@@ -164,16 +145,9 @@ export default function RootLayout({
               "contactPoint": {
                 "@type": "ContactPoint",
                 "contactType": "customer service",
-                "email": "info.shithaa@gmail.com"
+                "email": "info.jjtextiles@gmail.com"
               },
-              "sameAs": [
-                "https://instagram.com/shithaa.in"
-              ],
-              "creator": {
-                "@type": "Organization",
-                "name": "Elev8Max",
-                "url": "https://www.instagram.com/elev8max/"
-              },
+              "sameAs": [],
               "foundingDate": "2023",
               "industry": "Fashion & Apparel",
               "numberOfEmployees": "10-50"
@@ -186,14 +160,14 @@ export default function RootLayout({
             __html: JSON.stringify({
               "@context": "https://schema.org",
               "@type": "WebSite",
-              "name": "Shithaa - Elegant Maternity & Feeding Wear",
-              "url": "https://shithaa.in",
+              "name": "JJTextiles",
+              "url": "https://jjtextiles.com",
               "potentialAction": {
                 "@type": "SearchAction",
-                "target": "https://shithaa.in/search?q={search_term_string}",
+                "target": "https://jjtextiles.com/search?q={search_term_string}",
                 "query-input": "required name=search_term_string"
               },
-              "description": "Premium maternity wear and feeding essentials designed for comfort and style. Shop our collection of maternity dresses, feeding wear, and zipless lounge wear."
+              "description": "Shop premium apparel and textiles at JJTextiles."
             })
           }}
         />
@@ -205,19 +179,16 @@ export default function RootLayout({
             __html: JSON.stringify({
               "@context": "https://schema.org",
               "@type": "Brand",
-              "name": "Shithaa",
-              "description": "Elegant Maternity & Feeding Wear - Premium Maternity Clothing",
-              "url": "https://shithaa.in",
+              "name": "JJTextiles",
+              "description": "Premium apparel and textiles",
+              "url": "https://jjtextiles.com",
               "logo": "https://jjtextiles.com/logo1.png",
               "category": "Fashion & Apparel",
-              "slogan": "Elegant Maternity & Feeding Wear",
+              "slogan": "Premium Apparel & Textiles",
               "knowsAbout": [
-                "Maternity Fashion",
-                "Pregnancy Clothing",
-                "Nursing Wear",
-                "Feeding Dresses",
-                "Maternity Maxi Dresses",
-                "Zipless Feeding Wear"
+                "Apparel",
+                "Textiles",
+                "Fashion"
               ]
             })
           }}

@@ -177,12 +177,7 @@ const Add = ({token}) => {
   const getSelectedName = () => selectedCategory?.name || "";
   const getSelectedSlug = () => selectedCategory?.slug || "";
 
-   // Updated function to check if current category should show sleeve type field
-   const shouldShowSleeveType = () => {
-     return category === "Zipless Feeding Lounge Wear" || 
-            category === "Non-Feeding Lounge Wear" || 
-            category === "Zipless Feeding Dupatta Lounge Wear";
-   };
+   // Sleeve type is optional (legacy category-specific requirement removed)
 
    const onSubmitHandler = async (e) => {
     e.preventDefault();
@@ -204,11 +199,7 @@ const Add = ({token}) => {
       return;
     }
 
-    // Validate sleeve type for categories that require it
-    if (shouldShowSleeveType() && !sleeveType) {
-      toast.error("Please select a sleeve type for this category");
-      return;
-    }
+    // Sleeve type is optional
 
     // Validate that at least one image is selected
     if (!image1 && !image2 && !image3 && !image4) {
@@ -252,8 +243,8 @@ const Add = ({token}) => {
       image3 && formData.append("image3",image3)
       image4 && formData.append("image4",image4)
       
-      // Add sleeve type if applicable
-      if (shouldShowSleeveType() && sleeveType && sleeveType.trim()) {
+      // Add sleeve type if provided
+      if (sleeveType && sleeveType.trim()) {
         formData.append("sleeveType", sleeveType);
       }
       
@@ -422,23 +413,20 @@ const Add = ({token}) => {
           />
         </div>
 
-          {/* Sleeve Type Field - Only show for Lounge Wear categories */}
-          {shouldShowSleeveType() && (
-            <div className='w-full'>
-              <p className='mb-2'>Sleeve Type</p>
-              <select 
-                onChange={(e) => setSleeveType(e.target.value)} 
-                value={sleeveType}
-                className='w-full px-3 py-2'
-                required
-              >
-                <option value="">Select Sleeve Type</option>
-                {SLEEVE_TYPE_OPTIONS.map(option => (
-                  <option key={option} value={option}>{option}</option>
-                ))}
-              </select>
-            </div>
-          )}
+          {/* Sleeve Type (Optional) */}
+          <div className='w-full'>
+            <p className='mb-2'>Sleeve Type (optional)</p>
+            <select
+              onChange={(e) => setSleeveType(e.target.value)}
+              value={sleeveType}
+              className='w-full px-3 py-2'
+            >
+              <option value="">Select Sleeve Type</option>
+              {SLEEVE_TYPE_OPTIONS.map(option => (
+                <option key={option} value={option}>{option}</option>
+              ))}
+            </select>
+          </div>
 
           <div>
             <p className='mb-2'>Product Price</p>

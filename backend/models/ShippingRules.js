@@ -4,8 +4,7 @@ const shippingRuleSchema = new mongoose.Schema({
   category: {
     type: String,
     required: true,
-    unique: true,
-    enum: ['maternity-feeding-wear', 'zipless-feeding-lounge-wear', 'non-feeding-lounge-wear', 'zipless-feeding-dupatta-lounge-wear']
+    unique: true
   },
   categoryName: {
     type: String,
@@ -100,90 +99,9 @@ shippingRuleSchema.statics.calculateShipping = function(category, quantity, stat
 
 // Static method to get default rules for a category
 shippingRuleSchema.statics.getDefaultRules = function(category) {
-  const defaults = {
-    'maternity-feeding-wear': {
-      categoryName: 'Maternity Feeding Wear',
-      rules: {
-        tamilNadu: new Map([
-          ['1', 39],
-          ['2', 49],
-          ['3', 59],
-          ['4', 69],
-          ['5', 79],
-          ['6', 89],
-          ['7+', 99]
-        ]),
-        otherStates: new Map([
-          ['1', 49],
-          ['2', 69],
-          ['3', 89],
-          ['4+', 109]
-        ])
-      }
-    },
-    'zipless-feeding-lounge-wear': {
-      categoryName: 'Zipless Feeding Lounge Wear',
-      rules: {
-        tamilNadu: new Map([
-          ['1', 0],  // Free shipping in Tamil Nadu
-          ['2', 0],
-          ['3', 0],
-          ['4', 0],
-          ['5', 0],
-          ['6', 0],
-          ['7+', 0]
-        ]),
-        otherStates: new Map([
-          ['1', 39],
-          ['2', 49],
-          ['3', 59],
-          ['4+', 69]
-        ])
-      }
-    },
-    'non-feeding-lounge-wear': {
-      categoryName: 'Non-Feeding Lounge Wear',
-      rules: {
-        tamilNadu: new Map([
-          ['1', 0],  // Free shipping in Tamil Nadu
-          ['2', 0],
-          ['3', 0],
-          ['4', 0],
-          ['5', 0],
-          ['6', 0],
-          ['7+', 0]
-        ]),
-        otherStates: new Map([
-          ['1', 39],
-          ['2', 49],
-          ['3', 59],
-          ['4+', 69]
-        ])
-      }
-    },
-    'zipless-feeding-dupatta-lounge-wear': {
-      categoryName: 'Zipless Feeding Dupatta Lounge Wear',
-      rules: {
-        tamilNadu: new Map([
-          ['1', 0],  // Free shipping in Tamil Nadu
-          ['2', 0],
-          ['3', 0],
-          ['4', 0],
-          ['5', 0],
-          ['6', 0],
-          ['7+', 0]
-        ]),
-        otherStates: new Map([
-          ['1', 39],
-          ['2', 49],
-          ['3', 59],
-          ['4+', 69]
-        ])
-      }
-    }
-  };
-  
-  return defaults[category] || null;
+  // No category-specific defaults anymore (maternity logic removed).
+  // If you need defaults, create them from admin panel (Shipping Rules) or seed them separately.
+  return null;
 };
 
 export default mongoose.model('ShippingRules', shippingRuleSchema); 

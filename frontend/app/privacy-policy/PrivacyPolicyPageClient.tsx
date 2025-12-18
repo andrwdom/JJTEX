@@ -22,7 +22,7 @@ export default function PrivacyPolicyPageClient() {
           <ol className={styles.orderedList}>
             <li className={styles.orderedListItem}>
               <span className={styles.strong}>Introduction</span><br/>
-              At Shithaa we respect your privacy and are committed to protecting the personal information you share with us. This Privacy Policy explains how we collect, use, and safeguard your data when you visit or make a purchase from our premium maternity wear website.
+              At JJTextiles we respect your privacy and are committed to protecting the personal information you share with us. This Privacy Policy explains how we collect, use, and safeguard your data when you visit or make a purchase from our website.
             </li>
             <li className={styles.orderedListItem}>
               <span className={styles.strong}>Information We Collect</span><br/>
@@ -73,8 +73,8 @@ export default function PrivacyPolicyPageClient() {
             <li className={styles.orderedListItem}>
               <span className={styles.strong}>Contact Us</span><br/>
               If you have any questions about this Privacy Policy, please contact us at:<br/>
-              Email: <a href="mailto:info.shithaa@gmail.com" className={styles.link}>info.shithaa@gmail.com</a><br/>
-              Instagram: <a href="https://www.instagram.com/shithaa.in" className={styles.link}>@shithaa.in</a>
+              Email: <a href="mailto:info.jjtextiles@gmail.com" className={styles.link}>info.jjtextiles@gmail.com</a><br/>
+              Instagram: <a href="https://www.instagram.com/jjtextiles" className={styles.link}>@jjtextiles</a>
             </li>
           </ol>
         </div>

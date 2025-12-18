@@ -105,7 +105,7 @@ export default function AboutPage() {
                   <div className="bg-white rounded-2xl p-3 shadow-lg transform rotate-2">
                     <OptimizedStaticImage
                       src="/about-us.jpg"
-                      alt="Founder of Shithaa with her child, representing the mother-child bond"
+                      alt="JJTextiles"
                       width={250}
                       height={300}
                       className="w-full h-72 object-cover rounded-xl"
@@ -133,13 +133,12 @@ export default function AboutPage() {
 
                     <h3 className="text-2xl font-semibold text-[#473C66] mb-4">Founded with Love & Understanding</h3>
                     <p className="text-gray-700 leading-relaxed mb-4">
-                      Shithaa was born from the heart of a passionate creator, mother, and influencer who, through her
+                      JJTextiles was born from a passion for quality, comfort, and timeless design.
                       journey with her growing community of 32,000+ followers, witnessed the beautiful yet challenging
                       experience of expecting mothers preparing to welcome their little ones.
                     </p>
                     <p className="text-gray-700 leading-relaxed mb-4">
-                      What started as heartfelt conversations about the excitement, anticipation, and dreams of motherhood
-                      evolved into a mission: to create maternity wear that honors not just your changing body, but the
+                      What started as a simple idea evolved into a mission: to create apparel and textiles that support everyday life with comfort and style.
                       incredible love story unfolding between you and your baby.
                     </p>
                     <p className="text-gray-700 leading-relaxed">
@@ -186,7 +185,7 @@ export default function AboutPage() {
 
                     <h3 className="text-2xl font-semibold text-[#473C66] mb-4">Our Mission</h3>
                     <p className="text-gray-700 leading-relaxed mb-4">
-                      To empower expecting mothers with elegant, comfortable, and thoughtfully designed maternity wear
+                      To deliver elegant, comfortable, and thoughtfully designed apparel
                       that celebrates every stage of their beautiful journey. We believe that feeling beautiful and
                       comfortable during pregnancy is not a luxury—it's essential.
                     </p>
@@ -426,10 +425,10 @@ export default function AboutPage() {
                 <HeartDoodle className="bottom-8 right-1/4" />
 
                 <h2 className="text-3xl md:text-4xl font-light mb-6">
-                  Join the <span className="font-semibold">Shithaa</span> Family
+                  Join the <span className="font-semibold">JJTextiles</span> Family
                 </h2>
                 <p className="text-lg mb-8 opacity-90 leading-relaxed">
-                  Discover our collection of elegant maternity wear and feeding essentials designed with love for you and your little one.
+                  Discover our collection of premium apparel and textiles—designed with care for everyday comfort and style.
                 </p>
                 <div className="flex flex-col sm:flex-row gap-4 justify-center">
                   <Button

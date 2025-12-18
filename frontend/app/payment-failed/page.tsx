@@ -240,8 +240,8 @@ function PaymentFailedContent() {
         <div className="mt-8 text-center">
           <p className="text-sm text-gray-500 mb-2">Need help? Contact our support team</p>
           <div className="flex justify-center gap-4 text-sm">
-            <a href="mailto:info.shithaa@gmail.com" className="text-[#473C66] hover:underline">
-              info.shithaa@gmail.com
+            <a href="mailto:info.jjtextiles@gmail.com" className="text-[#473C66] hover:underline">
+              info.jjtextiles@gmail.com
             </a>
           </div>
         </div>

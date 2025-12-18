@@ -20,7 +20,7 @@ export default function TermsPageClient() {
         
         <div className={styles.infoCard}>
           <p className={styles.cardContent}>
-            Welcome to Shithaa.in. These Terms and Conditions ("Terms") govern your use of our website located at www.shithaa.in and the services we offer. By accessing or using the Site, you agree to be bound by these Terms.
+            Welcome to JJTextiles. These Terms and Conditions ("Terms") govern your use of our website located at www.jjtextiles.com and the services we offer. By accessing or using the Site, you agree to be bound by these Terms.
           </p>
         </div>
 
@@ -28,7 +28,7 @@ export default function TermsPageClient() {
           <ol className={styles.orderedList}>
             <li className={styles.orderedListItem}>
               <span className={styles.strong}>General Information</span><br />
-              This website is operated by S KARTHIKA. Throughout the site, the terms "we", "us" and "our" refer to Shithaa.
+              This website is operated by S KARTHIKA. Throughout the site, the terms "we", "us" and "our" refer to JJTextiles.
             </li>
             <li className={styles.orderedListItem}>
               <span className={styles.strong}>Use of Our Website</span><br />
@@ -55,11 +55,11 @@ export default function TermsPageClient() {
               <span className={styles.strong}>Returns & Refunds</span><br />
               We offer refunds only if the delivered product is damaged or defective.<br />
               Items must be unused and in original packaging.<br />
-              Refunds and exchanges are only applicable for damaged products. Contact us via Instagram direct message (preferred) or email us at <a href="mailto:info.shithaa@gmail.com" className={styles.link}>info.shithaa@gmail.com</a>. Refund requests made after 2 days from the date you receive your order will not be eligible.
+              Refunds and exchanges are only applicable for damaged products. Contact us via Instagram direct message (preferred) or email us at <a href="mailto:info.jjtextiles@gmail.com" className={styles.link}>info.jjtextiles@gmail.com</a>. Refund requests made after 2 days from the date you receive your order will not be eligible.
             </li>
             <li className={styles.orderedListItem}>
               <span className={styles.strong}>Intellectual Property</span><br />
-              All content on this website (images, text, design, logo, etc.) is the property of Shithaa and may not be copied or used without written permission.
+              All content on this website (images, text, design, logo, etc.) is the property of JJTextiles and may not be copied or used without written permission.
             </li>
             <li className={styles.orderedListItem}>
               <span className={styles.strong}>Limitation of Liability</span><br />
@@ -72,8 +72,8 @@ export default function TermsPageClient() {
             <li className={styles.orderedListItem}>
               <span className={styles.strong}>Contact Information</span><br />
               <span className={styles.strong}>Contact Information:</span><br />
-              Email: <a href="mailto:info.shithaa@gmail.com" className={styles.link}>info.shithaa@gmail.com</a><br />
-              Instagram: <a href="https://www.instagram.com/shithaa.in" className={styles.link}>@shithaa.in</a>
+              Email: <a href="mailto:info.jjtextiles@gmail.com" className={styles.link}>info.jjtextiles@gmail.com</a><br />
+              Instagram: <a href="https://www.instagram.com/jjtextiles" className={styles.link}>@jjtextiles</a>
             </li>
           </ol>
         </div>

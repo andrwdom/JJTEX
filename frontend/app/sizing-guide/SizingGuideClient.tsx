@@ -8,35 +8,35 @@ import Link from "next/link"
 
 const sizeCharts = [
   {
-    id: "maternity",
-    title: "Maternity Wear Size Chart",
-    description: "Comprehensive sizing guide for all maternity clothing including dresses, tops, and bottoms",
+    id: "apparel",
+    title: "Apparel Size Chart",
+    description: "Comprehensive sizing guide for apparel including dresses, tops, and bottoms",
     image: "/maternity-sizechart.jpeg",
-    alt: "Maternity wear size chart showing measurements and sizes",
+    alt: "Apparel size chart showing measurements and sizes",
     tips: [
       "Measure around the fullest part of your bust",
       "Measure around your natural waistline",
       "Measure around the fullest part of your hips",
-      "For maternity wear, consider your pre-pregnancy size and add 1-2 sizes"
+      "If you prefer a relaxed fit, consider sizing up"
     ]
   },
   {
-    id: "zipless",
-    title: "Zipless Feeding Loungewear Size Chart",
-    description: "Specialized sizing for comfortable and accessible nursing loungewear",
-    image: "/zipless-feeding-sizechart.jpeg",
-    alt: "Zipless feeding loungewear size chart with nursing-specific measurements",
+    id: "kids",
+    title: "Kids Size Chart",
+    description: "Sizing guidance for kids collections",
+    image: "/maternity-sizechart.jpeg",
+    alt: "Kids size chart with measurements and sizes",
     tips: [
-      "Measure around your bust at the fullest point",
-      "Consider your nursing needs - you may want to size up slightly",
-      "Measure your natural waist and hips",
-      "Loungewear should be comfortable and not restrictive"
+      "Measure chest, waist, and hips",
+      "For growing kids, consider a comfortable fit",
+      "Check height and weight guidelines when available",
+      "Choose breathable fabrics for everyday comfort"
     ]
   }
 ]
 
 export default function SizingGuideClient() {
-  const [activeTab, setActiveTab] = useState("maternity")
+  const [activeTab, setActiveTab] = useState("apparel")
 
   const handleDownload = (imageSrc: string, title: string) => {
     const link = document.createElement('a')
@@ -51,8 +51,8 @@ export default function SizingGuideClient() {
     if (navigator.share) {
       try {
         await navigator.share({
-          title: 'Shithaa Size Guide',
-          text: 'Check out our comprehensive size guide for maternity wear!',
+          title: 'JJTextiles Size Guide',
+          text: 'Check out our size guide for a better fit!',
           url: window.location.href
         })
       } catch (err) {
@@ -115,7 +115,7 @@ export default function SizingGuideClient() {
             transition={{ delay: 0.1 }}
             className="text-xl text-gray-600 max-w-3xl mx-auto"
           >
-            Find your perfect fit with our comprehensive size charts for maternity wear and nursing loungewear
+            Find your perfect fit with our size charts and measurement tips.
           </motion.p>
         </div>
 

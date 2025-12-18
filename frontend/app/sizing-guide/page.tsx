@@ -2,33 +2,25 @@ import { Metadata } from "next"
 import SizingGuideClient from "./SizingGuideClient"
 
 export const metadata: Metadata = {
-  title: "Size Guide - Shithaa Maternity Wear | Find Your Perfect Fit",
-  description: "Find your perfect fit with our comprehensive size guide for maternity wear, mom wear, and zipless feeding loungewear. Get accurate measurements and sizing charts for pregnancy clothing.",
+  title: "Size Guide - JJTextiles | Find Your Perfect Fit",
+  description: "Find your perfect fit with our size guide. Get accurate measurements and sizing charts for a better shopping experience.",
   keywords: [
-    "maternity size guide",
-    "pregnancy clothing sizes", 
-    "maternity wear sizing",
-    "zipless feeding size chart",
-    "mom wear size guide",
-    "feeding dresses sizing",
-    "maternity fashion size chart",
-    "pregnancy clothing measurements",
-    "nursing wear sizing",
-    "maternity maxi size guide",
-    "maternity gown sizing",
-    "feeding wear measurements"
+    "size guide",
+    "size chart",
+    "measurements",
+    "jjtextiles sizing"
   ],
   openGraph: {
-    title: "Size Guide - Shithaa Maternity Wear | Find Your Perfect Fit",
-    description: "Find your perfect fit with our comprehensive size guide for maternity wear, mom wear, and zipless feeding loungewear.",
+    title: "Size Guide - JJTextiles | Find Your Perfect Fit",
+    description: "Find your perfect fit with our size guide and sizing charts.",
     images: ['/logo1.png'],
     type: 'website',
-    url: 'https://shithaa.in/sizing-guide',
-    siteName: 'Shithaa',
+    url: 'https://jjtextiles.com/sizing-guide',
+    siteName: 'JJTextiles',
   },
   twitter: {
-    title: "Size Guide - Shithaa Maternity Wear | Find Your Perfect Fit",
-    description: "Find your perfect fit with our comprehensive size guide for maternity wear, mom wear, and zipless feeding loungewear.",
+    title: "Size Guide - JJTextiles | Find Your Perfect Fit",
+    description: "Find your perfect fit with our size guide and sizing charts.",
     card: 'summary_large_image',
     images: ['/logo1.png'],
   },
