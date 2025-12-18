@@ -1,8 +1,21 @@
 // backend/config.js
 
-// Load environment variables at the very beginning
+// Load environment variables at the very beginning.
+//
+// IMPORTANT (ESM import order):
+// `server.js` imports this module, and ESM evaluates imported modules BEFORE running
+// `server.js` top-level code. So we MUST load the backend `.env` from THIS directory
+// (not from process.cwd()), otherwise production will crash with:
+// "JWT_SECRET is not defined..."
 import dotenv from 'dotenv';
-dotenv.config();
+import { fileURLToPath } from 'url';
+import path from 'path';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
+// Always load `/backend/.env` regardless of where Node was started from.
+dotenv.config({ path: path.join(__dirname, '.env') });
 
 // Debug: Log environment variables (commented out for security)
 // console.log('🔍 DEBUG: Environment variables loaded:', {
