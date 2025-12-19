@@ -17,9 +17,9 @@ module.exports = {
         LOG_DIR: '/var/log/jjtextiles',
         SERVICE_NAME: 'payment-service'
       },
-      error_file: './backend/logs/backend-err.log',
-      out_file: './backend/logs/backend-out.log',
-      log_file: './backend/logs/backend-combined.log',
+      error_file: '/var/www/jjtextiles/JJTEX/backend/logs/backend-err.log',
+      out_file: '/var/www/jjtextiles/JJTEX/backend/logs/backend-out.log',
+      log_file: '/var/www/jjtextiles/JJTEX/backend/logs/backend-combined.log',
       time: true,
       merge_logs: true,
       log_date_format: 'YYYY-MM-DD HH:mm:ss Z'
@@ -38,9 +38,9 @@ module.exports = {
         NODE_ENV: 'production',
         PORT: 3000
       },
-      error_file: './frontend/logs/frontend-err.log',
-      out_file: './frontend/logs/frontend-out.log',
-      log_file: './frontend/logs/frontend-combined.log',
+      error_file: '/var/www/jjtextiles/JJTEX/frontend/logs/frontend-err.log',
+      out_file: '/var/www/jjtextiles/JJTEX/frontend/logs/frontend-out.log',
+      log_file: '/var/www/jjtextiles/JJTEX/frontend/logs/frontend-combined.log',
       time: true
     },
     {
@@ -57,9 +57,9 @@ module.exports = {
         NODE_ENV: 'production',
         PORT: 4173
       },
-      error_file: './admin/logs/admin-err.log',
-      out_file: './admin/logs/admin-out.log',
-      log_file: './admin/logs/admin-combined.log',
+      error_file: '/var/www/jjtextiles/JJTEX/admin/logs/admin-err.log',
+      out_file: '/var/www/jjtextiles/JJTEX/admin/logs/admin-out.log',
+      log_file: '/var/www/jjtextiles/JJTEX/admin/logs/admin-combined.log',
       time: true
     },
     
@@ -76,9 +76,9 @@ module.exports = {
       env: {
         NODE_ENV: 'production'
       },
-      error_file: './backend/logs/stock-cleanup-worker-err.log',
-      out_file: './backend/logs/stock-cleanup-worker-out.log',
-      log_file: './backend/logs/stock-cleanup-worker-combined.log',
+      error_file: '/var/www/jjtextiles/JJTEX/backend/logs/stock-cleanup-worker-err.log',
+      out_file: '/var/www/jjtextiles/JJTEX/backend/logs/stock-cleanup-worker-out.log',
+      log_file: '/var/www/jjtextiles/JJTEX/backend/logs/stock-cleanup-worker-combined.log',
       time: true
     },
     {
@@ -94,9 +94,9 @@ module.exports = {
       env: {
         NODE_ENV: 'production'
       },
-      error_file: './backend/logs/reservation-expiry-worker-err.log',
-      out_file: './backend/logs/reservation-expiry-worker-out.log',
-      log_file: './backend/logs/reservation-expiry-worker-combined.log',
+      error_file: '/var/www/jjtextiles/JJTEX/backend/logs/reservation-expiry-worker-err.log',
+      out_file: '/var/www/jjtextiles/JJTEX/backend/logs/reservation-expiry-worker-out.log',
+      log_file: '/var/www/jjtextiles/JJTEX/backend/logs/reservation-expiry-worker-combined.log',
       time: true
     }
     // REMOVED: jjtextiles-reconcile-payments to avoid conflict with existing jjtextiles-reconciliation-worker
