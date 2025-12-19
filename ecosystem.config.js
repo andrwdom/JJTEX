@@ -3,16 +3,16 @@ module.exports = {
     {
       name: 'jjtextiles-backend',
       script: 'backend/server.js',
-      cwd: '/var/www/jjtextiles-ecom',
+      cwd: '/var/www/jjtextiles/JJTEX',
       instances: 1,
       exec_mode: 'fork',
       autorestart: true,
       watch: false,
       max_memory_restart: '1G',
-      env_file: '/var/www/jjtextiles-ecom/backend/.env',
+      env_file: '/var/www/jjtextiles/JJTEX/backend/.env',
       env: {
         NODE_ENV: 'production',
-        PORT: 4100,
+        PORT: 4000,
         LOG_LEVEL: 'info',
         LOG_DIR: '/var/log/jjtextiles',
         SERVICE_NAME: 'payment-service'
@@ -28,7 +28,7 @@ module.exports = {
       name: 'jjtextiles-frontend',
       script: 'npm',
       args: 'start',
-      cwd: '/var/www/jjtextiles-ecom/frontend',
+      cwd: '/var/www/jjtextiles/JJTEX/frontend',
       instances: 1,
       exec_mode: 'fork',
       autorestart: true,
@@ -36,7 +36,7 @@ module.exports = {
       max_memory_restart: '1G',
       env: {
         NODE_ENV: 'production',
-        PORT: 3001
+        PORT: 3000
       },
       error_file: './frontend/logs/frontend-err.log',
       out_file: './frontend/logs/frontend-out.log',
@@ -47,7 +47,7 @@ module.exports = {
       name: 'jjtextiles-admin',
       script: 'npm',
       args: 'run preview',
-      cwd: '/var/www/jjtextiles-ecom/admin',
+      cwd: '/var/www/jjtextiles/JJTEX/admin',
       instances: 1,
       exec_mode: 'fork',
       autorestart: true,
@@ -55,7 +55,7 @@ module.exports = {
       max_memory_restart: '1G',
       env: {
         NODE_ENV: 'production',
-        PORT: 4174
+        PORT: 4173
       },
       error_file: './admin/logs/admin-err.log',
       out_file: './admin/logs/admin-out.log',
@@ -66,13 +66,13 @@ module.exports = {
     {
       name: 'jjtextiles-stock-cleanup-worker',
       script: 'backend/workers/stockCleanupWorker.js',
-      cwd: '/var/www/jjtextiles-ecom',
+      cwd: '/var/www/jjtextiles/JJTEX',
       instances: 1,
       exec_mode: 'fork',
       autorestart: true,
       watch: false,
       max_memory_restart: '500M',
-      env_file: '/var/www/jjtextiles-ecom/backend/.env',
+      env_file: '/var/www/jjtextiles/JJTEX/backend/.env',
       env: {
         NODE_ENV: 'production'
       },
@@ -84,13 +84,13 @@ module.exports = {
     {
       name: 'jjtextiles-reservation-expiry-worker',
       script: 'backend/workers/reservationExpiryWorker.js',
-      cwd: '/var/www/jjtextiles-ecom',
+      cwd: '/var/www/jjtextiles/JJTEX',
       instances: 1,
       exec_mode: 'fork',
       autorestart: true,
       watch: false,
       max_memory_restart: '500M',
-      env_file: '/var/www/jjtextiles-ecom/backend/.env',
+      env_file: '/var/www/jjtextiles/JJTEX/backend/.env',
       env: {
         NODE_ENV: 'production'
       },
