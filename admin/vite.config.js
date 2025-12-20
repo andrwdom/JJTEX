@@ -8,6 +8,7 @@ export default defineConfig({
   preview: {
     port: 4173,
     host: '0.0.0.0',
-    allowedHosts: ['admin.shithaa.in'],
+    // Allow production admin hostname(s) when running `vite preview`
+    allowedHosts: ['admin.jjtextiles.com', 'admin.shithaa.in'],
   },
 })
