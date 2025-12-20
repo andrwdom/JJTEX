@@ -1,13 +1,11 @@
 "use client";
 import { useState, useEffect } from "react";
-import Navbar from "@/components/navbar";
 import Footer from "@/components/footer";
-import CategorySidebar from "@/components/category-sidebar";
+import SiteHeader from "@/components/site-header";
 import { usePathname } from "next/navigation";
 import { useLoading } from "@/components/loading-context";
 
 export default function LayoutClient({ children }: { children: React.ReactNode }) {
-  const [isCategorySidebarOpen, setIsCategorySidebarOpen] = useState(false);
   const pathname = usePathname();
   const { isLoading } = useLoading();
 
@@ -28,15 +26,7 @@ export default function LayoutClient({ children }: { children: React.ReactNode }
       {/* Show navbar on all pages except checkout */}
       {shouldShowNavbar && (
         <>
-          <Navbar onCategoriesClick={() => setIsCategorySidebarOpen(true)} />
-          <CategorySidebar
-            isOpen={isCategorySidebarOpen}
-            onClose={() => setIsCategorySidebarOpen(false)}
-            onCategorySelect={(slug) => {
-              setIsCategorySidebarOpen(false);
-              window.location.href = `/collections/${slug}`;
-            }}
-          />
+          <SiteHeader />
         </>
       )}
       <main className="flex-1 flex flex-col">{children}</main>

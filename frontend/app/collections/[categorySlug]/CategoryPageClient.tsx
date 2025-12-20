@@ -367,15 +367,33 @@ export default function CategoryPageClient({ categorySlug }: CategoryPageClientP
 
           {/* Main Content */}
           <div className="flex-1 lg:ml-0 w-full">
-            {/* Breadcrumb */}
-            <div className="px-4 sm:px-6 lg:px-8 py-6 w-full">
-              <div className="flex items-center space-x-2 text-sm text-gray-600">
-                <Button variant="ghost" size="sm" className="text-[rgb(71,60,102)] hover:text-[rgb(71,60,102)]/80" onClick={() => (window.location.href = "/")}>
-                  <Home className="h-4 w-4 mr-1" />
+            {/* Minimal breadcrumb + title (Home-style typography) */}
+            <div className="px-4 sm:px-6 lg:px-8 pt-5 pb-4 w-full">
+              <div className="flex items-center gap-2 text-[12px] text-gray-500">
+                <button
+                  type="button"
+                  onClick={() => (window.location.href = "/")}
+                  className="hover:text-gray-700 transition-colors"
+                >
                   Home
-                </Button>
-                <ChevronRight className="h-4 w-4" />
-                <span className="text-gray-900 font-medium">{categoryName}</span>
+                </button>
+                <ChevronRight className="h-4 w-4 opacity-70" />
+                <span className="text-gray-700 font-medium">{categoryName}</span>
+              </div>
+
+              <div className="mt-3 flex items-end justify-between gap-4">
+                <div className="min-w-0">
+                  <h1 className="text-[20px] sm:text-[24px] font-extrabold tracking-tight text-[#1f1f1f] truncate">
+                    {categoryName}
+                  </h1>
+                  <p className="mt-1 text-[12px] sm:text-[13px] text-gray-600">
+                    Curated pieces for everyday comfort and elegance.
+                  </p>
+                </div>
+
+                <div className="flex-shrink-0 text-[12px] text-gray-500">
+                  {filteredProducts.length} of {products.length}
+                </div>
               </div>
             </div>
 
@@ -386,17 +404,8 @@ export default function CategoryPageClient({ categorySlug }: CategoryPageClientP
               </div>
             )}
 
-            {/* Page Header with Search and Filters */}
+            {/* Search and Filters */}
             <div className="px-4 sm:px-6 lg:px-8 pb-6 lg:pb-8 w-full">
-              <div className="mb-6 lg:mb-8">
-                <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-gray-900 mb-3 lg:mb-4 font-serif">
-                  {categoryName}
-                </h1>
-                <p className="text-base lg:text-lg text-gray-600 max-w-3xl">
-                  Discover our carefully curated collection—quality you can feel, styles you’ll love.
-                </p>
-              </div>
-              {/* Mobile category navigation is handled via main navigation */}
 
               {/* Search and Filter Bar */}
               <div className="flex flex-col gap-2 mb-6 lg:mb-8 w-full max-w-full px-0 sm:px-0">
