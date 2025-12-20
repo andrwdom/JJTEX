@@ -2,6 +2,7 @@ import fs from "fs";
 import path from "path";
 import imageOptimizer from '../utils/imageOptimizer.js';
 import productModel from '../models/productModel.js';
+import { deleteProductImagesFromDisk } from '../utils/productImageCleanup.js';
 import Category from '../models/Category.js';
 import redisService from '../services/redisService.js';
 import { config } from '../config.js';
@@ -353,11 +354,16 @@ export const deleteProduct = async (req, res) => {
     try {
         const productId = req.params.id;
         
-        // Delete product
+        // Delete product (DB) first, then cleanup disk based on saved image refs
         const product = await productModel.findByIdAndDelete(productId);
         
         if (!product) {
             return res.status(404).json({ error: 'Product not found' });
+        }
+
+        const cleanup = deleteProductImagesFromDisk(product.images);
+        if (cleanup.errors.length) {
+            console.warn('⚠️ Product image cleanup errors (cached controller):', cleanup);
         }
         
         // Invalidate specific product cache

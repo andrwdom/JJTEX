@@ -3,6 +3,7 @@ import path from "path";
 import imageOptimizer from '../utils/imageOptimizer.js';
 import productModel from '../models/productModel.js';
 import Category from '../models/Category.js';
+import { deleteProductImagesFromDisk } from '../utils/productImageCleanup.js';
 
 
 // GET /api/products/:id or /api/products/custom/:customId - RESTful single product fetch
@@ -569,24 +570,10 @@ export const removeProduct = async (req, res) => {
         if (!product) {
             return res.json({ success: false, message: "Product not found" });
         }
-        // Delete associated image files from local storage
-        if (Array.isArray(product.images)) {
-            for (const imageUrl of product.images) {
-                // Only handle local VPS URLs
-                const match = imageUrl.match(/\/images\/products\/(.+)$/);
-                if (match && match[1]) {
-                    const filename = match[1];
-                    const baseUploads = process.env.UPLOAD_PATH || './uploads';
-                    const filePath = path.join(path.isAbsolute(baseUploads) ? baseUploads : path.resolve(process.cwd(), baseUploads), 'products', filename);
-                    try {
-                        if (fs.existsSync(filePath)) {
-                            fs.unlinkSync(filePath);
-                        }
-                    } catch (err) {
-                        console.error(`Failed to delete image file: ${filePath}`, err);
-                    }
-                }
-            }
+        // Delete associated image files from VPS disk (all variants)
+        const cleanup = deleteProductImagesFromDisk(product.images);
+        if (cleanup.errors.length) {
+            console.warn('⚠️ Product image cleanup errors:', cleanup);
         }
         await productModel.findByIdAndDelete(id);
         res.json({ success: true, message: "Product Removed Successfully" })
