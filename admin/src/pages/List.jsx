@@ -291,11 +291,6 @@ const ProductTableRow = ({ product, onEdit, onDelete, isDragging, onDragStart, o
               <div className="text-sm text-gray-900 font-medium">
                 {product.category}
               </div>
-              {product.sleeveType && (
-                <div className="text-xs text-gray-500 mt-1">
-                  {product.sleeveType}
-                </div>
-              )}
             </div>
             <div className="text-right">
               <div className="text-sm font-semibold text-gray-900">
@@ -439,9 +434,6 @@ const MobileProductCard = ({ product, onEdit, onDelete, onMoveTop, onMoveBottom,
             <div>
               <h4 className="text-xs font-semibold text-gray-700 uppercase tracking-wide mb-2">Category</h4>
               <div className="text-sm text-gray-900">{product.category}</div>
-              {product.sleeveType && (
-                <div className="text-xs text-gray-500 mt-1">{product.sleeveType}</div>
-              )}
             </div>
 
             {/* Stock by Size */}

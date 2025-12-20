@@ -27,16 +27,13 @@ const Add = ({token}) => {
    const [description, setDescription] = useState("");
    const [price, setPrice] = useState("");
    const [category, setCategory] = useState("");
-   const [selectedCategory, setSelectedCategory] = useState(null); // { name, slug, path, isLeaf, breadcrumbs }
-   const [bestseller, setBestseller] = useState(false);
-   const [sizes, setSizes] = useState([]);
-   const [sleeveType, setSleeveType] = useState("");
+  const [selectedCategory, setSelectedCategory] = useState(null); // { name, slug, path, isLeaf, breadcrumbs }
+  const [bestseller, setBestseller] = useState(false);
+  const [sizes, setSizes] = useState([]);
 
-   // Deprecated: simple categories list (kept for compatibility if needed)
-   const [categories, setCategories] = useState([]);
-   const [customId, setCustomId] = useState("");
-
-   const SLEEVE_TYPE_OPTIONS = ["Puff Sleeve", "Normal Sleeve"];
+  // Deprecated: simple categories list (kept for compatibility if needed)
+  const [categories, setCategories] = useState([]);
+  const [customId, setCustomId] = useState("");
 
    const [loading, setLoading] = useState(false)
    const [uploadProgress, setUploadProgress] = useState(0)
@@ -243,11 +240,6 @@ const Add = ({token}) => {
       image3 && formData.append("image3",image3)
       image4 && formData.append("image4",image4)
       
-      // Add sleeve type if provided
-      if (sleeveType && sleeveType.trim()) {
-        formData.append("sleeveType", sleeveType);
-      }
-      
       // Debug logging
       console.log('Form data being sent:');
       console.log('customId:', customId);
@@ -259,7 +251,6 @@ const Add = ({token}) => {
       console.log('bestseller:', bestseller);
       console.log('sizes:', sizesWithStock);
       console.log('availableSizes:', sizesWithStock.map(s => s.size));
-      console.log('sleeveType:', sleeveType);
       console.log('Images:', { image1, image2, image3, image4 });
       
       // Log FormData contents
@@ -298,7 +289,6 @@ const Add = ({token}) => {
         setSizes([])
         setBestseller(false)
         setCustomId("");
-        setSleeveType(""); // Reset sleeve type
       } else {
         toast.error(response.data.message || "Failed to add product.")
       }
@@ -412,21 +402,6 @@ const Add = ({token}) => {
             label="Category (select parent → subcategory)"
           />
         </div>
-
-          {/* Sleeve Type (Optional) */}
-          <div className='w-full'>
-            <p className='mb-2'>Sleeve Type (optional)</p>
-            <select
-              onChange={(e) => setSleeveType(e.target.value)}
-              value={sleeveType}
-              className='w-full px-3 py-2'
-            >
-              <option value="">Select Sleeve Type</option>
-              {SLEEVE_TYPE_OPTIONS.map(option => (
-                <option key={option} value={option}>{option}</option>
-              ))}
-            </select>
-          </div>
 
           <div>
             <p className='mb-2'>Product Price</p>

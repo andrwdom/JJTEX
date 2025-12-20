@@ -19,7 +19,6 @@ const EditProduct = ({ product, token, onClose, onUpdate }) => {
   const [loading, setLoading] = useState(false)
   const [stock, setStock] = useState(product.stock || 0)
   const [customId, setCustomId] = useState(product.customId || "");
-  const [sleeveType, setSleeveType] = useState(product.sleeveType || "");
 
   // Debug token on component mount
   useEffect(() => {
@@ -27,10 +26,6 @@ const EditProduct = ({ product, token, onClose, onUpdate }) => {
     console.log('Token from localStorage:', localStorage.getItem('token'));
     console.log('Token comparison:', token === localStorage.getItem('token'));
   }, [token]);
-
-  // Sleeve type is optional (legacy category-specific requirement removed)
-
-  const SLEEVE_TYPE_OPTIONS = ["Puff Sleeve", "Normal Sleeve"];
 
   const getSelectedName = () => selectedCategory?.name || category || '';
   const getSelectedSlug = () => selectedCategory?.slug || product.categorySlug || '';
@@ -105,11 +100,6 @@ const EditProduct = ({ product, token, onClose, onUpdate }) => {
       formData.append("sizes", JSON.stringify(sizes))
       formData.append("stock", stock)
       formData.append("customId", customId)
-      
-      // Add sleeve type if provided
-      if (sleeveType) {
-        formData.append("sleeveType", sleeveType);
-      }
 
       if (image1) formData.append("image1", image1)
       if (image2) formData.append("image2", image2)
@@ -313,21 +303,6 @@ const EditProduct = ({ product, token, onClose, onUpdate }) => {
                   label="Category"
                 />
               </div>
-
-        {/* Sleeve Type (Optional) */}
-        <div>
-          <p className='mb-2'>Sleeve Type (optional)</p>
-          <select
-            value={sleeveType}
-            onChange={e => setSleeveType(e.target.value)}
-            className='w-full px-3 py-2 border rounded bg-white text-gray-900'
-          >
-            <option value="">Select Sleeve Type</option>
-            {SLEEVE_TYPE_OPTIONS.map(option => (
-              <option key={option} value={option}>{option}</option>
-            ))}
-          </select>
-        </div>
 
         <div>
           <p className='mb-2'>Product Price</p>

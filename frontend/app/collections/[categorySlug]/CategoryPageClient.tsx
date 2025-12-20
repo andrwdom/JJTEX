@@ -34,7 +34,6 @@ interface Product {
   sizes: any[] // Can be string[] or { size: string, stock: number }[]
   bestseller: boolean
   isBestSeller: boolean
-  sleeveType?: string
   dateAdded?: string
 }
 
@@ -54,8 +53,6 @@ export default function CategoryPageClient({ categorySlug }: CategoryPageClientP
   const [sizeSelectionProduct, setSizeSelectionProduct] = useState<Product | null>(null)
   const [isSizeSelectionOpen, setIsSizeSelectionOpen] = useState(false)
   const [error, setError] = useState<string | null>(null)
-  const [sleeveTypeFilter, setSleeveTypeFilter] = useState("all")
-  const [availableSleeveTypes, setAvailableSleeveTypes] = useState<string[]>([])
   const [selectedSize, setSelectedSize] = useState<string>("")
   const { setBuyNowItem } = useBuyNow()
   const { addToCart, openCartSidebar } = useCart()
@@ -139,7 +136,6 @@ export default function CategoryPageClient({ categorySlug }: CategoryPageClientP
   // Clear all filters
   const clearAllFilters = () => {
     setSelectedSize("")
-    setSleeveTypeFilter("all")
     setSearchQuery("")
     setSortBy("featured")
     updateURL("")
@@ -165,10 +161,6 @@ export default function CategoryPageClient({ categorySlug }: CategoryPageClientP
           params.categorySlug = categorySlug
           params.sortBy = 'displayOrder'
           params.sortOrder = 'asc'
-        }
-        // Add sleeve type filter to API call if selected
-        if (sleeveTypeFilter && sleeveTypeFilter !== 'all') {
-          params.sleeveType = sleeveTypeFilter
         }
         // Add size filter to API call if selected
         if (selectedSize) {
@@ -206,20 +198,9 @@ export default function CategoryPageClient({ categorySlug }: CategoryPageClientP
           sizes: p.sizes || [],
           bestseller: p.bestseller,
           isBestSeller: p.isBestSeller,
-          sleeveType: p.sleeveType,
           dateAdded: p.createdAt,
         }));
         setProducts(mappedProducts);
-
-        // Derive sleeve types from products in this category
-        const sleeveTypes = Array.from(
-          new Set(
-            (mappedProducts || [])
-              .map((p: any) => p?.sleeveType)
-              .filter((t: any) => typeof t === 'string' && t.trim().length > 0)
-          )
-        ) as string[];
-        setAvailableSleeveTypes(sleeveTypes);
       } catch (err) {
         if (process.env.NODE_ENV === 'development') {
           console.error('Error fetching products:', err);
@@ -231,7 +212,7 @@ export default function CategoryPageClient({ categorySlug }: CategoryPageClientP
     }
 
     getProducts();
-  }, [categorySlug, sleeveTypeFilter, selectedSize]);
+  }, [categorySlug, selectedSize]);
 
   // Filter and sort products
   useEffect(() => {
@@ -244,11 +225,6 @@ export default function CategoryPageClient({ categorySlug }: CategoryPageClientP
           product.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
           product.description.toLowerCase().includes(searchQuery.toLowerCase()),
       )
-    }
-
-    // Sleeve type filter
-    if (sleeveTypeFilter && sleeveTypeFilter !== 'all') {
-      filtered = filtered.filter(product => product.sleeveType === sleeveTypeFilter)
     }
 
     // Sort products
@@ -267,7 +243,7 @@ export default function CategoryPageClient({ categorySlug }: CategoryPageClientP
     }
 
     setFilteredProducts(filtered)
-  }, [products, searchQuery, sortBy, sleeveTypeFilter])
+  }, [products, searchQuery, sortBy])
 
   const handleProductClick = async (productId: string, productCategorySlug?: string) => {
     // Use new URL structure: /[category-name]/product/[product-id]
@@ -365,7 +341,7 @@ export default function CategoryPageClient({ categorySlug }: CategoryPageClientP
   }
 
   // Check if any filters are active
-  const hasActiveFilters = selectedSize || sleeveTypeFilter !== 'all' || searchQuery
+  const hasActiveFilters = selectedSize || searchQuery
 
   return (
     <ErrorBoundary>
@@ -440,35 +416,6 @@ export default function CategoryPageClient({ categorySlug }: CategoryPageClientP
                       />
                     </div>
                   </div>
-                  {/* Sleeve Type Filter (only if products in this category have sleeveType) */}
-                  {availableSleeveTypes.length > 0 && (
-                    <div className="flex-shrink-0 hidden sm:block">
-                      <Select value={sleeveTypeFilter} onValueChange={setSleeveTypeFilter}>
-                        <SelectTrigger className="w-48 h-12 border-2 border-gray-200 focus:border-[rgb(71,60,102)] rounded-lg">
-                          <SelectValue placeholder="Filter by Sleeve Type" />
-                        </SelectTrigger>
-                        <SelectContent 
-                          position="popper" 
-                          side="bottom" 
-                          align="start" 
-                          className="w-[var(--radix-select-trigger-width)] z-[9999]"
-                          sideOffset={4}
-                          alignOffset={0}
-                          avoidCollisions={false}
-                          collisionBoundary={undefined}
-                          sticky="always"
-                          onCloseAutoFocus={(e: any) => e.preventDefault()}
-                        >
-                          <SelectItem value="all">All Sleeve Types</SelectItem>
-                          {availableSleeveTypes.map((sleeveType) => (
-                            <SelectItem key={sleeveType} value={sleeveType}>
-                              {sleeveType}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                    </div>
-                  )}
 
                   {/* Sort Dropdown: Icon only on mobile, full on sm+ */}
                   <div className="flex-shrink-0">
@@ -523,37 +470,6 @@ export default function CategoryPageClient({ categorySlug }: CategoryPageClientP
                   </div>
                 </div>
 
-                {/* Sleeve Type Filter - Mobile version (full width) */}
-                {availableSleeveTypes.length > 0 && (
-                  <div className="flex w-full gap-2 mt-2 sm:hidden">
-                    <div className="flex-1">
-                      <Select value={sleeveTypeFilter} onValueChange={setSleeveTypeFilter}>
-                        <SelectTrigger className="h-12 border-2 border-gray-200 focus:border-[rgb(71,60,102)] rounded-lg">
-                          <SelectValue placeholder="Filter by Sleeve Type" />
-                        </SelectTrigger>
-                        <SelectContent 
-                          position="popper" 
-                          side="bottom" 
-                          align="start" 
-                          className="w-[var(--radix-select-trigger-width)] z-[9999]"
-                          sideOffset={4}
-                          alignOffset={0}
-                          avoidCollisions={false}
-                          collisionBoundary={undefined}
-                          sticky="always"
-                          onCloseAutoFocus={(e: any) => e.preventDefault()}
-                        >
-                          <SelectItem value="all">All Sleeve Types</SelectItem>
-                          {availableSleeveTypes.map((sleeveType) => (
-                            <SelectItem key={sleeveType} value={sleeveType}>
-                              {sleeveType}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                    </div>
-                  </div>
-                )}
               </div>
 
               {/* Filter and Sort Section */}
@@ -568,30 +484,17 @@ export default function CategoryPageClient({ categorySlug }: CategoryPageClientP
                 </div>
 
                 {/* Applied Filters */}
-                {(selectedSize || sleeveTypeFilter !== 'all') && (
+                {selectedSize && (
                   <div className="flex items-center gap-2 mb-4 flex-wrap">
-                    {selectedSize && (
-                      <div className="flex items-center gap-2 bg-gray-100 px-3 py-1 rounded-full text-sm">
-                        <span className="text-gray-700">Size: {selectedSize}</span>
-                        <button
-                          onClick={() => handleSizeFilter(selectedSize)}
-                          className="text-gray-500 hover:text-gray-700"
-                        >
-                          <X className="h-4 w-4" />
-                        </button>
-                      </div>
-                    )}
-                    {sleeveTypeFilter !== 'all' && (
-                      <div className="flex items-center gap-2 bg-gray-100 px-3 py-1 rounded-full text-sm">
-                        <span className="text-gray-700">Sleeve: {sleeveTypeFilter}</span>
-                        <button
-                          onClick={() => setSleeveTypeFilter('all')}
-                          className="text-gray-500 hover:text-gray-700"
-                        >
-                          <X className="h-4 w-4" />
-                        </button>
-                      </div>
-                    )}
+                    <div className="flex items-center gap-2 bg-gray-100 px-3 py-1 rounded-full text-sm">
+                      <span className="text-gray-700">Size: {selectedSize}</span>
+                      <button
+                        onClick={() => handleSizeFilter(selectedSize)}
+                        className="text-gray-500 hover:text-gray-700"
+                      >
+                        <X className="h-4 w-4" />
+                      </button>
+                    </div>
                     {hasActiveFilters && (
                       <button
                         onClick={clearAllFilters}
@@ -690,10 +593,6 @@ export default function CategoryPageClient({ categorySlug }: CategoryPageClientP
                           ₹ {product.price.toLocaleString()}.00 INR
                         </div>
 
-                        {/* Sleeve Type */}
-                        {product.sleeveType && (
-                          <p className="text-xs text-gray-500 mt-1">{product.sleeveType}</p>
-                        )}
 
                         {/* Simple Add to Cart Button */}
                         <Button

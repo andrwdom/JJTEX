@@ -111,10 +111,7 @@ export const getAllProducts = async (req, res) => {
             };
         }
         
-        // Sleeve type filtering
-        if (sleeveType) {
-            filter.sleeveType = sleeveType;
-        }
+        // Sleeve type filtering removed (deprecated)
         
         // Debug logging removed for production performance
         
@@ -451,22 +448,11 @@ export const addProduct = async (req, res) => {
         console.log(`   Average compression: ${stats.avgCompressionRatio}%`);
         console.log(`   Total processing time: ${stats.totalProcessingTime}ms`);
 
-        // Build simple image URLs for VPS using optimized filenames
+        // Build image URLs using the actual saved filename.
+        // Important: optimization can fail, in which case the file may remain .jpg/.png.
+        // If we always force ".webp" URLs, images will 404 or break.
         const baseUrl = process.env.BASE_URL || 'https://jjtextiles.com';
-        let imagesUrl;
-        
-        try {
-            imagesUrl = optimizedFiles.map(img => {
-                const baseFilename = path.parse(img.filename).name;
-                return imageOptimizer.generateResponsiveUrls(baseFilename, baseUrl);
-            });
-        } catch (error) {
-            console.error('❌ Error generating image URLs:', error);
-            // Fallback to simple URLs
-            imagesUrl = optimizedFiles.map(img => {
-                return `${baseUrl}/images/products/${img.filename}`;
-            });
-        }
+        const imagesUrl = optimizedFiles.map(img => `${baseUrl}/images/products/${img.filename}`);
 
         console.log('📊 Image URLs generated:', imagesUrl);
 
@@ -491,14 +477,7 @@ export const addProduct = async (req, res) => {
         // Ensure both bestseller and isBestSeller are set for compatibility
         const bestsellerValue = (bestseller === "true" || isBestSeller === "true") ? true : false;
 
-        // Validate sleeveType if provided (maternity/category-specific gating removed)
-        const validSleeveTypes = ["Puff Sleeve", "Normal Sleeve"];
-        if (sleeveType && !validSleeveTypes.includes(sleeveType)) {
-            return res.status(400).json({
-                success: false,
-                message: "Invalid sleeve type. Must be 'Puff Sleeve' or 'Normal Sleeve'"
-            });
-        }
+        // Sleeve type is deprecated - ignore if provided
 
         const productData = {
             customId,
@@ -519,8 +498,7 @@ export const addProduct = async (req, res) => {
             images: imagesUrl,
             date: Date.now(),
             stock: stock !== undefined ? Number(stock) : 0,
-            // Include sleeveType only if provided
-            ...(sleeveType ? { sleeveType } : {})
+            // Sleeve type is deprecated - not included
         }
 
         // After parsing sizes, always sync main stock field
@@ -663,14 +641,7 @@ export const updateProduct = async (req, res) => {
             product.customId = customId;
         }
 
-        // Validate sleeveType if provided (maternity/category-specific gating removed)
-        const validSleeveTypes = ["Puff Sleeve", "Normal Sleeve"];
-        if (sleeveType !== undefined && sleeveType !== null && sleeveType !== "" && !validSleeveTypes.includes(sleeveType)) {
-            return res.status(400).json({
-                success: false,
-                message: "Invalid sleeve type. Must be 'Puff Sleeve' or 'Normal Sleeve'"
-            });
-        }
+        // Sleeve type is deprecated - ignore if provided
 
         // Parse features if provided
         let parsedFeatures = product.features || [];
@@ -732,13 +703,9 @@ export const updateProduct = async (req, res) => {
                     console.log(`   Average compression: ${stats.avgCompressionRatio}%`);
                     console.log(`   Total processing time: ${stats.totalProcessingTime}ms`);
 
-                    // Build responsive image URLs using optimized filenames
+                    // Build image URLs using the actual saved filename (no forced .webp)
                     const baseUrl = process.env.BASE_URL || 'https://jjtextiles.com';
-                    const uploadedImages = optimizedFiles.map(img => {
-                        const baseFilename = path.parse(img.filename).name;
-                        return imageOptimizer.generateResponsiveUrls(baseFilename, baseUrl);
-                    });
-                    imagesUrl = uploadedImages;
+                    imagesUrl = optimizedFiles.map(img => `${baseUrl}/images/products/${img.filename}`);
                     
                     // Store optimization stats for response
                     imageOptimizationStats = {
