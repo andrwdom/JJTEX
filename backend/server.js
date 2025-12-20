@@ -368,12 +368,13 @@ app.use((req, res, next) => {
 });
 
 // Static file serving with caching headers for better performance
-app.use('/uploads', express.static('uploads', {
+// Serve files from the same base directory used by multer/product uploads.
+const uploadsBase = process.env.UPLOAD_PATH || 'uploads';
+app.use('/uploads', express.static(uploadsBase, {
     maxAge: '1d', // Cache for 1 day
     etag: true,
     lastModified: true
-}))
-const uploadsBase = process.env.UPLOAD_PATH || 'uploads';
+}));
 app.use('/images', express.static(uploadsBase, {
     maxAge: '1d', // Cache for 1 day
     etag: true,

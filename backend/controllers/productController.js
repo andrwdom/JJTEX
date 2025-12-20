@@ -452,7 +452,7 @@ export const addProduct = async (req, res) => {
         console.log(`   Total processing time: ${stats.totalProcessingTime}ms`);
 
         // Build simple image URLs for VPS using optimized filenames
-        const baseUrl = process.env.BASE_URL || 'https://jjtextiles.in';
+        const baseUrl = process.env.BASE_URL || 'https://jjtextiles.com';
         let imagesUrl;
         
         try {
@@ -733,7 +733,7 @@ export const updateProduct = async (req, res) => {
                     console.log(`   Total processing time: ${stats.totalProcessingTime}ms`);
 
                     // Build responsive image URLs using optimized filenames
-                    const baseUrl = process.env.BASE_URL || 'https://jjtextiles.in';
+                    const baseUrl = process.env.BASE_URL || 'https://jjtextiles.com';
                     const uploadedImages = optimizedFiles.map(img => {
                         const baseFilename = path.parse(img.filename).name;
                         return imageOptimizer.generateResponsiveUrls(baseFilename, baseUrl);
