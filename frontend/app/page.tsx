@@ -1,9 +1,11 @@
 "use client"
 
-import React, { useState, useEffect } from "react"
+import React, { useEffect, useMemo, useRef, useState } from "react"
 import { fetchCategoryTree, getLeafCategories, CategoryTree } from "@/lib/category-utils"
 import { useRouter } from "next/navigation"
 import SiteHeader from "@/components/site-header"
+import { fetchProducts } from "@/lib/api-utils"
+import { getProductUrl } from "@/lib/product-url-utils"
 
 type Highlight = {
 	title: string
@@ -23,21 +25,57 @@ const fallbackHighlights: Highlight[] = [
 	{ title: "Jewellery", image: "/p_img8.png", slug: "jewellery" },
 ]
 
-const products = Array.from({ length: 6 }).map((_, i) => {
-	const productImages = ["/p_img1.png", "/p_img2.png", "/p_img3.png", "/p_img4.png", "/p_img5.png", "/p_img6.png"]
-	return {
-		id: i + 1,
-		title: ["Floral Kurta", "Classic Saree", "Girls Dress", "Boys Tee", "Baby Romper", "Teens Jeans"][i % 6],
-		price: ["₹799", "₹1,499", "₹699", "₹399", "₹499", "₹999"][i % 6],
-		originalPrice: ["₹1,299", "₹2,499", "₹1,199", "₹699", "₹899", "₹1,799"][i % 6],
-		image: productImages[i % productImages.length],
+type HomeProduct = {
+	id: string
+	_id?: string
+	customId?: string
+	name: string
+	price: number
+	originalPrice?: number
+	images: string[]
+	category: string
+	categorySlug?: string
+}
+
+function useRevealOnScroll() {
+	const refMap = useRef(new Map<string, HTMLElement>())
+	const [visible, setVisible] = useState<Record<string, boolean>>({})
+
+	useEffect(() => {
+		if (typeof IntersectionObserver === "undefined") return
+		const obs = new IntersectionObserver(
+			(entries) => {
+				entries.forEach((e) => {
+					if (!e.isIntersecting) return
+					const id = (e.target as HTMLElement).dataset.revealId
+					if (!id) return
+					setVisible((v) => ({ ...v, [id]: true }))
+					obs.unobserve(e.target)
+				})
+			},
+			{ threshold: 0.15 },
+		)
+
+		refMap.current.forEach((el) => obs.observe(el))
+		return () => obs.disconnect()
+	}, [])
+
+	const register = (id: string) => (el: HTMLElement | null) => {
+		if (!el) return
+		el.dataset.revealId = id
+		refMap.current.set(id, el)
 	}
-})
+
+	return { register, visible }
+}
 
 export default function Home() {
 	const [highlights, setHighlights] = useState<Highlight[]>(fallbackHighlights)
 	const [categoriesLoading, setCategoriesLoading] = useState(true)
+	const [homeProducts, setHomeProducts] = useState<HomeProduct[]>([])
+	const [productsLoading, setProductsLoading] = useState(true)
 	const router = useRouter()
+	const { register, visible } = useRevealOnScroll()
 
 	// Fetch categories and create highlights
 	useEffect(() => {
@@ -70,6 +108,47 @@ export default function Home() {
 		loadCategories()
 	}, [])
 
+	// Fetch homepage products (latest / curated)
+	useEffect(() => {
+		async function loadProducts() {
+			setProductsLoading(true)
+			try {
+				const res = await fetchProducts({ limit: "8", sortBy: "createdAt", sortOrder: "desc" })
+				const data = await res.json()
+				const raw = Array.isArray(data) ? data : (data?.products || data?.data?.products || data?.data || [])
+
+				const mapped: HomeProduct[] = (raw || []).slice(0, 8).map((p: any) => ({
+					id: String(p.customId || p._id),
+					_id: String(p._id || ""),
+					customId: p.customId ? String(p.customId) : undefined,
+					name: p.name || "JJTextiles Pick",
+					price: Number(p.price || 0),
+					originalPrice: p.originalPrice != null ? Number(p.originalPrice) : undefined,
+					images: Array.isArray(p.images) && p.images.length ? p.images : [p.image || "/placeholder.svg"],
+					category: p.category || "featured",
+					categorySlug: p.categorySlug,
+				}))
+
+				setHomeProducts(mapped)
+			} catch (e) {
+				console.error("Failed to load homepage products:", e)
+				setHomeProducts([])
+			} finally {
+				setProductsLoading(false)
+			}
+		}
+		loadProducts()
+	}, [])
+
+	const seasonalSubtitle = useMemo(() => {
+		const month = new Date().getMonth() // 0-11
+		if (month === 11 || month === 0) return "A symphony of textures for the modern winter—soft layers, quiet glow, effortless elegance."
+		if (month >= 1 && month <= 2) return "Fresh silhouettes for late-winter light—clean lines, gentle color, and breathable comfort."
+		if (month >= 3 && month <= 5) return "Spring’s first flourish—airy fabrics, romantic prints, and everyday polish."
+		if (month >= 6 && month <= 8) return "Summer ease, elevated—light drape, sun-ready color, and movement that feels free."
+		return "Transitional pieces with editorial poise—made to carry you from day to evening with ease."
+	}, [])
+
 	const handleHighlightClick = (highlight: Highlight) => {
 		if (highlight.slug) {
 			// Navigate to category page using slug
@@ -86,21 +165,21 @@ export default function Home() {
 
 	return (
 		<div className="min-h-screen bg-white font-sans text-gray-900">
-      <SiteHeader />
+      <SiteHeader seamless sticky glassOnScroll />
 
 			{/* Category rail */}
-			<section className="mt-4 px-3">
+			<section className="bg-[#fce4ec] pt-3 pb-4">
 				<div
-					className="no-scrollbar flex gap-3 overflow-x-auto py-1"
+					className="no-scrollbar flex gap-5 overflow-x-auto px-4 py-2"
 					style={{ WebkitOverflowScrolling: "touch" }}
 				>
 					{highlights.map((item) => (
 						<button
 							key={item.title}
 							onClick={() => handleHighlightClick(item)}
-							className="flex w-[78px] flex-col items-center shrink-0 cursor-pointer hover:opacity-80 transition-opacity"
+							className="group flex w-[84px] flex-col items-center shrink-0 cursor-pointer transition-transform duration-300 ease-in-out"
 						>
-							<div className="h-16 w-16 rounded-full bg-white shadow-sm ring-1 ring-gray-200 overflow-hidden">
+							<div className="h-16 w-16 rounded-full bg-white ring-1 ring-pink-200/80 shadow-[0_0_0_3px_rgba(233,30,99,0.06)] overflow-hidden transition-transform duration-300 ease-in-out group-hover:scale-[1.05]">
 								<img
 									src={item.image}
 									alt={item.title}
@@ -108,7 +187,7 @@ export default function Home() {
 									loading="lazy"
 								/>
 							</div>
-							<p className="mt-2 text-center text-[11px] leading-tight text-gray-700">
+							<p className="mt-2 text-center text-[11px] leading-tight text-gray-700 group-hover:text-gray-900 transition-colors duration-300">
 								{item.title}
 							</p>
 						</button>
@@ -117,20 +196,37 @@ export default function Home() {
 			</section>
 
 			{/* Hero banner */}
-			<section className="mt-4 px-4">
-				<div className="relative rounded-lg overflow-hidden">
+			<section className="bg-gradient-to-b from-[#fce4ec] to-white px-4 pb-6">
+				<div className="relative overflow-hidden rounded-2xl">
+					{/* Atmospheric blend background */}
+					<div className="absolute inset-0 bg-gradient-to-b from-[#fce4ec] via-[#fce4ec] to-black/10" />
+
 					<img
 						src="/hero_img.png"
-						alt="Big Winter Bonanza"
-						className="h-64 sm:h-72 w-full object-cover"
+						alt="Winter editorial"
+						className="h-72 sm:h-[340px] w-full object-cover"
+						style={{
+							WebkitMaskImage: "linear-gradient(to bottom, rgba(0,0,0,0.98), rgba(0,0,0,0.92) 55%, rgba(0,0,0,0.55), rgba(0,0,0,0.2))",
+							maskImage: "linear-gradient(to bottom, rgba(0,0,0,0.98), rgba(0,0,0,0.92) 55%, rgba(0,0,0,0.55), rgba(0,0,0,0.2))",
+						}}
+						loading="eager"
 					/>
-					<div className="absolute inset-0 bg-black/30" />
-					<div className="absolute left-4 top-4">
-						<p className="text-[10px] uppercase tracking-wider text-white/90">
+
+					{/* Editorial overlay */}
+					<div className="absolute inset-0 bg-gradient-to-t from-black/35 via-black/10 to-transparent" />
+
+					<div className="absolute left-5 top-6">
+						<p className="text-[11px] uppercase tracking-[0.22em] text-white/90 font-medium">
 							Big Winter Bonanza
 						</p>
-						<h3 className="mt-1 text-xl font-extrabold text-white">40–80% OFF</h3>
-						<button className="mt-2 rounded-full bg-[#E91E63] px-3 py-1.5 text-xs font-semibold text-white">
+						<h3 className="mt-2 text-2xl sm:text-3xl font-semibold text-white font-serif tracking-[0.06em]">
+							40–80% OFF
+						</h3>
+						<button
+							type="button"
+							onClick={() => router.push("/collections/dresses-jumpsuits")}
+							className="mt-4 inline-flex items-center justify-center rounded-full bg-[#E91E63] px-5 py-2 text-sm font-semibold text-white transition-all duration-300 ease-in-out hover:shadow-[0_0_24px_rgba(233,30,99,0.35)] hover:-translate-y-0.5"
+						>
 							Shop Now
 						</button>
 					</div>
@@ -138,50 +234,82 @@ export default function Home() {
 			</section>
 
 			{/* Latest Collections */}
-			<section className="mt-12 sm:mt-16 px-6">
+			<section className="mt-10 sm:mt-14 px-6">
 				<div className="flex items-center">
-					<div className="h-px flex-1 bg-gray-200" />
-					<h2 className="mx-3 text-center text-[18px] font-extrabold tracking-wide text-[#E91E63]">
+					<div className="h-px flex-1 bg-black/10" />
+					<h2 className="mx-3 text-center text-[14px] sm:text-[15px] font-bold tracking-[0.28em] text-gray-900">
 						LATEST COLLECTIONS
 					</h2>
-					<div className="h-px flex-1 bg-gray-200" />
+					<div className="h-px flex-1 bg-black/10" />
 				</div>
 				<p className="mt-2 text-center text-[12px] text-gray-600">
-					New styles that celebrate tradition, comfort, and everyday elegance
+					{seasonalSubtitle}
 				</p>
 			</section>
 
 			{/* Product grid */}
-			<section className="mt-5 px-3 pb-20">
-				<div className="grid grid-cols-2 gap-3">
-					{products.map((p) => (
-						<article
-							key={p.id}
-							className="rounded-lg border border-gray-100 overflow-hidden bg-white"
-						>
-							<div className="aspect-[3/4] w-full bg-gray-100">
-								<img
-									src={p.image}
-									alt={p.title}
-									className="h-full w-full object-cover"
-									loading="lazy"
-								/>
-							</div>
-							<div className="p-2">
-								<h3 className="line-clamp-1 text-[13px] font-medium text-gray-800">
-									{p.title}
-								</h3>
-								<div className="mt-0.5 flex items-center gap-2">
-									<p className="text-[12px] font-bold text-gray-900">{p.price}</p>
-									{p.originalPrice && (
-										<span className="text-[11px] text-gray-400 line-through">
-											{p.originalPrice}
-										</span>
+			<section className="mt-6 px-4 pb-20">
+				<div className="grid grid-cols-2 lg:grid-cols-4 gap-6">
+					{(productsLoading ? Array.from({ length: 8 }).map((_, i) => ({ id: `sk-${i}` })) : homeProducts).map((p: any, idx: number) => {
+						const id = p.id || `sk-${idx}`
+						const isVisible = visible[id]
+						const img1 = p?.images?.[0] || "/placeholder.svg"
+						const img2 = p?.images?.[1] || ""
+						const title = p?.name || "JJTextiles Pick"
+						const price = typeof p?.price === "number" ? p.price : 0
+						const originalPrice = typeof p?.originalPrice === "number" ? p.originalPrice : undefined
+						const url = p?.id ? getProductUrl(p.id, p.categorySlug) : "#"
+
+						return (
+							<article
+								key={id}
+								ref={register(id)}
+								onClick={() => url !== "#" && router.push(url)}
+								className={[
+									"group cursor-pointer",
+									"transition-all duration-300 ease-in-out",
+									isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-2",
+								].join(" ")}
+								style={{ willChange: "transform, opacity" }}
+							>
+								<div className="relative aspect-[3/4] w-full overflow-hidden rounded-2xl bg-[#f9f9f9]">
+									<img
+										src={img1}
+										alt={title}
+										className="h-full w-full object-cover transition-opacity duration-300 ease-in-out group-hover:opacity-0"
+										loading="lazy"
+									/>
+									{img2 ? (
+										<img
+											src={img2}
+											alt={`${title} lifestyle`}
+											className="absolute inset-0 h-full w-full object-cover opacity-0 transition-opacity duration-300 ease-in-out group-hover:opacity-100"
+											loading="lazy"
+										/>
+									) : (
+										<div className="absolute inset-0 flex items-center justify-center opacity-0 transition-opacity duration-300 ease-in-out group-hover:opacity-100">
+											<span className="rounded-full bg-white/80 backdrop-blur px-4 py-2 text-xs font-semibold text-gray-900 border border-pink-100">
+												Quick View
+											</span>
+										</div>
 									)}
 								</div>
-							</div>
-						</article>
-					))}
+
+								{/* Minimalist-modern info: transparent background, bottom border only */}
+								<div className="pt-3 pb-2 border-b border-black/10">
+									<h3 className="text-[13px] sm:text-[14px] font-medium text-gray-900 line-clamp-1">
+										{title}
+									</h3>
+									<div className="mt-1 flex items-center gap-2">
+										<p className="text-[13px] font-semibold text-gray-900">₹{price.toLocaleString()}</p>
+										{originalPrice && originalPrice > price && (
+											<span className="text-[12px] text-gray-400 line-through">₹{originalPrice.toLocaleString()}</span>
+										)}
+									</div>
+								</div>
+							</article>
+						)
+					})}
 				</div>
 			</section>
 

@@ -23,6 +23,14 @@ type SiteHeaderProps = {
    */
   seamless?: boolean
   /**
+   * If true, the header becomes sticky and stays visible while scrolling.
+   */
+  sticky?: boolean
+  /**
+   * If true, the header transitions into a subtle glass look after scrolling a bit.
+   */
+  glassOnScroll?: boolean
+  /**
    * If true (and search isn't controlled via props), sync the search input to the URL query param (default `q`).
    * This lets pages like collections read `?q=` and filter without rendering a second search bar.
    */
@@ -36,6 +44,8 @@ export default function SiteHeader({
   searchPlaceholder = "Search for brands and products",
   showSearch = true,
   seamless = false,
+  sticky = false,
+  glassOnScroll = false,
   syncSearchToUrl = false,
   searchParamKey = "q",
 }: SiteHeaderProps) {
@@ -46,6 +56,7 @@ export default function SiteHeader({
   const router = useRouter()
   const pathname = usePathname()
   const searchParams = useSearchParams()
+  const [isScrolled, setIsScrolled] = useState(false)
 
   const cartCount = cartItems.reduce((total, item) => total + item.quantity, 0)
   const urlSearchValue = useMemo(() => (searchParams?.get(searchParamKey) || "").toString(), [searchParams, searchParamKey])
@@ -58,6 +69,18 @@ export default function SiteHeader({
     if (!syncSearchToUrl) return
     setInternalSearch(urlSearchValue)
   }, [searchValue, syncSearchToUrl, urlSearchValue])
+
+  useEffect(() => {
+    if (!glassOnScroll) return
+
+    const onScroll = () => {
+      setIsScrolled(window.scrollY > 10)
+    }
+
+    onScroll()
+    window.addEventListener("scroll", onScroll, { passive: true })
+    return () => window.removeEventListener("scroll", onScroll)
+  }, [glassOnScroll])
 
   const handleAccountClick = () => {
     if (user) {
@@ -92,8 +115,14 @@ export default function SiteHeader({
       {/* Light pink header with soft bottom curve (Home-style) */}
       <header
         className={[
-          "relative text-[#1f1f1f] px-4 pt-3",
-          seamless ? "bg-[#fce4ec] pb-2 rounded-b-none" : "bg-[#FCDDF3] pb-4 rounded-b-[28px]",
+          "relative text-[#1f1f1f] px-4 pt-3 transition-all duration-300 ease-in-out",
+          sticky ? "sticky top-0 z-[9999]" : "",
+          // Background + shape
+          seamless ? "pb-2 rounded-b-none" : "pb-4 rounded-b-[28px]",
+          // Color blending
+          glassOnScroll && isScrolled
+            ? "bg-[#fce4ec]/70 backdrop-blur-md"
+            : (seamless ? "bg-[#fce4ec]" : "bg-[#FCDDF3]"),
         ].join(" ")}
         style={seamless ? undefined : { boxShadow: "0 2px 0 rgba(0,0,0,0.02) inset" }}
       >
