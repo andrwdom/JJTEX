@@ -1,11 +1,12 @@
 "use client"
 
-import React, { useState } from "react"
+import React, { useEffect, useMemo, useState } from "react"
 import { AlignJustify, ShoppingCart, User, Search as SearchIcon } from "lucide-react"
 import MobileMenuSidebar from "@/components/mobile-menu-sidebar"
 import { useCart } from "@/components/cart-context"
 import { useAuth } from "@/components/auth/useAuth"
 import LoginModal from "@/components/auth/LoginModal"
+import { usePathname, useRouter, useSearchParams } from "next/navigation"
 
 type SiteHeaderProps = {
   /**
@@ -16,6 +17,17 @@ type SiteHeaderProps = {
   onSearchChange?: (value: string) => void
   searchPlaceholder?: string
   showSearch?: boolean
+  /**
+   * Seamless mode for pages where the header should visually blend into the next section (e.g. category pages).
+   * Removes rounded bottom + any header shadow so the background color flows into the hero below.
+   */
+  seamless?: boolean
+  /**
+   * If true (and search isn't controlled via props), sync the search input to the URL query param (default `q`).
+   * This lets pages like collections read `?q=` and filter without rendering a second search bar.
+   */
+  syncSearchToUrl?: boolean
+  searchParamKey?: string
 }
 
 export default function SiteHeader({
@@ -23,13 +35,29 @@ export default function SiteHeader({
   onSearchChange,
   searchPlaceholder = "Search for brands and products",
   showSearch = true,
+  seamless = false,
+  syncSearchToUrl = false,
+  searchParamKey = "q",
 }: SiteHeaderProps) {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
   const [isLoginModalOpen, setIsLoginModalOpen] = useState(false)
   const { openCartSidebar, cartItems } = useCart()
   const { user } = useAuth()
+  const router = useRouter()
+  const pathname = usePathname()
+  const searchParams = useSearchParams()
 
   const cartCount = cartItems.reduce((total, item) => total + item.quantity, 0)
+  const urlSearchValue = useMemo(() => (searchParams?.get(searchParamKey) || "").toString(), [searchParams, searchParamKey])
+
+  const [internalSearch, setInternalSearch] = useState("")
+  const effectiveSearchValue = typeof searchValue === "string" ? searchValue : (syncSearchToUrl ? urlSearchValue : internalSearch)
+
+  useEffect(() => {
+    if (typeof searchValue === "string") return
+    if (!syncSearchToUrl) return
+    setInternalSearch(urlSearchValue)
+  }, [searchValue, syncSearchToUrl, urlSearchValue])
 
   const handleAccountClick = () => {
     if (user) {
@@ -39,14 +67,37 @@ export default function SiteHeader({
     }
   }
 
+  const handleSearchChange = (value: string) => {
+    if (onSearchChange) {
+      onSearchChange(value)
+      return
+    }
+
+    setInternalSearch(value)
+
+    if (!syncSearchToUrl) return
+
+    const params = new URLSearchParams(searchParams?.toString() || "")
+    const trimmed = value.trim()
+
+    if (trimmed) params.set(searchParamKey, trimmed)
+    else params.delete(searchParamKey)
+
+    const qs = params.toString()
+    router.replace(qs ? `${pathname}?${qs}` : `${pathname}`, { scroll: false })
+  }
+
   return (
     <>
       {/* Light pink header with soft bottom curve (Home-style) */}
       <header
-        className="relative bg-[#FCDDF3] text-[#1f1f1f] px-4 pt-3 pb-4 rounded-b-[28px]"
-        style={{ boxShadow: "0 2px 0 rgba(0,0,0,0.02) inset" }}
+        className={[
+          "relative text-[#1f1f1f] px-4 pt-3",
+          seamless ? "bg-[#fce4ec] pb-2 rounded-b-none" : "bg-[#FCDDF3] pb-4 rounded-b-[28px]",
+        ].join(" ")}
+        style={seamless ? undefined : { boxShadow: "0 2px 0 rgba(0,0,0,0.02) inset" }}
       >
-        <div className="flex items-center justify-between mb-4">
+        <div className={["flex items-center justify-between", seamless ? "mb-3" : "mb-4"].join(" ")}>
           <button
             aria-label="Menu"
             className="p-2 hover:bg-white/30 rounded-lg transition-colors duration-200"
@@ -89,17 +140,18 @@ export default function SiteHeader({
 
         {/* Search bar inside pink header */}
         {showSearch && (
-          <div className="px-0 pb-2">
+          <div className={["px-0", seamless ? "pb-1" : "pb-2"].join(" ")}>
             <div className="relative">
-              <div className="flex items-center gap-2 bg-white rounded-full shadow-lg px-4 py-3">
+              <div className={["flex items-center gap-2 bg-white rounded-full px-4 py-3", seamless ? "shadow-md" : "shadow-lg"].join(" ")}>
                 <SearchIcon className="h-5 w-5 text-gray-500" />
                 <input
+                  id="site-header-search"
                   type="text"
                   placeholder={searchPlaceholder}
                   className="w-full bg-transparent text-sm outline-none placeholder:text-gray-400"
                   aria-label="Search"
-                  value={searchValue}
-                  onChange={(e) => onSearchChange?.(e.target.value)}
+                  value={effectiveSearchValue}
+                  onChange={(e) => handleSearchChange(e.target.value)}
                 />
               </div>
             </div>

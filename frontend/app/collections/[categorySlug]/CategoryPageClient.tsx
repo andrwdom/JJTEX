@@ -3,7 +3,6 @@
 import { useState, useEffect } from "react"
 import CartSidebar from "@/components/cart-sidebar"
 import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { ChevronRight, Search, Filter, SlidersHorizontal, X, ShoppingBag } from "lucide-react"
 import Image from "next/image"
@@ -46,7 +45,6 @@ export default function CategoryPageClient({ categorySlug }: CategoryPageClientP
   const [products, setProducts] = useState<Product[]>([])
   const [filteredProducts, setFilteredProducts] = useState<Product[]>([])
   const [loading, setLoading] = useState(true)
-  const [searchQuery, setSearchQuery] = useState("")
   const [sortBy, setSortBy] = useState("featured")
   const [sizeSelectionProduct, setSizeSelectionProduct] = useState<Product | null>(null)
   const [isSizeSelectionOpen, setIsSizeSelectionOpen] = useState(false)
@@ -104,17 +102,24 @@ export default function CategoryPageClient({ categorySlug }: CategoryPageClientP
     }
   }, [searchParams])
 
+  // Read search query from navbar (synced via `?q=` by SiteHeader in collections pages)
+  const searchQuery = (searchParams.get('q') || "").trim()
+
   // Update URL when filters change
-  const updateURL = (newSize?: string) => {
+  const updateURL = (opts: { size?: string; q?: string } = {}) => {
     const params = new URLSearchParams(searchParams.toString())
     
-    if (newSize) {
-      params.set('size', newSize)
-    } else {
-      params.delete('size')
+    if (opts.size !== undefined) {
+      if (opts.size) params.set('size', opts.size)
+      else params.delete('size')
+    }
+    if (opts.q !== undefined) {
+      if (opts.q) params.set('q', opts.q)
+      else params.delete('q')
     }
     
-    const newURL = `${window.location.pathname}?${params.toString()}`
+    const qs = params.toString()
+    const newURL = qs ? `${window.location.pathname}?${qs}` : `${window.location.pathname}`
     router.push(newURL, { scroll: false })
   }
 
@@ -123,20 +128,19 @@ export default function CategoryPageClient({ categorySlug }: CategoryPageClientP
     if (selectedSize === size) {
       // Deselect if already selected
       setSelectedSize("")
-      updateURL("")
+      updateURL({ size: "" })
     } else {
       // Select new size
       setSelectedSize(size)
-      updateURL(size)
+      updateURL({ size })
     }
   }
 
   // Clear all filters
   const clearAllFilters = () => {
     setSelectedSize("")
-    setSearchQuery("")
     setSortBy("featured")
-    updateURL("")
+    updateURL({ size: "", q: "" })
   }
 
   // Compute category name from slug
@@ -341,40 +345,40 @@ export default function CategoryPageClient({ categorySlug }: CategoryPageClientP
           <div className="flex-1 w-full">
             {/* Premium Category Hero (homepage-header inspired) */}
             <section className="w-full">
-              <div className="bg-gradient-to-b from-[#fce4ec] via-white to-white">
-                <div className="px-4 sm:px-6 lg:px-8 pt-6 pb-8 sm:pt-8 sm:pb-10">
+              <div className="bg-gradient-to-b from-[#fce4ec] via-[#fce4ec] to-white">
+                <div className="px-4 sm:px-6 lg:px-8 pt-3 pb-6 sm:pt-4 sm:pb-8">
                   <div className="mx-auto max-w-6xl">
-                    <div className="flex items-center justify-center gap-2 text-[12px] text-gray-600">
+                    <div className="flex items-center justify-center gap-2 text-[11px] text-gray-500/90">
                       <button
                         type="button"
                         onClick={() => (window.location.href = "/")}
-                        className="hover:text-gray-900 transition-colors"
+                        className="hover:text-gray-800 transition-colors"
                       >
                         Home
                       </button>
                       <ChevronRight className="h-4 w-4 opacity-70" />
-                      <span className="text-gray-800 font-medium">{categoryName}</span>
+                      <span className="text-gray-700 font-medium">{categoryName}</span>
                     </div>
 
-                    <div className="mt-4 text-center">
+                    <div className="mt-2 text-center">
                       {heroCopy.eyebrow && (
                         <p className="text-[11px] sm:text-[12px] tracking-[0.18em] uppercase text-pink-700/80">
                           {heroCopy.eyebrow}
                         </p>
                       )}
-                      <h1 className="mt-2 text-[26px] sm:text-[34px] lg:text-[40px] font-extrabold tracking-tight text-[#1f1f1f] font-serif">
+                      <h1 className="mt-2 text-[26px] sm:text-[34px] lg:text-[40px] font-extrabold tracking-[0.02em] text-[#1f1f1f] font-serif">
                         {heroCopy.title}
                       </h1>
                       <p className="mt-3 text-[13px] sm:text-[14px] lg:text-[15px] text-gray-700 max-w-2xl mx-auto leading-relaxed">
                         {heroCopy.description}
                       </p>
 
-                      <div className="mt-4 flex items-center justify-center gap-3 text-[12px] text-gray-600 flex-wrap">
-                        <span className="rounded-full bg-white/70 backdrop-blur px-3 py-1 border border-pink-100">
+                      <div className="mt-3 flex items-center justify-center gap-3 text-[12px] text-gray-600 flex-wrap">
+                        <span className="rounded-full bg-transparent px-3 py-1 border border-pink-200/80">
                           {filteredProducts.length} of {products.length} products
                         </span>
                         {selectedSize && (
-                          <span className="rounded-full bg-white/70 backdrop-blur px-3 py-1 border border-pink-100">
+                          <span className="rounded-full bg-transparent px-3 py-1 border border-pink-200/80">
                             Size: <span className="font-semibold text-gray-900">{selectedSize}</span>
                           </span>
                         )}
@@ -382,7 +386,7 @@ export default function CategoryPageClient({ categorySlug }: CategoryPageClientP
                     </div>
                   </div>
                 </div>
-                <div className="h-6 sm:h-8 rounded-b-[28px] bg-white" />
+                <div className="h-4 sm:h-6 rounded-b-[28px] bg-[#f9f9f9]" />
               </div>
             </section>
 
@@ -396,46 +400,30 @@ export default function CategoryPageClient({ categorySlug }: CategoryPageClientP
             {/* Search and Filters */}
             <div className="px-4 sm:px-6 lg:px-8 pb-6 lg:pb-8 w-full">
 
-              {/* Search and Filter Bar */}
-              <div className="mx-auto max-w-6xl flex flex-col gap-2 mb-6 lg:mb-8 w-full max-w-full px-0 sm:px-0">
-                {/* Search Bar Row with Sort */}
-                <div className="flex w-full gap-2 flex-row">
-                  <div className="relative flex-1 min-w-0 max-w-full flex items-center">
-                    <div className="flex items-center w-full bg-white/90 backdrop-blur border border-pink-100 rounded-[20px] overflow-hidden shadow-sm">
-                      <span className="inline-flex items-center px-4 h-12 text-gray-400 text-base">
-                        <Search className="h-5 w-5" />
-                      </span>
-                      <Input
-                        placeholder="Search by style, fabric, or detail…"
-                        value={searchQuery}
-                        onChange={(e) => setSearchQuery(e.target.value)}
-                        className="h-12 border-0 rounded-none focus-visible:ring-0 focus-visible:ring-offset-0 focus-visible:border-0 bg-transparent text-base w-full pr-3 placeholder:text-gray-400"
-                        style={{ boxShadow: 'none' }}
-                      />
-                      {searchQuery && (
-                        <button
-                          type="button"
-                          onClick={() => setSearchQuery("")}
-                          className="px-3 h-12 text-gray-400 hover:text-gray-700 transition-colors"
-                          aria-label="Clear search"
-                        >
-                          <X className="h-4 w-4" />
-                        </button>
-                      )}
-                    </div>
-                  </div>
+              {/* Compact Controls Row (search lives in the navbar) */}
+              <div className="mx-auto max-w-6xl mb-5 lg:mb-6 w-full">
+                <div className="flex items-center justify-between gap-2">
+                  <button
+                    type="button"
+                    onClick={() => (document.getElementById("site-header-search") as HTMLInputElement | null)?.focus()}
+                    className="inline-flex items-center gap-2 h-11 px-4 rounded-full border border-pink-200/80 bg-transparent text-gray-700 hover:bg-pink-50 transition-colors"
+                    aria-label="Focus search"
+                  >
+                    <Search className="h-4 w-4 text-pink-700/80" />
+                    <span className="text-sm font-medium">Search</span>
+                  </button>
 
-                  {/* Sort Dropdown: Icon only on mobile, full on sm+ */}
+                  {/* Sort Dropdown */}
                   <div className="flex-shrink-0">
                     {/* Mobile Select */}
                     <Select value={sortBy} onValueChange={setSortBy}>
-                      <SelectTrigger className="h-12 w-12 border border-pink-100 bg-white/90 backdrop-blur rounded-[20px] flex items-center justify-center sm:hidden shadow-sm">
-                        <SlidersHorizontal className="h-6 w-6" />
+                      <SelectTrigger className="h-11 w-11 border border-pink-200/80 bg-transparent rounded-full flex items-center justify-center sm:hidden">
+                        <SlidersHorizontal className="h-5 w-5" />
                       </SelectTrigger>
-                      <SelectContent 
-                        position="popper" 
-                        side="bottom" 
-                        align="end" 
+                      <SelectContent
+                        position="popper"
+                        side="bottom"
+                        align="end"
                         className="w-48 z-[9999]"
                         sideOffset={4}
                         alignOffset={0}
@@ -450,17 +438,17 @@ export default function CategoryPageClient({ categorySlug }: CategoryPageClientP
                         <SelectItem value="name">Name: A to Z</SelectItem>
                       </SelectContent>
                     </Select>
-                    
+
                     {/* Desktop Select */}
                     <Select value={sortBy} onValueChange={setSortBy}>
-                      <SelectTrigger className="hidden sm:flex w-44 h-12 border border-pink-100 bg-white/90 backdrop-blur rounded-[20px] items-center shadow-sm">
+                      <SelectTrigger className="hidden sm:flex w-44 h-11 border border-pink-200/80 bg-transparent rounded-full items-center">
                         <SlidersHorizontal className="h-4 w-4 mr-2" />
                         <SelectValue placeholder="Sort By" />
                       </SelectTrigger>
-                      <SelectContent 
-                        position="popper" 
-                        side="bottom" 
-                        align="end" 
+                      <SelectContent
+                        position="popper"
+                        side="bottom"
+                        align="end"
                         className="w-[var(--radix-select-trigger-width)] z-[9999]"
                         sideOffset={4}
                         alignOffset={0}
@@ -477,7 +465,6 @@ export default function CategoryPageClient({ categorySlug }: CategoryPageClientP
                     </Select>
                   </div>
                 </div>
-
               </div>
 
               {/* Filter and Sort Section */}
@@ -499,7 +486,7 @@ export default function CategoryPageClient({ categorySlug }: CategoryPageClientP
                       <div className="flex items-center gap-2 bg-white border border-pink-100 px-3 py-1.5 rounded-full text-sm shadow-sm">
                         <span className="text-gray-700">Search: “{searchQuery}”</span>
                         <button
-                          onClick={() => setSearchQuery("")}
+                          onClick={() => updateURL({ q: "" })}
                           className="text-gray-500 hover:text-gray-700"
                           aria-label="Remove search filter"
                           type="button"
