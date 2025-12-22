@@ -1,23 +1,21 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import Footer from "@/components/footer"
 import CartSidebar from "@/components/cart-sidebar"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { ChevronRight, Home, Search, Filter, SlidersHorizontal, Baby, Heart, Shirt, X, ShoppingBag } from "lucide-react"
+import { ChevronRight, Search, Filter, SlidersHorizontal, X, ShoppingBag } from "lucide-react"
 import Image from "next/image"
 import PageLoading from "@/components/page-loading"
 import SizeSelectionSidebar from "@/components/size-selection-sidebar"
-import CheckoutPromptModal from "@/components/checkout-prompt-modal"
 import ErrorBoundary from "@/components/error-boundary"
-import { safeFetch } from "@/lib/api-health"
 import { useBuyNow } from "@/components/buy-now-context";
 import { useCart } from "@/components/cart-context";
 import { useCheckoutFlow } from "@/components/checkout-flow-manager";
 import { useRouter, useSearchParams } from "next/navigation"
 import WishlistButton from "@/components/WishlistButton"
+import { getCategoryHeroCopy, getProductDisplayTitle, getProductFeatureSummary, humanizeCategorySlug } from "@/lib/category-page-copy"
 
 interface Product {
   id: string // This will be the customId for routing
@@ -142,10 +140,7 @@ export default function CategoryPageClient({ categorySlug }: CategoryPageClientP
   }
 
   // Compute category name from slug
-  const categoryName = categorySlug
-    .split("-")
-    .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
-    .join(" ")
+  const categoryName = humanizeCategorySlug(categorySlug)
 
   // Sleeve filter availability is derived from the fetched products (no category hardcoding)
 
@@ -252,10 +247,6 @@ export default function CategoryPageClient({ categorySlug }: CategoryPageClientP
     window.location.href = url
   }
 
-  const handleCategorySelect = (slug: string) => {
-    window.location.href = `/collections/${slug}`
-  }
-
   const handleAddToCart = (product: Product) => {
     // Ensure images array is unique and not duplicating the main image
     let images: string[] = [];
@@ -336,66 +327,64 @@ export default function CategoryPageClient({ categorySlug }: CategoryPageClientP
     }, 100);
   };
 
-  const handleCheckout = () => {
-    setCheckoutFlow('cart');
-  }
-
   // Check if any filters are active
   const hasActiveFilters = selectedSize || searchQuery
+  const heroCopy = getCategoryHeroCopy(categorySlug, products)
 
   return (
     <ErrorBoundary>
       <PageLoading loadingMessage="Loading JJTextiles Collection..." minLoadingTime={1500}>
-        <div className="min-h-screen bg-gray-50 w-full overflow-x-hidden">
+        <div className="min-h-screen bg-[#f9f9f9] w-full overflow-x-hidden">
         <div className="flex w-full overflow-x-hidden">
-          {/* Category Sidebar - Refined Design with Proper Bounds */}
-          <div className="w-80 flex-shrink-0 hidden lg:block">
-            <div className="sticky top-32 h-[calc(100vh-8rem)] overflow-y-auto">
-              <div className="bg-white shadow-xl rounded-3xl p-6 mx-4 border border-gray-100">
-                <div className="mb-8">
-                  <h2 className="text-2xl font-bold text-[rgb(71,60,102)] font-serif bg-gradient-to-r from-[rgb(71,60,102)] to-purple-600 bg-clip-text text-transparent">Categories</h2>
-                </div>
-
-                <div className="space-y-4">
-                  <div className="p-4 rounded-2xl border border-gray-200 bg-gray-50 text-sm text-gray-700">
-                    Browse categories using the main navigation.
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
 
           {/* Main Content */}
-          <div className="flex-1 lg:ml-0 w-full">
-            {/* Minimal breadcrumb + title (Home-style typography) */}
-            <div className="px-4 sm:px-6 lg:px-8 pt-5 pb-4 w-full">
-              <div className="flex items-center gap-2 text-[12px] text-gray-500">
-                <button
-                  type="button"
-                  onClick={() => (window.location.href = "/")}
-                  className="hover:text-gray-700 transition-colors"
-                >
-                  Home
-                </button>
-                <ChevronRight className="h-4 w-4 opacity-70" />
-                <span className="text-gray-700 font-medium">{categoryName}</span>
-              </div>
+          <div className="flex-1 w-full">
+            {/* Premium Category Hero (homepage-header inspired) */}
+            <section className="w-full">
+              <div className="bg-gradient-to-b from-[#fce4ec] via-white to-white">
+                <div className="px-4 sm:px-6 lg:px-8 pt-6 pb-8 sm:pt-8 sm:pb-10">
+                  <div className="mx-auto max-w-6xl">
+                    <div className="flex items-center justify-center gap-2 text-[12px] text-gray-600">
+                      <button
+                        type="button"
+                        onClick={() => (window.location.href = "/")}
+                        className="hover:text-gray-900 transition-colors"
+                      >
+                        Home
+                      </button>
+                      <ChevronRight className="h-4 w-4 opacity-70" />
+                      <span className="text-gray-800 font-medium">{categoryName}</span>
+                    </div>
 
-              <div className="mt-3 flex items-end justify-between gap-4">
-                <div className="min-w-0">
-                  <h1 className="text-[20px] sm:text-[24px] font-extrabold tracking-tight text-[#1f1f1f] truncate">
-                    {categoryName}
-                  </h1>
-                  <p className="mt-1 text-[12px] sm:text-[13px] text-gray-600">
-                    Curated pieces for everyday comfort and elegance.
-                  </p>
-                </div>
+                    <div className="mt-4 text-center">
+                      {heroCopy.eyebrow && (
+                        <p className="text-[11px] sm:text-[12px] tracking-[0.18em] uppercase text-pink-700/80">
+                          {heroCopy.eyebrow}
+                        </p>
+                      )}
+                      <h1 className="mt-2 text-[26px] sm:text-[34px] lg:text-[40px] font-extrabold tracking-tight text-[#1f1f1f] font-serif">
+                        {heroCopy.title}
+                      </h1>
+                      <p className="mt-3 text-[13px] sm:text-[14px] lg:text-[15px] text-gray-700 max-w-2xl mx-auto leading-relaxed">
+                        {heroCopy.description}
+                      </p>
 
-                <div className="flex-shrink-0 text-[12px] text-gray-500">
-                  {filteredProducts.length} of {products.length}
+                      <div className="mt-4 flex items-center justify-center gap-3 text-[12px] text-gray-600 flex-wrap">
+                        <span className="rounded-full bg-white/70 backdrop-blur px-3 py-1 border border-pink-100">
+                          {filteredProducts.length} of {products.length} products
+                        </span>
+                        {selectedSize && (
+                          <span className="rounded-full bg-white/70 backdrop-blur px-3 py-1 border border-pink-100">
+                            Size: <span className="font-semibold text-gray-900">{selectedSize}</span>
+                          </span>
+                        )}
+                      </div>
+                    </div>
+                  </div>
                 </div>
+                <div className="h-6 sm:h-8 rounded-b-[28px] bg-white" />
               </div>
-            </div>
+            </section>
 
             {/* Error Message */}
             {error && (
@@ -408,21 +397,31 @@ export default function CategoryPageClient({ categorySlug }: CategoryPageClientP
             <div className="px-4 sm:px-6 lg:px-8 pb-6 lg:pb-8 w-full">
 
               {/* Search and Filter Bar */}
-              <div className="flex flex-col gap-2 mb-6 lg:mb-8 w-full max-w-full px-0 sm:px-0">
+              <div className="mx-auto max-w-6xl flex flex-col gap-2 mb-6 lg:mb-8 w-full max-w-full px-0 sm:px-0">
                 {/* Search Bar Row with Sort */}
                 <div className="flex w-full gap-2 flex-row">
                   <div className="relative flex-1 min-w-0 max-w-full flex items-center">
-                    <div className="flex items-center w-full">
-                      <span className="inline-flex items-center px-3 h-12 border border-r-0 border-gray-200 bg-white rounded-l-full text-gray-400 text-base">
+                    <div className="flex items-center w-full bg-white/90 backdrop-blur border border-pink-100 rounded-[20px] overflow-hidden shadow-sm">
+                      <span className="inline-flex items-center px-4 h-12 text-gray-400 text-base">
                         <Search className="h-5 w-5" />
                       </span>
                       <Input
-                        placeholder="Search products..."
+                        placeholder="Search by style, fabric, or detail…"
                         value={searchQuery}
                         onChange={(e) => setSearchQuery(e.target.value)}
-                        className="h-12 border border-gray-200 border-l-0 rounded-l-none rounded-r-lg focus:border-[rgb(71,60,102)] bg-white text-base w-full max-w-[calc(100vw-4.5rem)] sm:w-[350px] lg:w-[450px] transition-all duration-200 pr-2"
+                        className="h-12 border-0 rounded-none focus-visible:ring-0 focus-visible:ring-offset-0 focus-visible:border-0 bg-transparent text-base w-full pr-3 placeholder:text-gray-400"
                         style={{ boxShadow: 'none' }}
                       />
+                      {searchQuery && (
+                        <button
+                          type="button"
+                          onClick={() => setSearchQuery("")}
+                          className="px-3 h-12 text-gray-400 hover:text-gray-700 transition-colors"
+                          aria-label="Clear search"
+                        >
+                          <X className="h-4 w-4" />
+                        </button>
+                      )}
                     </div>
                   </div>
 
@@ -430,7 +429,7 @@ export default function CategoryPageClient({ categorySlug }: CategoryPageClientP
                   <div className="flex-shrink-0">
                     {/* Mobile Select */}
                     <Select value={sortBy} onValueChange={setSortBy}>
-                      <SelectTrigger className="h-12 w-12 border-2 border-gray-200 focus:border-[rgb(71,60,102)] rounded-lg flex items-center justify-center sm:hidden">
+                      <SelectTrigger className="h-12 w-12 border border-pink-100 bg-white/90 backdrop-blur rounded-[20px] flex items-center justify-center sm:hidden shadow-sm">
                         <SlidersHorizontal className="h-6 w-6" />
                       </SelectTrigger>
                       <SelectContent 
@@ -454,7 +453,7 @@ export default function CategoryPageClient({ categorySlug }: CategoryPageClientP
                     
                     {/* Desktop Select */}
                     <Select value={sortBy} onValueChange={setSortBy}>
-                      <SelectTrigger className="hidden sm:flex w-40 h-12 border-2 border-gray-200 focus:border-[rgb(71,60,102)] rounded-lg items-center">
+                      <SelectTrigger className="hidden sm:flex w-44 h-12 border border-pink-100 bg-white/90 backdrop-blur rounded-[20px] items-center shadow-sm">
                         <SlidersHorizontal className="h-4 w-4 mr-2" />
                         <SelectValue placeholder="Sort By" />
                       </SelectTrigger>
@@ -485,7 +484,8 @@ export default function CategoryPageClient({ categorySlug }: CategoryPageClientP
               <div className="mb-6 w-full">
                 <div className="flex items-center justify-between mb-4">
                   <div className="flex items-center gap-2">
-                    <Filter className="h-5 w-5 text-gray-600" />
+                    <Filter className="h-5 w-5 text-pink-700/80" />
+                    <span className="text-sm font-medium text-gray-800">Filters</span>
                   </div>
                   <div className="text-sm text-gray-600">
                     {filteredProducts.length} of {products.length} products
@@ -493,21 +493,38 @@ export default function CategoryPageClient({ categorySlug }: CategoryPageClientP
                 </div>
 
                 {/* Applied Filters */}
-                {selectedSize && (
+                {(selectedSize || searchQuery) && (
                   <div className="flex items-center gap-2 mb-4 flex-wrap">
-                    <div className="flex items-center gap-2 bg-gray-100 px-3 py-1 rounded-full text-sm">
-                      <span className="text-gray-700">Size: {selectedSize}</span>
-                      <button
-                        onClick={() => handleSizeFilter(selectedSize)}
-                        className="text-gray-500 hover:text-gray-700"
-                      >
-                        <X className="h-4 w-4" />
-                      </button>
-                    </div>
+                    {searchQuery && (
+                      <div className="flex items-center gap-2 bg-white border border-pink-100 px-3 py-1.5 rounded-full text-sm shadow-sm">
+                        <span className="text-gray-700">Search: “{searchQuery}”</span>
+                        <button
+                          onClick={() => setSearchQuery("")}
+                          className="text-gray-500 hover:text-gray-700"
+                          aria-label="Remove search filter"
+                          type="button"
+                        >
+                          <X className="h-4 w-4" />
+                        </button>
+                      </div>
+                    )}
+                    {selectedSize && (
+                      <div className="flex items-center gap-2 bg-gray-100 px-3 py-1 rounded-full text-sm">
+                        <span className="text-gray-700">Size: {selectedSize}</span>
+                        <button
+                          onClick={() => handleSizeFilter(selectedSize)}
+                          className="text-gray-500 hover:text-gray-700"
+                          type="button"
+                        >
+                          <X className="h-4 w-4" />
+                        </button>
+                      </div>
+                    )}
                     {hasActiveFilters && (
                       <button
                         onClick={clearAllFilters}
-                        className="text-sm text-gray-500 hover:text-gray-700 underline"
+                        className="text-sm text-gray-600 hover:text-gray-900 underline"
+                        type="button"
                       >
                         Remove all
                       </button>
@@ -523,13 +540,17 @@ export default function CategoryPageClient({ categorySlug }: CategoryPageClientP
                       <button
                         key={sizeWithCount.size}
                         onClick={() => handleSizeFilter(sizeWithCount.size)}
-                        className={`px-4 py-2 rounded-full text-sm font-medium transition-all duration-200 ${
+                        type="button"
+                        className={`px-4 py-2 rounded-full text-sm font-medium transition-all duration-200 border shadow-sm ${
                           selectedSize === sizeWithCount.size
-                            ? 'bg-black text-white shadow-md'
-                            : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                            ? 'bg-pink-500 text-white border-pink-500'
+                            : 'bg-white text-gray-800 border-pink-100 hover:bg-pink-50 hover:border-pink-200'
                         }`}
                       >
-                        {sizeWithCount.size} ({sizeWithCount.count})
+                        <span className="tabular-nums">{sizeWithCount.size}</span>
+                        <span className={`ml-1 text-[12px] tabular-nums ${selectedSize === sizeWithCount.size ? "text-white/90" : "text-gray-500"}`}>
+                          ({sizeWithCount.count})
+                        </span>
                       </button>
                     ))}
                   </div>
@@ -540,6 +561,7 @@ export default function CategoryPageClient({ categorySlug }: CategoryPageClientP
             {/* Products Grid - Responsive: 2 columns on mobile, 4 on desktop */}
             {/* Products Grid - Clean Minimalist Layout */}
             <div className="px-2 sm:px-4 lg:px-8 pb-16 w-full box-border">
+              <div className="mx-auto max-w-6xl">
               {loading ? (
                 <div className="grid grid-cols-2 lg:grid-cols-4 gap-6 lg:gap-8">
                   {[1, 2, 3, 4, 5, 6, 7, 8].map((i) => (
@@ -562,14 +584,14 @@ export default function CategoryPageClient({ categorySlug }: CategoryPageClientP
                       onClick={() => handleProductClick(product.id, product.categorySlug || categorySlug)}
                     >
                       {/* Clean Product Image */}
-                      <div className="relative aspect-[2/3] bg-gray-100 rounded-lg overflow-hidden mb-4">
+                      <div className="relative aspect-[2/3] bg-white rounded-2xl overflow-hidden mb-3 shadow-sm ring-1 ring-black/5">
                         <Image
                           src={product.image || "/placeholder.svg"}
                           alt={product.name}
                           fill
                           sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 25vw"
                           loading="lazy"
-                          className="object-cover group-hover:scale-105 transition-transform duration-300 rounded-lg"
+                          className="object-cover group-hover:scale-105 transition-transform duration-500"
                         />
                         
                         {/* Always visible wishlist button */}
@@ -578,10 +600,10 @@ export default function CategoryPageClient({ categorySlug }: CategoryPageClientP
                         </div>
                         
                         {/* Overlay buttons on hover */}
-                        <div className="absolute inset-0 bg-black/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center gap-3">
+                        <div className="absolute inset-0 bg-black/15 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center gap-3">
                           <Button 
                             size="sm" 
-                            className="rounded-full bg-pink-500 hover:bg-pink-600 shadow-lg"
+                            className="rounded-full bg-[#E91E63] hover:bg-[#d81b60] shadow-lg"
                             onClick={(e) => {
                               e.stopPropagation()
                               handleAddToCart(product)
@@ -593,26 +615,33 @@ export default function CategoryPageClient({ categorySlug }: CategoryPageClientP
                       </div>
 
                       {/* Clean Product Info */}
-                      <div className="space-y-3">
+                      <div className="space-y-2">
                         {/* Product Title */}
-                        <h3 className="text-sm lg:text-base font-medium text-gray-900 leading-tight">{product.name}</h3>
+                        <h3 className="text-sm lg:text-[15px] font-semibold text-gray-900 leading-snug">
+                          {getProductDisplayTitle(product, categorySlug)}
+                        </h3>
+
+                        {/* 1-line premium feature summary */}
+                        <p className="text-[12px] text-gray-600 leading-snug line-clamp-2">
+                          {getProductFeatureSummary(product, categorySlug)}
+                        </p>
 
                         {/* Price */}
-                        <div className="text-sm lg:text-base text-gray-900">
-                          ₹ {product.price.toLocaleString()}.00 INR
+                        <div className="text-sm lg:text-[15px] text-gray-900 font-bold">
+                          ₹{product.price.toLocaleString()}
                         </div>
 
 
                         {/* Simple Add to Cart Button */}
                         <Button
                           variant="outline"
-                          className="w-full border border-brand text-brand hover:bg-brand hover:text-white bg-white rounded-none font-normal text-sm py-2 h-auto transition-colors duration-200 focus:ring-2 focus:ring-brand"
+                          className="w-full border border-pink-200 text-pink-700 hover:bg-[#E91E63] hover:text-white hover:border-[#E91E63] bg-white rounded-full font-medium text-sm py-2 h-auto transition-colors duration-200 focus-visible:ring-2 focus-visible:ring-pink-500/30"
                           onClick={(e) => {
                             e.stopPropagation()
                             handleAddToCart(product)
                           }}
                         >
-                          ADD TO CART
+                          Add to Cart
                         </Button>
                       </div>
                     </div>
@@ -620,18 +649,18 @@ export default function CategoryPageClient({ categorySlug }: CategoryPageClientP
                 </div>
               ) : (
                 <div className="text-center py-20">
-                  <div className="text-6xl mb-4">🔍</div>
                   <h3 className="text-xl font-medium text-gray-900 mb-2">No products found</h3>
                   <p className="text-gray-600 mb-6">Try adjusting your search or filter criteria</p>
                   <Button
                     onClick={clearAllFilters}
                     variant="outline"
-                    className="border border-brand text-brand hover:bg-brand hover:text-white bg-white rounded-none px-6 focus:ring-2 focus:ring-brand"
+                    className="border border-pink-200 text-pink-700 hover:bg-[#E91E63] hover:text-white hover:border-[#E91E63] bg-white rounded-full px-6 focus-visible:ring-2 focus-visible:ring-pink-500/30"
                   >
                     Clear All Filters
                   </Button>
                 </div>
               )}
+              </div>
             </div>
           </div>
         </div>

@@ -27,13 +27,13 @@ const Add = ({token}) => {
    const [description, setDescription] = useState("");
    const [price, setPrice] = useState("");
    const [category, setCategory] = useState("");
-  const [selectedCategory, setSelectedCategory] = useState(null); // { name, slug, path, isLeaf, breadcrumbs }
-  const [bestseller, setBestseller] = useState(false);
-  const [sizes, setSizes] = useState([]);
+   const [selectedCategory, setSelectedCategory] = useState(null); // { name, slug, path, isLeaf, breadcrumbs }
+   const [bestseller, setBestseller] = useState(false);
+   const [sizes, setSizes] = useState([]);
 
-  // Deprecated: simple categories list (kept for compatibility if needed)
-  const [categories, setCategories] = useState([]);
-  const [customId, setCustomId] = useState("");
+   // Deprecated: simple categories list (kept for compatibility if needed)
+   const [categories, setCategories] = useState([]);
+   const [customId, setCustomId] = useState("");
 
    const [loading, setLoading] = useState(false)
    const [uploadProgress, setUploadProgress] = useState(0)
@@ -401,7 +401,7 @@ const Add = ({token}) => {
             requiredLeaf={true}
             label="Category (select parent → subcategory)"
           />
-        </div>
+          </div>
 
           <div>
             <p className='mb-2'>Product Price</p>

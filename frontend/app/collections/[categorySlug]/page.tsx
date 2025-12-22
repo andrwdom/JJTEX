@@ -1,21 +1,20 @@
 import { Metadata } from "next"
 import CategoryPageClient from "./CategoryPageClient"
 import Script from "next/script"
+import { getCategoryHeroCopy, humanizeCategorySlug } from "@/lib/category-page-copy"
 
 // SEO Metadata - This will be dynamic based on category
 export const generateMetadata = async ({ params }: { params: Promise<{ categorySlug: string }> }): Promise<Metadata> => {
   const { categorySlug } = await params
-  const categoryName = categorySlug
-    .split("-")
-    .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
-    .join(" ")
+  const categoryName = humanizeCategorySlug(categorySlug)
 
   const siteName = "JJ Textiles"
   const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://jjtextiles.com"
 
   // Keep metadata generic (this project was migrated from a different site)
   const title = `${categoryName} Collection | ${siteName}`
-  const description = `Shop ${categoryName} at ${siteName}. Browse the latest products in this category.`
+  // Use premium category copy (fallbacks internally if slug isn't recognized)
+  const description = getCategoryHeroCopy(categorySlug).description
 
   return {
     title: title,
@@ -48,10 +47,7 @@ export default async function CategoryPage({ params }: { params: Promise<{ categ
   const { categorySlug } = await params
   
   // Format category name for display
-  const categoryName = categorySlug
-    .split("-")
-    .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
-    .join(" ")
+  const categoryName = humanizeCategorySlug(categorySlug)
 
   const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://jjtextiles.com"
   

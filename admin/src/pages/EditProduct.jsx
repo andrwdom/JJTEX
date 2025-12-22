@@ -302,7 +302,7 @@ const EditProduct = ({ product, token, onClose, onUpdate }) => {
                   requiredLeaf={true}
                   label="Category"
                 />
-              </div>
+        </div>
 
         <div>
           <p className='mb-2'>Product Price</p>
