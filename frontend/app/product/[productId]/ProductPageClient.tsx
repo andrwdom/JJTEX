@@ -77,10 +77,13 @@ export default function ProductPageClient({ productId }: ProductPageClientProps)
   useEffect(() => {
     const fetchProduct = async () => {
       try {
-        // 🔧 FIX: Add aggressive cache busting and debugging
+        // Prefer same-origin /api in the browser (Next dev rewrites proxy to backend; prod is served behind nginx).
+        // Only use NEXT_PUBLIC_API_URL if you explicitly deploy backend on a different origin.
         const timestamp = Date.now();
         const random = Math.random();
-        const apiUrl = (process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000') + `/api/products/${productId}?_t=${timestamp}&_r=${random}&_fresh=true&_cache_bust=${refreshKey}`;
+        const baseUrl = process.env.NEXT_PUBLIC_API_URL || "";
+        const origin = baseUrl ? baseUrl.replace(/\/$/, "") : "";
+        const apiUrl = `${origin}/api/products/${productId}?_t=${timestamp}&_r=${random}&_fresh=true&_cache_bust=${refreshKey}`;
         console.log('🔄 Fetching product from:', apiUrl);
         console.log('🔄 Refresh key:', refreshKey);
         
@@ -95,6 +98,7 @@ export default function ProductPageClient({ productId }: ProductPageClientProps)
         });
         
         if (!res.ok) {
+          // If backend is reachable but the id lookup fails, still treat as "not found"
           throw new Error(`HTTP error! status: ${res.status}`);
         }
         
@@ -134,7 +138,7 @@ export default function ProductPageClient({ productId }: ProductPageClientProps)
         }
       } catch (error) {
         console.error('❌ Error fetching product:', error);
-        setError('Failed to fetch product');
+        setError(error instanceof Error ? error.message : 'Failed to fetch product');
       } finally {
         setLoading(false);
       }
@@ -157,6 +161,9 @@ export default function ProductPageClient({ productId }: ProductPageClientProps)
   
   const selectedSizeObj = product?.sizes?.find(s => s.size === selectedSize);
   const selectedSizeStock = selectedSizeObj ? Math.max(0, (selectedSizeObj.stock || 0) - (selectedSizeObj.reserved || 0)) : 0;
+  const totalStockLeft = Array.isArray(product?.sizes)
+    ? product!.sizes.reduce((sum: number, s: any) => sum + Math.max(0, (s?.stock || 0) - (s?.reserved || 0)), 0)
+    : (product?.stock || 0);
 
   // Auto-adjust quantity if it exceeds stock when size changes
   useEffect(() => {
@@ -235,12 +242,21 @@ export default function ProductPageClient({ productId }: ProductPageClientProps)
 
   if (!product) {
     return (
-      <div className="min-h-screen bg-gray-50">
+      <div className="min-h-screen bg-[#f9f9f9]">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 text-center">
           <h1 className="text-2xl font-bold text-gray-900 mb-4">Product Not Found</h1>
+          {error && <p className="text-sm text-gray-600 mb-4">{error}</p>}
+          <div className="flex items-center justify-center gap-3">
+            <Button
+              onClick={() => setRefreshKey((k) => k + 1)}
+              className="rounded-full bg-[#E91E63] hover:bg-[#d81b60]"
+            >
+              Retry
+            </Button>
           <Button onClick={() => (window.location.href = "/")} className="rounded-full">
             Return to Home
           </Button>
+          </div>
         </div>
       </div>
     )
@@ -269,22 +285,27 @@ export default function ProductPageClient({ productId }: ProductPageClientProps)
 
   return (
     <>
-      <div className="min-h-screen bg-gray-50">
+      <div className="min-h-screen bg-[#f9f9f9]">
         {/* Header */}
-        <div className="sticky top-20 z-40 bg-white/95 backdrop-blur-md border-b border-gray-100 shadow-sm">
+        <div className="sticky top-20 z-40 bg-gradient-to-b from-[#fce4ec]/70 via-white/90 to-white/90 backdrop-blur-md border-b border-pink-100 shadow-sm">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="flex flex-col h-auto py-3">
               {/* Breadcrumb */}
               <div className="flex items-center space-x-2 text-sm text-gray-600 mb-2">
-                <Button variant="link" size="sm" className="p-0 h-auto text-[rgb(71,60,102)] hover:text-[rgb(71,60,102)]/80" onClick={() => (window.location.href = "/")}>
+                <Button variant="link" size="sm" className="p-0 h-auto text-[#E91E63] hover:text-[#d81b60]" onClick={() => (window.location.href = "/")}>
                   Home
                 </Button>
                 <ChevronRight className="h-4 w-4" />
                 <Button 
                   variant="link" 
                   size="sm" 
-                  className="p-0 h-auto text-[rgb(71,60,102)] hover:text-[rgb(71,60,102)]/80" 
-                  onClick={() => (window.location.href = `/collections/${product.category.toLowerCase().replace(/ /g, '-')}`)}
+                  className="p-0 h-auto text-[#E91E63] hover:text-[#d81b60]" 
+                  onClick={() => {
+                    const slug =
+                      product.categorySlug ||
+                      (product.category || "product").toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "");
+                    window.location.href = `/collections/${slug}`;
+                  }}
                 >
                   {product.category}
                 </Button>
@@ -464,7 +485,21 @@ export default function ProductPageClient({ productId }: ProductPageClientProps)
             <div className="space-y-6">
               <div>
                 <p className="text-sm text-gray-500 uppercase tracking-wide mb-2">{product.category}</p>
-                <h1 className="text-3xl font-bold text-gray-900 mb-4">{product.name}</h1>
+                <h1 className="text-3xl font-bold text-gray-900 mb-2 font-serif">{product.name}</h1>
+                <p className="text-sm text-gray-600 mb-4">
+                  {totalStockLeft > 0 ? (
+                    <span className="inline-flex items-center gap-2 rounded-full bg-white border border-pink-100 px-3 py-1">
+                      <span className="h-2 w-2 rounded-full bg-green-500" />
+                      <span className="font-medium text-gray-700">Stock left:</span>
+                      <span className="font-semibold text-gray-900 tabular-nums">{totalStockLeft}</span>
+                    </span>
+                  ) : (
+                    <span className="inline-flex items-center gap-2 rounded-full bg-white border border-pink-100 px-3 py-1">
+                      <span className="h-2 w-2 rounded-full bg-red-500" />
+                      <span className="font-semibold text-gray-900">Out of stock</span>
+                    </span>
+                  )}
+                </p>
 
                 {/* Price */}
                 <div className="flex items-center gap-3 mb-6">
@@ -511,10 +546,10 @@ export default function ProductPageClient({ productId }: ProductPageClientProps)
                             disabled={isOutOfStock}
                             className={`border rounded-md px-3 py-2 text-sm font-semibold transition-all focus:outline-none focus:ring-2 focus:ring-cyan-400
                               ${isSelected 
-                                ? "border-gray-900 bg-gray-900 text-white" 
+                                ? "border-[#E91E63] bg-[#E91E63] text-white" 
                                 : isOutOfStock
                                   ? "border-gray-200 bg-gray-100 text-gray-400 cursor-not-allowed opacity-50"
-                                  : "border-gray-300 bg-white text-gray-900 hover:border-cyan-400"
+                                  : "border-gray-300 bg-white text-gray-900 hover:border-pink-300"
                               }
                             `}
                             title={isOutOfStock ? "Out of Stock" : `Select size ${size}`}
@@ -589,10 +624,10 @@ export default function ProductPageClient({ productId }: ProductPageClientProps)
                       type="button"
                       className={`flex-1 border rounded-md h-10 font-semibold transition text-sm disabled:opacity-50 disabled:cursor-not-allowed
                         ${!selectedSize 
-                          ? "border-orange-400 bg-orange-50 text-orange-700 hover:bg-orange-100" 
+                          ? "border-pink-200 bg-pink-50 text-pink-700 hover:bg-pink-100" 
                           : selectedSizeStock === 0 
                             ? "border-gray-300 bg-gray-100 text-gray-500 cursor-not-allowed"
-                            : "border-gray-400 bg-white text-gray-900 hover:bg-gray-100"
+                            : "border-pink-200 bg-white text-gray-900 hover:bg-pink-50"
                         }
                       `}
                       disabled={!selectedSize || selectedSizeStock === 0 || quantity > selectedSizeStock}
@@ -621,7 +656,7 @@ export default function ProductPageClient({ productId }: ProductPageClientProps)
                   {/* Buy it now */}
                   <button
                     type="button"
-                    className="w-full h-12 rounded-md bg-[#473C66] hover:bg-[#3a3054] text-white font-bold text-base tracking-wide transition shadow-md"
+                    className="w-full h-12 rounded-md bg-[#E91E63] hover:bg-[#d81b60] text-white font-bold text-base tracking-wide transition shadow-md"
                     disabled={!selectedSize || selectedSizeStock === 0 || quantity > selectedSizeStock}
                     onClick={handleBuyNow}
                   >
