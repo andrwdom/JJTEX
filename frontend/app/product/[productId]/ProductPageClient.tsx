@@ -2,9 +2,7 @@
 
 import { useState, useEffect } from "react"
 import { Button } from "@/components/ui/button"
-import { Card, CardContent } from "@/components/ui/card"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { ArrowLeft, Share2, Truck, Shield, RotateCcw, Plus, Minus, Star, ChevronRight } from "lucide-react"
+import { ArrowLeft, Share2, Truck, ShieldCheck, RotateCcw, ChevronRight } from "lucide-react"
 import Image from "next/image"
 import Script from "next/script"
 import PageLoading from "@/components/page-loading"
@@ -12,7 +10,8 @@ import { useCart } from "@/components/cart-context";
 import { useBuyNow } from "@/components/buy-now-context";
 import { useCheckoutFlow } from "@/components/checkout-flow-manager";
 import WishlistButton from "@/components/WishlistButton"
-import { toast } from "sonner"
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion"
+import { getDesignerNote, getRomanticizedProductTitle } from "@/lib/product-page-copy"
 
 interface Product {
   id?: number
@@ -70,6 +69,7 @@ export default function ProductPageClient({ productId }: ProductPageClientProps)
   const [quantity, setQuantity] = useState(1)
   const [isWishlisted, setIsWishlisted] = useState(false)
   const [refreshKey, setRefreshKey] = useState(0)
+  const [shakeSizes, setShakeSizes] = useState(false)
   const { addToCart, openCartSidebar, clearCart } = useCart()
   const { setBuyNowItem } = useBuyNow()
   const { setCheckoutFlow } = useCheckoutFlow();
@@ -164,6 +164,9 @@ export default function ProductPageClient({ productId }: ProductPageClientProps)
   const totalStockLeft = Array.isArray(product?.sizes)
     ? product!.sizes.reduce((sum: number, s: any) => sum + Math.max(0, (s?.stock || 0) - (s?.reserved || 0)), 0)
     : (product?.stock || 0);
+  const showLowStock = selectedSize ? (selectedSizeStock > 0 && selectedSizeStock <= 3) : (totalStockLeft > 0 && totalStockLeft <= 3)
+  const displayTitle = product ? getRomanticizedProductTitle(product) : ""
+  const designerNote = product ? getDesignerNote(product) : ""
 
   // Auto-adjust quantity if it exceeds stock when size changes
   useEffect(() => {
@@ -174,7 +177,8 @@ export default function ProductPageClient({ productId }: ProductPageClientProps)
 
   const handleBuyNow = async () => {
     if (!selectedSize) {
-      toast.error("Please select a size first!")
+      setShakeSizes(true)
+      setTimeout(() => setShakeSizes(false), 300)
       return
     }
     if (!product) return;
@@ -285,9 +289,9 @@ export default function ProductPageClient({ productId }: ProductPageClientProps)
 
   return (
     <>
-      <div className="min-h-screen bg-[#f9f9f9]">
+      <div className="min-h-screen bg-white">
         {/* Header */}
-        <div className="sticky top-20 z-40 bg-gradient-to-b from-[#fce4ec]/70 via-white/90 to-white/90 backdrop-blur-md border-b border-pink-100 shadow-sm">
+        <div className="sticky top-20 z-40 bg-gradient-to-b from-[#fce4ec] via-[#fce4ec]/70 to-white/90 backdrop-blur-md border-b border-transparent">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="flex flex-col h-auto py-3">
               {/* Breadcrumb */}
@@ -310,7 +314,7 @@ export default function ProductPageClient({ productId }: ProductPageClientProps)
                   {product.category}
                 </Button>
                 <ChevronRight className="h-4 w-4" />
-                <span className="text-gray-900 font-medium truncate">{product.name}</span>
+                <span className="text-gray-900 font-medium truncate">{displayTitle || product.name}</span>
               </div>
               
               {/* Product Title and Share */}
@@ -319,7 +323,7 @@ export default function ProductPageClient({ productId }: ProductPageClientProps)
                   <ArrowLeft className="h-5 w-5 mr-2" />
                   Back
                 </Button>
-                <h1 className="text-lg font-semibold text-gray-900 truncate flex-1">{product.name}</h1>
+                <h1 className="text-lg font-semibold text-gray-900 truncate flex-1">{displayTitle || product.name}</h1>
                 <div className="flex items-center space-x-2">
                   <WishlistButton productId={product.id?.toString() || product._id || productId} size="sm" />
                   <Button
@@ -329,7 +333,7 @@ export default function ProductPageClient({ productId }: ProductPageClientProps)
                     onClick={async () => {
                       if (navigator.share) {
                         const shareData = {
-                          title: product.name || 'Product',
+                          title: (displayTitle || product.name) || 'Product',
                           text: product.description || 'Check out this product',
                           url: window.location.href
                         };
@@ -358,7 +362,8 @@ export default function ProductPageClient({ productId }: ProductPageClientProps)
           </div>
         </div>
 
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <div className="bg-gradient-to-b from-[#fce4ec] to-white">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-4 pb-10">
           {/* Add Product structured data */}
           {product && (
             <Script
@@ -434,10 +439,10 @@ export default function ProductPageClient({ productId }: ProductPageClientProps)
             />
           )}
           
-          <div className="grid lg:grid-cols-2 gap-12">
+          <div className="grid lg:grid-cols-2 gap-10">
             {/* Product Images */}
-            <div className="space-y-4">
-              <div className="relative aspect-[2/3] w-full max-w-md bg-white rounded-2xl overflow-hidden shadow-lg mx-auto">
+            <div className="space-y-4 lg:sticky lg:top-28 lg:self-start">
+              <div className="relative aspect-[2/3] w-full max-w-md bg-white rounded-[8px] overflow-hidden shadow-sm ring-1 ring-black/5 mx-auto">
                 <Image
                   src={product.images[selectedImage] || "/placeholder.svg"}
                   alt={product.name}
@@ -464,8 +469,8 @@ export default function ProductPageClient({ productId }: ProductPageClientProps)
                     <button
                       key={index}
                       onClick={() => setSelectedImage(index)}
-                      className={`flex-none w-16 aspect-[2/3] rounded-lg overflow-hidden border-2 transition-all ${
-                        selectedImage === index ? "border-gray-900" : "border-gray-200"
+                      className={`flex-none w-16 aspect-[2/3] rounded-[8px] overflow-hidden border transition-all duration-300 ${
+                        selectedImage === index ? "border-[#E91E63]" : "border-black/10 hover:border-pink-200"
                       }`}
                     >
                       <Image
@@ -483,31 +488,40 @@ export default function ProductPageClient({ productId }: ProductPageClientProps)
 
             {/* Product Details */}
             <div className="space-y-6">
-              <div>
-                <p className="text-sm text-gray-500 uppercase tracking-wide mb-2">{product.category}</p>
-                <h1 className="text-3xl font-bold text-gray-900 mb-2 font-serif">{product.name}</h1>
-                <p className="text-sm text-gray-600 mb-4">
-                  {totalStockLeft > 0 ? (
-                    <span className="inline-flex items-center gap-2 rounded-full bg-white border border-pink-100 px-3 py-1">
-                      <span className="h-2 w-2 rounded-full bg-green-500" />
-                      <span className="font-medium text-gray-700">Stock left:</span>
-                      <span className="font-semibold text-gray-900 tabular-nums">{totalStockLeft}</span>
-                    </span>
-                  ) : (
-                    <span className="inline-flex items-center gap-2 rounded-full bg-white border border-pink-100 px-3 py-1">
-                      <span className="h-2 w-2 rounded-full bg-red-500" />
-                      <span className="font-semibold text-gray-900">Out of stock</span>
-                    </span>
-                  )}
-                </p>
+              <div className="bg-white/70 backdrop-blur-md border border-pink-100 rounded-2xl shadow-sm p-5 sm:p-6">
+                <p className="text-xs text-gray-500 uppercase tracking-[0.22em] mb-2">{product.category}</p>
+                <h1 className="text-3xl sm:text-4xl font-bold text-gray-900 mb-2 font-serif tracking-[0.01em]">
+                  {displayTitle || product.name}
+                </h1>
 
-                {/* Price */}
-                <div className="flex items-center gap-3 mb-6">
-                  <span className="text-3xl font-bold text-gray-900">₹{product.price.toLocaleString()}</span>
+                {/* Price (directly under title) */}
+                <div className="flex items-center gap-3 mb-4">
+                  <span className="text-3xl font-bold text-gray-900 font-sans">₹{product.price.toLocaleString()}</span>
                   {product.originalPrice > product.price && (
                     <span className="text-xl text-gray-500 line-through">₹{product.originalPrice.toLocaleString()}</span>
                   )}
                 </div>
+
+                {/* Scarcity only when low */}
+                {showLowStock && (
+                  <div className="mb-4">
+                    <span className="inline-flex items-center gap-2 rounded-full bg-white/70 border border-pink-200 px-3 py-1 text-sm text-gray-700">
+                      <span className="h-2 w-2 rounded-full bg-[#E91E63]" />
+                      <span className="font-medium">Only</span>
+                      <span className="font-semibold tabular-nums">{selectedSize ? selectedSizeStock : totalStockLeft}</span>
+                      <span className="font-medium">left</span>
+                    </span>
+                  </div>
+                )}
+
+                {/* Designer note */}
+                {designerNote && (
+                  <div className="mb-5">
+                    <p className="text-sm text-gray-700 leading-relaxed">
+                      <span className="font-semibold text-gray-900">Designer’s note:</span> {designerNote}
+                    </p>
+                  </div>
+                )}
 
 
                 {/* Promotional banners can be added here if needed */}
@@ -529,9 +543,9 @@ export default function ProductPageClient({ productId }: ProductPageClientProps)
                       Sizing guide
                     </button>
                   </div>
-                  {/* Size grid */}
+                  {/* Size tiles */}
                   {sizeOptions.length > 0 ? (
-                    <div className="grid grid-cols-4 gap-2 sm:grid-cols-6 md:grid-cols-8 lg:grid-cols-8 mb-2">
+                    <div className={["grid grid-cols-4 gap-2 sm:grid-cols-6 md:grid-cols-8 lg:grid-cols-8 mb-2", shakeSizes ? "animate-shake-soft" : ""].join(" ")}>
                       {sizeOptions.map((size) => {
                         const sizeObj = product.sizes?.find(s => s.size === size);
                         const sizeStock = sizeObj ? sizeObj.stock : 0;
@@ -544,17 +558,22 @@ export default function ProductPageClient({ productId }: ProductPageClientProps)
                             type="button"
                             onClick={() => setSelectedSize(size)}
                             disabled={isOutOfStock}
-                            className={`border rounded-md px-3 py-2 text-sm font-semibold transition-all focus:outline-none focus:ring-2 focus:ring-cyan-400
-                              ${isSelected 
-                                ? "border-[#E91E63] bg-[#E91E63] text-white" 
+                            className={[
+                              "relative h-11 rounded-full px-3 text-sm font-semibold transition-all duration-300 ease-in-out focus:outline-none border",
+                              isSelected
+                                ? "border-[#E91E63] bg-[#E91E63] text-white shadow-[0_0_0_3px_rgba(233,30,99,0.18)]"
                                 : isOutOfStock
-                                  ? "border-gray-200 bg-gray-100 text-gray-400 cursor-not-allowed opacity-50"
-                                  : "border-gray-300 bg-white text-gray-900 hover:border-pink-300"
-                              }
-                            `}
+                                  ? "border-black/10 bg-white/60 text-gray-400 opacity-50 cursor-not-allowed"
+                                  : "border-black/10 bg-white text-gray-800 hover:border-pink-200 hover:bg-pink-50",
+                            ].join(" ")}
                             title={isOutOfStock ? "Out of Stock" : `Select size ${size}`}
                           >
                             {size}
+                            {isOutOfStock && (
+                              <span className="pointer-events-none absolute inset-0 flex items-center justify-center">
+                                <span className="h-px w-8 bg-gray-400 rotate-[-25deg]" />
+                              </span>
+                            )}
                           </button>
                         );
                       })}
@@ -578,25 +597,18 @@ export default function ProductPageClient({ productId }: ProductPageClientProps)
                     </div>
                   )}
                   
-                  {/* Size selection guidance */}
-                  {!selectedSize && sizeOptions.length > 0 && (
-                    <div className="text-sm text-blue-600 bg-blue-50 border border-blue-200 rounded-md px-3 py-2 mb-2">
-                      💡 Please select a size to add this item to your cart
-                    </div>
-                  )}
-                  
                   {/* Quantity and Add to Cart */}
-                  <div className="flex gap-2 items-center mb-2">
-                    <div className="flex items-center border rounded-md overflow-hidden w-[110px]">
+                  <div className="flex gap-3 items-center mb-2">
+                    <div className="flex items-center gap-3">
                       <button
                         type="button"
                         onClick={() => setQuantity(Math.max(1, quantity - 1))}
                         disabled={quantity <= 1}
-                        className="h-10 w-10 flex items-center justify-center text-lg font-bold text-gray-700 disabled:text-gray-300 bg-white hover:bg-gray-100 transition"
+                        className="h-10 w-10 flex items-center justify-center text-lg font-semibold text-gray-700 disabled:text-gray-300 bg-transparent hover:bg-gray-50 rounded-full transition-all duration-300"
                       >
                         –
                       </button>
-                      <span className="flex-1 text-center text-base font-semibold text-gray-900 select-none">{quantity}</span>
+                      <span className="min-w-6 text-center text-base font-semibold text-gray-900 select-none tabular-nums">{quantity}</span>
                       <button
                         type="button"
                         onClick={() => {
@@ -606,12 +618,12 @@ export default function ProductPageClient({ productId }: ProductPageClientProps)
                           }
                         }}
                         disabled={!selectedSize || !selectedSizeStock || quantity >= selectedSizeStock}
-                        className="h-10 w-10 flex items-center justify-center text-lg font-bold text-gray-700 bg-white hover:bg-gray-100 transition disabled:opacity-50 disabled:cursor-not-allowed"
+                        className="h-10 w-10 flex items-center justify-center text-lg font-semibold text-gray-700 bg-transparent hover:bg-gray-50 rounded-full transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
                       >
                         +
                       </button>
                     </div>
-                    <span className={`ml-4 text-base font-semibold ${selectedSize && selectedSizeStock === 0 ? 'text-red-500' : selectedSizeStock <= 5 && selectedSizeStock > 0 ? 'text-yellow-600' : 'text-green-600'}`}>{stockStatus}</span>
+                    <span className={`text-sm font-semibold ${selectedSize && selectedSizeStock === 0 ? 'text-red-500' : selectedSizeStock <= 5 && selectedSizeStock > 0 ? 'text-yellow-600' : 'text-green-600'}`}>{stockStatus}</span>
                     
                     {/* Stock warning if quantity exceeds available stock */}
                     {selectedSize && selectedSizeStock > 0 && quantity > selectedSizeStock && (
@@ -622,7 +634,7 @@ export default function ProductPageClient({ productId }: ProductPageClientProps)
                     
                     <button
                       type="button"
-                      className={`flex-1 border rounded-md h-10 font-semibold transition text-sm disabled:opacity-50 disabled:cursor-not-allowed
+                      className={`flex-1 border rounded-full h-11 font-semibold transition-all duration-300 ease-in-out text-sm disabled:opacity-50 disabled:cursor-not-allowed
                         ${!selectedSize 
                           ? "border-pink-200 bg-pink-50 text-pink-700 hover:bg-pink-100" 
                           : selectedSizeStock === 0 
@@ -633,8 +645,8 @@ export default function ProductPageClient({ productId }: ProductPageClientProps)
                       disabled={!selectedSize || selectedSizeStock === 0 || quantity > selectedSizeStock}
                       onClick={() => {
                         if (!selectedSize) {
-                          // Show feedback when no size is selected
-                          toast.error("Please select a size first!");
+                          setShakeSizes(true)
+                          setTimeout(() => setShakeSizes(false), 300)
                           return;
                         }
                         if (!product) return;
@@ -656,87 +668,109 @@ export default function ProductPageClient({ productId }: ProductPageClientProps)
                   {/* Buy it now */}
                   <button
                     type="button"
-                    className="w-full h-12 rounded-md bg-[#E91E63] hover:bg-[#d81b60] text-white font-bold text-base tracking-wide transition shadow-md"
-                    disabled={!selectedSize || selectedSizeStock === 0 || quantity > selectedSizeStock}
-                    onClick={handleBuyNow}
+                    className={[
+                      "w-full h-12 rounded-full text-white font-bold text-base tracking-wide transition-all duration-300 ease-in-out shadow-md",
+                      "bg-gradient-to-r from-[#E91E63] to-[#ff5fa2] hover:shadow-lg hover:-translate-y-0.5",
+                      !selectedSize ? "opacity-50" : "opacity-100",
+                      (selectedSizeStock === 0 || quantity > selectedSizeStock) ? "opacity-50 cursor-not-allowed" : "",
+                    ].join(" ")}
+                    disabled={selectedSizeStock === 0 || quantity > selectedSizeStock}
+                    onClick={() => {
+                      if (!selectedSize) {
+                        setShakeSizes(true)
+                        setTimeout(() => setShakeSizes(false), 300)
+                        return
+                      }
+                      handleBuyNow()
+                    }}
                   >
                     BUY IT NOW
                   </button>
                 </div>
 
-                {/* Delivery Info - Moved above Product Description */}
-                <Card className="border-0 bg-gray-100 rounded-2xl mt-6">
-                  <CardContent className="p-6">
-                    <div className="space-y-4">
-                      <div className="flex items-center gap-3">
-                        <Truck className="h-5 w-5 text-gray-600" />
-                        <span className="text-sm font-medium">Delivery in 3-5 Days</span>
-                      </div>
-                      <div className="flex items-center gap-3">
-                        <Shield className="h-5 w-5 text-gray-600" />
-                        <span className="text-sm font-medium">Secure Checkout</span>
-                      </div>
-                      <div className="flex items-center gap-3">
-                        <RotateCcw className="h-5 w-5 text-gray-600" />
-                        <span className="text-sm font-medium">
-                          please refer to the{' '}
-                          <a 
-                            href="/return-policy" 
-                            className="text-[#473C66] hover:text-[#3a3054] underline font-medium transition-colors"
-                          >
-                            refund policy
-                          </a>
-                        </span>
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-
-                {/* Product Description - Below Delivery Info */}
-                <div className="mt-6">
-                  <h3 className="text-lg font-semibold text-gray-900 mb-4">Product Description</h3>
-                  <div className="bg-gradient-to-r from-gray-50 to-pink-50 rounded-lg p-6 border border-gray-100">
-                    <div className="text-gray-700 leading-relaxed space-y-2">
-                      {product.description.split('\n').map((line, index) => {
-                        // Handle empty lines - minimal spacing
-                        if (line.trim() === '') {
-                          return <div key={index} className="h-0.5"></div>;
-                        }
-                        
-                        // Handle bullet points (lines starting with *)
-                        if (line.trim().startsWith('*') && !line.trim().startsWith('**')) {
-                          return (
-                            <div key={index} className="flex items-start ml-4">
-                              <span className="text-pink-500 mr-2 mt-1 font-bold">•</span>
-                              <span className="text-gray-700 leading-relaxed">
-                                {formatWhatsAppStyle(line.trim().substring(1).trim())}
-                              </span>
-                            </div>
-                          );
-                        }
-                        
-                        // Handle bold text (lines starting with **)
-                        if (line.trim().startsWith('**') && line.trim().endsWith('**')) {
-                          return (
-                            <h3 key={index} className="font-bold text-gray-900 text-lg mt-4 mb-2 first:mt-0 border-b border-pink-200 pb-2">
-                              {line.trim().substring(2, line.trim().length - 2)}
-                            </h3>
-                          );
-                        }
-                        
-                        // Handle regular text
-                        return (
-                          <p key={index} className="text-gray-700 leading-relaxed">
-                            {formatWhatsAppStyle(line.trim())}
-                          </p>
-                        );
-                      })}
-                    </div>
+                {/* Trust row (thin pink icons) */}
+                <div className="mt-6 grid grid-cols-1 sm:grid-cols-3 gap-3">
+                  <div className="flex items-center gap-3 rounded-2xl border border-pink-100 bg-white/60 backdrop-blur px-4 py-3">
+                    <Truck className="h-5 w-5 text-[#E91E63]" strokeWidth={1.25} />
+                    <span className="text-sm text-gray-800">Delivery in 3–5 days</span>
                   </div>
+                  <div className="flex items-center gap-3 rounded-2xl border border-pink-100 bg-white/60 backdrop-blur px-4 py-3">
+                    <ShieldCheck className="h-5 w-5 text-[#E91E63]" strokeWidth={1.25} />
+                    <span className="text-sm text-gray-800">Secure checkout</span>
+                  </div>
+                  <div className="flex items-center gap-3 rounded-2xl border border-pink-100 bg-white/60 backdrop-blur px-4 py-3">
+                    <RotateCcw className="h-5 w-5 text-[#E91E63]" strokeWidth={1.25} />
+                    <span className="text-sm text-gray-800">
+                      <a href="/return-policy" className="underline underline-offset-4 hover:text-[#E91E63] transition-colors duration-300">
+                        Refund policy
+                      </a>
+                    </span>
+                  </div>
+                </div>
+
+                {/* Minimal accordions */}
+                <div className="mt-6 rounded-2xl border border-pink-100 bg-white/70 backdrop-blur-md">
+                  <Accordion type="single" collapsible>
+                    <AccordionItem value="desc" className="px-5">
+                      <AccordionTrigger className="text-gray-900 hover:no-underline">
+                        Product description
+                      </AccordionTrigger>
+                      <AccordionContent className="text-gray-700">
+                        <div className="leading-relaxed space-y-2">
+                          {product.description.split('\n').map((line, index) => {
+                            if (line.trim() === '') return <div key={index} className="h-0.5"></div>;
+                            if (line.trim().startsWith('*') && !line.trim().startsWith('**')) {
+                              return (
+                                <div key={index} className="flex items-start">
+                                  <span className="text-[#E91E63] mr-2 mt-1 font-bold">•</span>
+                                  <span>{formatWhatsAppStyle(line.trim().substring(1).trim())}</span>
+                                </div>
+                              );
+                            }
+                            if (line.trim().startsWith('**') && line.trim().endsWith('**')) {
+                              return (
+                                <div key={index} className="font-semibold text-gray-900 pt-2">
+                                  {line.trim().substring(2, line.trim().length - 2)}
+                                </div>
+                              );
+                            }
+                            return <p key={index}>{formatWhatsAppStyle(line.trim())}</p>;
+                          })}
+                        </div>
+                      </AccordionContent>
+                    </AccordionItem>
+
+                    <AccordionItem value="care" className="px-5">
+                      <AccordionTrigger className="text-gray-900 hover:no-underline">
+                        Care instructions
+                      </AccordionTrigger>
+                      <AccordionContent className="text-gray-700">
+                        <ul className="list-disc pl-5 space-y-1">
+                          <li>Gentle wash recommended; wash dark colors separately.</li>
+                          <li>Do not bleach; dry in shade to preserve color.</li>
+                          <li>Steam or low-heat iron as needed.</li>
+                        </ul>
+                      </AccordionContent>
+                    </AccordionItem>
+
+                    <AccordionItem value="ship" className="px-5 border-b-0">
+                      <AccordionTrigger className="text-gray-900 hover:no-underline">
+                        Shipping details
+                      </AccordionTrigger>
+                      <AccordionContent className="text-gray-700">
+                        <ul className="list-disc pl-5 space-y-1">
+                          <li>Dispatch in 24–48 hours (business days).</li>
+                          <li>Delivery typically within 3–5 days depending on location.</li>
+                          <li>For returns/refunds, please refer to our policy.</li>
+                        </ul>
+                      </AccordionContent>
+                    </AccordionItem>
+                  </Accordion>
                 </div>
               </div>
             </div>
           </div>
+        </div>
         </div>
       </div>
     </>

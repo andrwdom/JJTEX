@@ -282,6 +282,19 @@
   box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
 }
 
+/* Premium micro-interactions */
+@keyframes shake-soft {
+  0%, 100% { transform: translateX(0); }
+  20% { transform: translateX(-3px); }
+  40% { transform: translateX(3px); }
+  60% { transform: translateX(-2px); }
+  80% { transform: translateX(2px); }
+}
+
+.animate-shake-soft {
+  animation: shake-soft 280ms ease-in-out;
+}
+
 /* Enhanced navbar styles */
 @media (min-width: 768px) {
   .navbar-link-effect {

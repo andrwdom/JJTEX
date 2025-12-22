@@ -14,6 +14,7 @@ export default function LayoutClient({ children }: { children: React.ReactNode }
   // Hide legacy navbar/footer on the new mobile-first homepage
   const isHomePage = pathname === '/';
   const isCollectionsPage = pathname?.startsWith('/collections/');
+  const isProductPage = pathname?.startsWith('/product/') || pathname?.includes('/product/');
   
   // Don't hide navbar during page loading - only hide during checkout
   const shouldShowNavbar = !isCheckoutPage && !isHomePage;
@@ -27,7 +28,10 @@ export default function LayoutClient({ children }: { children: React.ReactNode }
       {/* Show navbar on all pages except checkout */}
       {shouldShowNavbar && (
         <>
-          <SiteHeader seamless={isCollectionsPage} syncSearchToUrl={isCollectionsPage} />
+          <SiteHeader
+            seamless={isCollectionsPage || isProductPage}
+            syncSearchToUrl={isCollectionsPage}
+          />
         </>
       )}
       <main className="flex-1 flex flex-col">{children}</main>
