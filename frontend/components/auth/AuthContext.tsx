@@ -140,8 +140,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   // Function to get ID token
   const getIdTokenFromAuth = async (forceRefresh: boolean = false) => {
-    if (!user || !auth) {
-      throw new Error('No user logged in or Firebase not available');
+    if (!user) {
+      throw new Error('No user logged in');
     }
     return await getIdToken(user, forceRefresh);
   };
