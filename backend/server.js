@@ -179,7 +179,9 @@ const corsOptions = {
         'cache-control',
         'Cache-Control',
         'pragma',
-        'Pragma'
+        'Pragma',
+        'expires',
+        'Expires'
     ],
     exposedHeaders: ['Access-Control-Allow-Origin', 'Access-Control-Allow-Credentials'],
     maxAge: 86400, // 24 hours
