@@ -5,7 +5,7 @@ import Reservation from '../models/Reservation.js';
 import productModel from '../models/productModel.js';
 import orderModel from '../models/orderModel.js';
 import { successResponse, errorResponse } from '../utils/response.js';
-import { checkStockAvailability, reserveStock, releaseStockReservation } from '../utils/stock.js';
+import { checkStockAvailability, reserveStock, releaseStockReservation, atomicBatchReservation } from '../utils/stock.js';
 import { reserveBatchStockAtomic } from '../utils/batchStockOperations.js';
 import mongoose from 'mongoose';
 
@@ -235,7 +235,16 @@ export const createCheckoutSession = async (req, res) => {
     // Generate session ID
     const sessionId = randomUUID();
     
-    // 🔑 ATOMIC: Create session WITH stock reservation in a transaction
+    const isTxnUnsupported = (err) => {
+      const msg = String(err?.message || err || '');
+      return (
+        msg.includes('Transaction numbers are only allowed on a replica set member or mongos') ||
+        msg.toLowerCase().includes('replica set') ||
+        msg.toLowerCase().includes('mongos')
+      );
+    };
+    
+    // 🔑 ATOMIC: Create session WITH stock reservation in a transaction (replica set / mongos)
     const mongoSession = await mongoose.startSession();
     
     try {
@@ -306,8 +315,90 @@ export const createCheckoutSession = async (req, res) => {
         console.log(`[${correlationId}] ✅ Stock reserved successfully`);
       });
     } catch (error) {
-      console.error(`[${correlationId}] ❌ Session creation failed:`, error.message);
-      throw error;
+      // 🔧 VPS FIX: Many VPS installs run MongoDB as standalone (no replica set) → no transactions.
+      // Fallback to a safe non-transactional flow with manual rollback.
+      if (isTxnUnsupported(error)) {
+        console.warn(`[${correlationId}] ⚠️ MongoDB transactions unsupported. Falling back to non-transactional checkout session creation.`);
+        
+        // 1) Create session (no transaction)
+        const checkoutSession = new CheckoutSession({
+          sessionId,
+          shippingCost,
+          source,
+          userId,
+          userEmail,
+          guestToken: !userId ? randomUUID() : undefined,
+          items: validatedItems,
+          subtotal: rawSubtotal,
+          discount: {
+            type: 'fixed',
+            value: offerDiscount,
+            appliedCouponCode: null
+          },
+          offerDetails: {
+            offerApplied: offerDiscount > 0,
+            offerType: offerDiscount > 0 ? 'loungewear_buy3_1299' : null,
+            offerDiscount,
+            offerDescription: offerDiscount > 0 ? 'Special Offer Applied' : null,
+            offerCalculation: {
+              completeSets: 0,
+              remainingItems: 0,
+              originalPrice: rawSubtotal,
+              offerPrice: total - shippingCost,
+              savings: offerDiscount
+            }
+          },
+          total,
+          currency: 'INR',
+          status: 'pending',
+          stockReserved: false,
+          expiresAt: new Date(Date.now() + 20 * 60 * 1000),
+          metadata: {
+            userAgent: req.headers['user-agent'],
+            ipAddress: req.ip || req.connection.remoteAddress,
+            correlationId,
+            checkoutFlow: source,
+            transactions: 'disabled_fallback'
+          }
+        });
+        
+        await checkoutSession.save();
+        console.log(`[${correlationId}] Session created (no-txn): ${sessionId}`);
+        
+        try {
+          // 2) Reserve stock item-by-item atomically; rollback on failure
+          console.log(`[${correlationId}] Reserving stock for ${validatedItems.length} items (no-txn rollback mode)...`);
+          
+          const reservationItems = validatedItems.map((it) => ({
+            productId: it.productId || it._id,
+            size: it.size,
+            quantity: it.quantity,
+            name: it.name
+          }));
+          
+          await atomicBatchReservation(reservationItems, { correlationId });
+          
+          // 3) Mark session reserved
+          checkoutSession.stockReserved = true;
+          checkoutSession.status = 'awaiting_payment';
+          await checkoutSession.save();
+          
+          console.log(`[${correlationId}] ✅ Stock reserved successfully (no-txn)`);
+          // Continue to success response below
+        } catch (reserveErr) {
+          console.error(`[${correlationId}] ❌ Stock reservation failed (no-txn), deleting session:`, reserveErr.message);
+          try {
+            await CheckoutSession.deleteOne({ sessionId });
+          } catch (cleanupErr) {
+            console.warn(`[${correlationId}] ⚠️ Failed to delete failed session:`, cleanupErr.message);
+          }
+          throw reserveErr;
+        }
+        
+      } else {
+        console.error(`[${correlationId}] ❌ Session creation failed:`, error.message);
+        throw error;
+      }
     } finally {
       await mongoSession.endSession();
     }
