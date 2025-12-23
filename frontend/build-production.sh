@@ -1,6 +1,6 @@
 #!/bin/bash
 
-echo "🚀 Building Shithaa Frontend for Production"
+echo "🚀 Building JJTextiles Frontend for Production"
 echo "============================================="
 
 # Colors for output
@@ -23,7 +23,21 @@ fi
 
 # Set production environment
 export NODE_ENV=production
-export NEXT_PUBLIC_API_URL=https://shithaa.in
+
+# Load environment variables for Next.js build-time injection
+# IMPORTANT: NEXT_PUBLIC_* vars must exist at BUILD time for the client bundle.
+if [ -f ".env.production" ]; then
+    echo -e "${YELLOW}🔐 Loading .env.production...${NC}"
+    set -a
+    source .env.production
+    set +a
+else
+    echo -e "${YELLOW}ℹ️  .env.production not found; using safe defaults where possible.${NC}"
+fi
+
+# Defaults (only used if not provided by .env.production)
+: "${NEXT_PUBLIC_API_URL:=https://jjtextiles.com}"
+: "${NEXT_PUBLIC_SITE_URL:=https://jjtextiles.com}"
 
 # Build the application
 echo -e "${YELLOW}🔨 Building Next.js application...${NC}"

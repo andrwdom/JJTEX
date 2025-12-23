@@ -1,26 +1,37 @@
 "use client"
 import { useState } from "react";
-import { GoogleAuthProvider, signInWithPopup, getIdToken } from "firebase/auth";
-import { auth } from "@/lib/firebase";
+import { GoogleAuthProvider, signInWithPopup } from "firebase/auth";
+import { getFirebaseAuth, isFirebaseConfigured } from "@/lib/firebase";
 import { toast } from "sonner";
 
 export default function GoogleLoginButton({ onSuccess }: { onSuccess: () => void }) {
   const [loading, setLoading] = useState(false);
 
   async function handleGoogleLogin() {
+    if (!isFirebaseConfigured()) {
+      toast.error("Google sign-in isn't configured yet. Please try again later.", {
+        position: "top-center",
+      });
+      return;
+    }
+
     setLoading(true);
     try {
+      const auth = getFirebaseAuth();
       console.log("Attempting Google login...");
-      const result = await signInWithPopup(auth, new GoogleAuthProvider());
+      const provider = new GoogleAuthProvider();
+      provider.setCustomParameters({ prompt: "select_account" });
+      const result = await signInWithPopup(auth, provider);
       console.log("Google login successful, getting ID token...");
       
-      const idToken = await getIdToken(auth.currentUser);
+      const idToken = await result.user.getIdToken();
       console.log("Got ID token, calling backend...");
       
       const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000"}/api/user/firebase-login`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ idToken }),
+        credentials: "include",
       });
       
       console.log("Backend response status:", res.status);
@@ -39,15 +50,15 @@ export default function GoogleLoginButton({ onSuccess }: { onSuccess: () => void
         
         if (isNewUser) {
           console.log("Showing new user welcome toast");
-          toast.success(`🎉 Welcome to Shithaa, ${userName}!`, {
-            description: "You've successfully signed up. Explore our elegant maternity wear collections now.",
+          toast.success(`🎉 Welcome to JJTextiles, ${userName}!`, {
+            description: "You've successfully signed up. Enjoy shopping!",
             duration: 5000,
             position: 'top-center',
           });
         } else {
           console.log("Showing returning user welcome toast");
           toast.success(`👋 Welcome back, ${userName}!`, {
-            description: "You've successfully signed in to Shithaa.",
+            description: "You've successfully signed in to JJTextiles.",
             duration: 5000,
             position: 'top-center',
           });

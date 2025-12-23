@@ -1,18 +1,13 @@
 "use client"
 import { useState } from "react";
-import { auth } from "@/lib/firebase";
-import { signInWithEmailAndPassword, createUserWithEmailAndPassword, updateProfile, getIdToken } from "firebase/auth";
-import { toast } from "sonner";
 import GoogleLoginButton from "./GoogleLoginButton";
 
 export default function LoginModal({ open, onClose, onSuccess }: { open: boolean, onClose: () => void, onSuccess: () => void }) {
-  const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   // Reset fields on modal close
   function handleClose() {
     setError(null);
-    setLoading(false);
     onClose();
   }
 
@@ -31,8 +26,8 @@ export default function LoginModal({ open, onClose, onSuccess }: { open: boolean
 
         {/* Brand Header */}
         <div className="text-center mb-8">
-          <h2 className="text-2xl font-bold text-[#473C66] mb-2">Welcome to Shithaa</h2>
-          <p className="text-gray-600 text-sm">Elegant Maternity & Feeding Wear</p>
+          <h2 className="text-2xl font-bold text-[#473C66] mb-2">Welcome to JJTextiles</h2>
+          <p className="text-gray-600 text-sm">Sign in to continue shopping</p>
         </div>
 
         {/* Error Display */}

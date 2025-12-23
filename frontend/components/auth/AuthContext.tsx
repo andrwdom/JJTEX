@@ -1,7 +1,7 @@
 "use client"
 import { createContext, useContext, useEffect, useState } from "react";
 import { onAuthStateChanged, signOut, User, getIdToken } from "firebase/auth";
-import { auth } from "@/lib/firebase";
+import { getFirebaseAuth } from "@/lib/firebase";
 import { useRouter } from 'next/navigation';
 import { toast } from "sonner";
 import { authenticatedFetch } from '@/lib/api-utils';
@@ -15,8 +15,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const router = useRouter();
 
   useEffect(() => {
-    // Skip Firebase auth if not available (e.g., during build time)
-    if (!auth) {
+    let auth;
+    try {
+      auth = getFirebaseAuth();
+    } catch (e) {
+      // Firebase not configured on the client build; keep auth features disabled.
+      console.warn("Firebase auth unavailable:", e);
       setLoading(false);
       return;
     }
@@ -116,8 +120,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       }
       
       // Sign out from Firebase if available
-      if (auth) {
+      try {
+        const auth = getFirebaseAuth();
         await signOut(auth);
+      } catch {
+        // Ignore if Firebase isn't configured
       }
       
       // Redirect to home page after a short delay
