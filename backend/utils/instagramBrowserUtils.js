@@ -95,7 +95,7 @@ export function getCorsHeaders(req, origin) {
         'Access-Control-Allow-Origin': origin,
         'Access-Control-Allow-Credentials': 'true',
         'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS, PATCH',
-        'Access-Control-Allow-Headers': 'Content-Type, Authorization, token, x-requested-with, Accept, Origin, If-None-Match, If-Modified-Since, Cache-Control',
+        'Access-Control-Allow-Headers': 'Content-Type, Authorization, token, x-requested-with, Accept, Origin, If-None-Match, If-Modified-Since, Cache-Control, Pragma',
         'Access-Control-Expose-Headers': 'Access-Control-Allow-Origin, Access-Control-Allow-Credentials'
     };
     
