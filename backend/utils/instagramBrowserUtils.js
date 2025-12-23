@@ -45,6 +45,13 @@ export function detectInstagramBrowser(req) {
 export function getCookieOptions(req, options = {}) {
     const browserInfo = detectInstagramBrowser(req);
     const isProduction = process.env.NODE_ENV === 'production';
+
+    const host = (req?.hostname || '').toLowerCase();
+    const cookieDomain = isProduction
+        ? (host.endsWith('jjtextiles.com') ? '.jjtextiles.com' :
+           host.endsWith('jjtextiles.in') ? '.jjtextiles.in' :
+           undefined)
+        : undefined;
     
     // Base cookie options
     const baseOptions = {
@@ -70,8 +77,8 @@ export function getCookieOptions(req, options = {}) {
         ...baseOptions,
         sameSite: 'lax',
         secure: isProduction,
-        // Set domain for same-origin requests in production
-        domain: isProduction ? '.jjtextiles.in' : undefined
+        // Allow cookies to work on both www + non-www (and match the actual site TLD)
+        domain: cookieDomain
     };
 }
 
@@ -88,7 +95,7 @@ export function getCorsHeaders(req, origin) {
         'Access-Control-Allow-Origin': origin,
         'Access-Control-Allow-Credentials': 'true',
         'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS, PATCH',
-        'Access-Control-Allow-Headers': 'Content-Type, Authorization, token, x-requested-with, Accept, Origin',
+        'Access-Control-Allow-Headers': 'Content-Type, Authorization, token, x-requested-with, Accept, Origin, If-None-Match, If-Modified-Since, Cache-Control',
         'Access-Control-Expose-Headers': 'Access-Control-Allow-Origin, Access-Control-Allow-Credentials'
     };
     

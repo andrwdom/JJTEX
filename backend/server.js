@@ -164,7 +164,21 @@ const corsOptions = {
     },
     credentials: true,
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS', 'PATCH'],
-    allowedHeaders: ['Content-Type', 'Authorization', 'token', 'x-requested-with', 'Accept', 'Origin'],
+    // Allow common caching + conditional request headers (ETag), otherwise browsers will block preflight.
+    allowedHeaders: [
+        'Content-Type',
+        'Authorization',
+        'token',
+        'x-requested-with',
+        'Accept',
+        'Origin',
+        'if-none-match',
+        'If-None-Match',
+        'if-modified-since',
+        'If-Modified-Since',
+        'cache-control',
+        'Cache-Control'
+    ],
     exposedHeaders: ['Access-Control-Allow-Origin', 'Access-Control-Allow-Credentials'],
     maxAge: 86400, // 24 hours
     preflightContinue: false,
