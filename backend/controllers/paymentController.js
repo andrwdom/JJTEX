@@ -573,13 +573,14 @@ export const createPhonePeSession = async (req, res) => {
     const phonepeTransactionId = randomUUID();
     const orderId = await getUniqueOrderId();
     
-    // Start MongoDB transaction for atomicity
-    const session = await mongoose.startSession();
+    // NOTE: Many VPS installs run MongoDB as standalone (no replica set), where transactions are unsupported.
+    // Draft order creation does NOT require a transaction here because stock is already reserved in CheckoutSession.
+    // We keep this flow non-transactional and use best-effort cleanup on failure.
+    let createdDraftOrder;
     
     try {
-      await session.withTransaction(async () => {
         // Create DRAFT order immediately
-        const draftOrder = await orderModel.create([{
+        createdDraftOrder = await orderModel.create({
       orderId,
       userInfo: {
         userId: checkoutSession.userId,
@@ -631,42 +632,47 @@ export const createPhonePeSession = async (req, res) => {
             source: checkoutSession.source,
             idempotencyKey
           }
-        }], { session });
+        });
 
-        const createdDraftOrder = draftOrder[0];
         console.log(`[${correlationId}] DRAFT order created: ${createdDraftOrder.orderId}`);
 
         // 🔑 Stock is ALREADY reserved in checkout session, just mark the order
         console.log(`[${correlationId}] ✅ Using pre-reserved stock from checkout session`);
         
-          await orderModel.findByIdAndUpdate(
-            createdDraftOrder._id,
-            { stockReserved: true },
-            { session }
-          );
+        await orderModel.findByIdAndUpdate(
+          createdDraftOrder._id,
+          { stockReserved: true }
+        );
         
         // Update checkout session status
-          checkoutSession.status = 'awaiting_payment';
-          await checkoutSession.save({ session });
+        checkoutSession.status = 'awaiting_payment';
+        await checkoutSession.save();
 
         console.log(`[${correlationId}] Draft order linked to reserved stock`);
         Logger.info('draft_order_created', {
-            correlationId,
-            checkoutSessionId,
-            orderId: createdDraftOrder.orderId,
+          correlationId,
+          checkoutSessionId,
+          orderId: createdDraftOrder.orderId,
           itemCount: checkoutSession.items.length,
-          stockAlreadyReserved: true
-          });
-      });
+          stockAlreadyReserved: true,
+          transactions: 'disabled'
+        });
     } catch (error) {
       console.error(`[${correlationId}] Draft order creation failed:`, error);
+      
+      // Best-effort cleanup: cancel the draft order if it was created
+      if (createdDraftOrder?._id) {
+        try {
+          await cancelDraftOrder(createdDraftOrder._id, `Draft creation failed: ${error.message}`);
+        } catch (e) {
+          // ignore cleanup errors
+        }
+      }
       return res.status(500).json({
         success: false,
         message: 'Failed to create draft order',
         error: error.message
       });
-    } finally {
-      await session.endSession();
     }
 
     // 🔑 STEP 4: CREATE PHONEPE PAYMENT SESSION
