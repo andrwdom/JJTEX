@@ -16,8 +16,10 @@ export default function LayoutClient({ children }: { children: React.ReactNode }
   const isCollectionsPage = pathname?.startsWith('/collections/');
   const isProductPage = pathname?.startsWith('/product/') || pathname?.includes('/product/');
   
-  // Don't hide navbar during page loading - only hide during checkout
-  const shouldShowNavbar = !isCheckoutPage && !isHomePage;
+  // Header: hidden on checkout + homepage (homepage has its own header)
+  const shouldShowHeader = !isCheckoutPage && !isHomePage;
+  // Footer: show everywhere except checkout
+  const shouldShowFooter = !isCheckoutPage;
 
   useEffect(() => {
     window.scrollTo({ top: 0, left: 0, behavior: "instant" });
@@ -26,7 +28,7 @@ export default function LayoutClient({ children }: { children: React.ReactNode }
   return (
     <>
       {/* Show navbar on all pages except checkout */}
-      {shouldShowNavbar && (
+      {shouldShowHeader && (
         <>
           <SiteHeader
             seamless={isCollectionsPage || isProductPage}
@@ -36,7 +38,7 @@ export default function LayoutClient({ children }: { children: React.ReactNode }
       )}
       <main className="flex-1 flex flex-col">{children}</main>
       {/* Show footer on all pages except checkout */}
-      {shouldShowNavbar && <Footer />}
+      {shouldShowFooter && <Footer />}
     </>
   );
 } 

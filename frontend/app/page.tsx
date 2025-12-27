@@ -6,11 +6,17 @@ import { useRouter } from "next/navigation"
 import SiteHeader from "@/components/site-header"
 import { fetchProducts } from "@/lib/api-utils"
 import { getProductUrl } from "@/lib/product-url-utils"
+import { ChevronRight } from "lucide-react"
 
 type Highlight = {
 	title: string
 	image: string
 	slug?: string // Category slug for navigation
+}
+
+type CategoryChip = {
+	name: string
+	slug: string
 }
 
 // Fallback highlights if categories aren't loaded yet
@@ -72,10 +78,15 @@ function useRevealOnScroll() {
 export default function Home() {
 	const [highlights, setHighlights] = useState<Highlight[]>(fallbackHighlights)
 	const [categoriesLoading, setCategoriesLoading] = useState(true)
+	const [allCategories, setAllCategories] = useState<CategoryChip[]>([])
 	const [homeProducts, setHomeProducts] = useState<HomeProduct[]>([])
 	const [productsLoading, setProductsLoading] = useState(true)
 	const router = useRouter()
 	const { register, visible } = useRevealOnScroll()
+	// Home grid is 2 columns on mobile; cap to 6 rows => 12 items max.
+	const HOME_MAX_ROWS = 6
+	const HOME_GRID_COLS_MOBILE = 2
+	const HOME_MAX_ITEMS = HOME_MAX_ROWS * HOME_GRID_COLS_MOBILE
 
 	// Fetch categories and create highlights
 	useEffect(() => {
@@ -84,6 +95,12 @@ export default function Home() {
 			try {
 				const tree = await fetchCategoryTree()
 				const leafCategories = getLeafCategories(tree)
+				const chips: CategoryChip[] = leafCategories
+					.filter((c) => !!c?.slug && !!c?.name)
+					.map((c) => ({ name: c.name, slug: c.slug }))
+					// Keep it stable + easy to scan
+					.sort((a, b) => a.name.localeCompare(b.name))
+				setAllCategories(chips)
 				
 				// Map leaf categories to highlights (take first 7 or use fallback)
 				if (leafCategories.length > 0) {
@@ -96,11 +113,13 @@ export default function Home() {
 				} else {
 					// Use fallback if no categories found
 					setHighlights(fallbackHighlights)
+					setAllCategories([])
 				}
 			} catch (error) {
 				console.error('Failed to load categories:', error)
 				// Use fallback on error
 				setHighlights(fallbackHighlights)
+				setAllCategories([])
 			} finally {
 				setCategoriesLoading(false)
 			}
@@ -113,11 +132,12 @@ export default function Home() {
 		async function loadProducts() {
 			setProductsLoading(true)
 			try {
-				const res = await fetchProducts({ limit: "8", sortBy: "createdAt", sortOrder: "desc" })
+				// Force refresh so newly-added admin products appear immediately.
+				const res = await fetchProducts({ limit: String(HOME_MAX_ITEMS), sortBy: "createdAt", sortOrder: "desc" }, true)
 				const data = await res.json()
 				const raw = Array.isArray(data) ? data : (data?.products || data?.data?.products || data?.data || [])
 
-				const mapped: HomeProduct[] = (raw || []).slice(0, 8).map((p: any) => ({
+				const mapped: HomeProduct[] = (raw || []).slice(0, HOME_MAX_ITEMS).map((p: any) => ({
 					id: String(p.customId || p._id),
 					_id: String(p._id || ""),
 					customId: p.customId ? String(p.customId) : undefined,
@@ -138,7 +158,7 @@ export default function Home() {
 			}
 		}
 		loadProducts()
-	}, [])
+	}, [HOME_MAX_ITEMS])
 
 	const seasonalSubtitle = useMemo(() => {
 		const month = new Date().getMonth() // 0-11
@@ -250,7 +270,7 @@ export default function Home() {
 			{/* Product grid */}
 			<section className="mt-6 px-4 pb-20">
 				<div className="grid grid-cols-2 lg:grid-cols-4 gap-6">
-					{(productsLoading ? Array.from({ length: 8 }).map((_, i) => ({ id: `sk-${i}` })) : homeProducts).map((p: any, idx: number) => {
+					{(productsLoading ? Array.from({ length: HOME_MAX_ITEMS }).map((_, i) => ({ id: `sk-${i}` })) : homeProducts).map((p: any, idx: number) => {
 						const id = p.id || `sk-${idx}`
 						const isVisible = visible[id]
 						const img1 = p?.images?.[0] || "/placeholder.svg"
@@ -310,6 +330,47 @@ export default function Home() {
 							</article>
 						)
 					})}
+				</div>
+			</section>
+
+			{/* Shop more by Category */}
+			<section className="px-6 pb-24">
+				<div className="flex items-center">
+					<div className="h-px flex-1 bg-black/10" />
+					<h2 className="mx-3 text-center text-[14px] sm:text-[15px] font-bold tracking-[0.28em] text-gray-900">
+						SHOP MORE BY CATEGORY
+					</h2>
+					<div className="h-px flex-1 bg-black/10" />
+				</div>
+				<p className="mt-2 text-center text-[12px] text-gray-600">
+					Explore everything we make—tap a category to browse.
+				</p>
+
+				<div className="mt-5 flex flex-wrap justify-center gap-3">
+					{categoriesLoading ? (
+						Array.from({ length: 14 }).map((_, i) => (
+							<div
+								key={`cat-sk-${i}`}
+								className="h-11 w-[160px] rounded-full bg-gray-100 animate-pulse"
+							/>
+						))
+					) : (
+						allCategories.map((cat) => (
+							<button
+								key={cat.slug}
+								type="button"
+								onClick={() => router.push(`/collections/${cat.slug}`)}
+								className="group relative"
+								aria-label={`Shop ${cat.name}`}
+							>
+								<span className="absolute inset-0 rounded-full bg-gradient-to-r from-pink-500/40 via-fuchsia-500/35 to-purple-500/40 blur-[10px] opacity-0 transition-opacity duration-300 group-hover:opacity-100" />
+								<span className="relative inline-flex items-center gap-2 rounded-full border border-pink-200/70 bg-white/90 px-5 py-3 text-[13px] font-semibold text-[#3b2b52] shadow-sm transition-all duration-300 hover:-translate-y-[1px] hover:shadow-md">
+									<span className="max-w-[170px] truncate">{cat.name}</span>
+									<ChevronRight className="h-4 w-4 text-pink-500 transition-transform duration-300 group-hover:translate-x-[1px]" />
+								</span>
+							</button>
+						))
+					)}
 				</div>
 			</section>
 

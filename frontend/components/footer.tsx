@@ -1,182 +1,177 @@
 "use client"
 
-import { Instagram, Mail, Shield, RotateCcw, Truck } from "lucide-react"
-import { Button } from "@/components/ui/button"
+import Link from "next/link"
+import { Instagram, Mail, ShieldCheck, RotateCcw, Truck, ChevronRight } from "lucide-react"
+
+const SUPPORT_EMAIL = "info.jjtextiles@gmail.com"
+const INSTAGRAM_URL = "https://www.instagram.com/jjtextiles"
+
+const categoryLinks = [
+  { label: "Dresses & Jumpsuits", slug: "dresses-jumpsuits" },
+  { label: "Ethnic Wear", slug: "ethnic-wear" },
+  { label: "Tops & Tees", slug: "tops-tees" },
+  { label: "Skirts", slug: "skirts" },
+  { label: "Jewellery", slug: "jewellery" },
+  { label: "Kids", slug: "kids" },
+]
+
+const helpLinks = [
+  { label: "Contact", href: "/contact" },
+  { label: "Shipping Info", href: "/shipping-info" },
+  { label: "Return Policy", href: "/return-policy" },
+  { label: "Size Guide", href: "/sizing-guide" },
+]
+
+const legalLinks = [
+  { label: "Terms", href: "/terms" },
+  { label: "Privacy Policy", href: "/privacy-policy" },
+]
 
 export default function Footer() {
   return (
-    <footer className="bg-gray-900 text-white">
-      <div className="container-responsive spacing-section">
-        {/* Trust Badges */}
-        <div className="grid-responsive mb-12 lg:mb-16 pb-12 lg:pb-16 border-b border-gray-800">
-          <div className="text-center group">
-            <div className="w-12 h-12 lg:w-16 lg:h-16 mx-auto mb-4 lg:mb-6 bg-gray-800 rounded-lg flex items-center justify-center group-hover:bg-gray-700 transition-colors duration-300">
-              <Truck className="h-6 w-6 lg:h-8 lg:w-8 text-white" />
-            </div>
-            <h3 className="font-bold mb-2 lg:mb-3 text-base lg:text-lg font-serif">Fast Delivery</h3>
-            <p className="text-gray-400 text-sm lg:text-base">Products will be delivered within 3-4 working days</p>
-          </div>
-          <div className="text-center group">
-            <div className="w-16 h-16 mx-auto mb-6 bg-gray-800 rounded-lg flex items-center justify-center group-hover:bg-gray-700 transition-colors duration-300">
-              <RotateCcw className="h-8 w-8 text-white" />
-            </div>
-            <div className="space-y-4 text-sm lg:text-base">
-              <h3 className="font-bold mb-3 text-lg font-serif">Customer Support</h3>
-              <p className="text-gray-400 text-sm lg:text-base">
-                Need help with your order or have questions? Contact us via Instagram DM or email info.shithaa@gmail.com.
-              </p>
+    <footer className="mt-10 border-t border-black/10 bg-gradient-to-b from-white to-[#fce4ec]/35">
+      {/* Trust row */}
+      <div className="px-4 sm:px-6 pt-10">
+        <div className="mx-auto max-w-6xl grid grid-cols-1 sm:grid-cols-3 gap-4">
+          <div className="rounded-2xl border border-pink-200/60 bg-white/80 backdrop-blur px-5 py-4 shadow-sm">
+            <div className="flex items-center gap-3">
+              <span className="h-11 w-11 rounded-xl bg-gradient-to-br from-pink-500/15 to-purple-500/10 flex items-center justify-center">
+                <Truck className="h-5 w-5 text-pink-600" />
+              </span>
+              <div>
+                <p className="font-semibold text-[#3b2b52]">Fast Delivery</p>
+                <p className="text-xs text-gray-600">Delivered in 3–4 working days</p>
+              </div>
             </div>
           </div>
-          <div className="text-center group">
-            <div className="w-16 h-16 mx-auto mb-6 bg-gray-800 rounded-lg flex items-center justify-center group-hover:bg-gray-700 transition-colors duration-300">
-              <Shield className="h-8 w-8 text-white" />
+
+          <div className="rounded-2xl border border-pink-200/60 bg-white/80 backdrop-blur px-5 py-4 shadow-sm">
+            <div className="flex items-center gap-3">
+              <span className="h-11 w-11 rounded-xl bg-gradient-to-br from-pink-500/15 to-purple-500/10 flex items-center justify-center">
+                <RotateCcw className="h-5 w-5 text-pink-600" />
+              </span>
+              <div>
+                <p className="font-semibold text-[#3b2b52]">Easy Support</p>
+                <p className="text-xs text-gray-600">Quick help via email & Instagram</p>
+              </div>
             </div>
-            <h3 className="font-bold mb-3 text-lg font-serif">Secure Checkout</h3>
-            <p className="text-gray-400">100% safe & secure payments</p>
+          </div>
+
+          <div className="rounded-2xl border border-pink-200/60 bg-white/80 backdrop-blur px-5 py-4 shadow-sm">
+            <div className="flex items-center gap-3">
+              <span className="h-11 w-11 rounded-xl bg-gradient-to-br from-pink-500/15 to-purple-500/10 flex items-center justify-center">
+                <ShieldCheck className="h-5 w-5 text-pink-600" />
+              </span>
+              <div>
+                <p className="font-semibold text-[#3b2b52]">Secure Checkout</p>
+                <p className="text-xs text-gray-600">Safe & trusted payments</p>
+              </div>
+            </div>
           </div>
         </div>
+      </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 lg:gap-8">
+      {/* Main footer */}
+      <div className="px-4 sm:px-6 py-10">
+        <div className="mx-auto max-w-6xl grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
           {/* Brand */}
-          <div className="space-y-4 lg:space-y-6">
-            <h3 className="text-2xl lg:text-3xl font-bold text-white tracking-wider font-serif">SHITHAA</h3>
-            <p className="text-gray-400 leading-relaxed text-sm lg:text-base">
-              Premium maternity wear designed for the modern mother. Comfort meets elegance in every piece we create
-              with love.
+          <div className="space-y-4">
+            <div className="flex items-center gap-3">
+              <img src="/logo1.png" alt="JJTextiles" className="h-9 w-9 rounded-lg border border-pink-200/70 bg-white" />
+              <div>
+                <p className="text-lg font-bold tracking-wide text-[#3b2b52]">JJTextiles</p>
+                <p className="text-xs text-gray-600">Premium Apparel & Textiles</p>
+              </div>
+            </div>
+            <p className="text-sm text-gray-600 leading-relaxed">
+              Curated styles, elevated essentials, and a smooth shopping experience—crafted for everyday confidence.
             </p>
-            <div className="flex space-x-4">
-              <Button
-                size="sm"
-                variant="ghost"
-                className="text-gray-400 hover:text-white hover:bg-gray-800 rounded-lg p-3"
-                onClick={() => window.open('https://instagram.com/shithaa.in', '_blank')}
-              >
-                <Instagram className="h-5 w-5" />
-              </Button>
-            </div>
-          </div>
-
-          {/* Categories */}
-          <div className="space-y-6">
-            <h4 className="text-xl font-bold text-white font-serif">Categories</h4>
-            <ul className="space-y-3">
-              <li>
-                <a
-                  href="/collections/maternity-feeding-wear"
-                  className="text-gray-400 hover:text-white transition-colors"
-                >
-                  Maternity Feeding Wear
-                </a>
-              </li>
-              <li>
-                <a
-                  href="/collections/zipless-feeding-lounge-wear"
-                  className="text-gray-400 hover:text-white transition-colors"
-                >
-                  Zipless Feeding Lounge Wear
-                </a>
-              </li>
-                <li>
-                  <a
-                    href="/collections/zipless-feeding-dupatta-lounge-wear"
-                    className="text-gray-400 hover:text-white transition-colors"
-                  >
-                    Zipless Feeding Dupatta Lounge Wear
-                  </a>
-                </li>
-              <li>
-                <a
-                  href="/collections/non-feeding-lounge-wear"
-                  className="text-gray-400 hover:text-white transition-colors"
-                >
-                  Non-Feeding Lounge Wear
-                </a>
-              </li>
-            </ul>
-          </div>
-
-          {/* Quick Links */}
-          <div className="space-y-6">
-            <h4 className="text-xl font-bold text-white font-serif">Quick Links</h4>
-            <ul className="space-y-3">
-              <li>
-                <a href="/about" className="text-gray-400 hover:text-white transition-colors">
-                  About Us
-                </a>
-              </li>
-              <li>
-                <a href="/sizing-guide" className="text-gray-400 hover:text-white transition-colors">
-                  Size Guide
-                </a>
-              </li>
-              <li>
-                <a href="/return-policy" className="text-gray-400 hover:text-white transition-colors">
-                  Return Policy
-                </a>
-              </li>
-              <li>
-                <a href="/shipping-info" className="text-gray-400 hover:text-white transition-colors">
-                  Shipping Info
-                </a>
-              </li>
-              <li>
-                <a href="/terms" className="text-gray-400 hover:text-white transition-colors">
-                  Terms & Conditions
-                </a>
-              </li>
-              <li>
-                <a href="/privacy-policy" className="text-gray-400 hover:text-white transition-colors">
-                  Privacy Policy
-                </a>
-              </li>
-            </ul>
-          </div>
-
-          {/* Contact */}
-          <div className="space-y-6">
-            <h4 className="text-xl font-bold text-white font-serif">Contact Us</h4>
-            <div className="space-y-4">
-              <div className="flex items-center space-x-3">
-                <div className="w-8 h-8 bg-gray-800 rounded-lg flex items-center justify-center">
-                  <Mail className="h-4 w-4 text-white" />
-                </div>
-                <span className="text-gray-400">info.shithaa@gmail.com</span>
-              </div>
-              <div className="flex items-center space-x-3">
-                <div className="w-8 h-8 bg-gray-800 rounded-lg flex items-center justify-center">
-                  <Instagram className="h-4 w-4 text-white" />
-                </div>
-                <span className="text-gray-400">@shithaa.in</span>
-              </div>
-
-              <p className="text-gray-400 text-sm">DM us on Instagram for fastest support!</p>
+            <div className="flex items-center gap-3">
               <a
-                href="/contact"
-                className="inline-block bg-gray-800 hover:bg-gray-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors"
+                href={`mailto:${SUPPORT_EMAIL}`}
+                className="inline-flex items-center gap-2 rounded-full border border-pink-200/70 bg-white px-4 py-2 text-sm font-semibold text-[#3b2b52] shadow-sm hover:-translate-y-[1px] hover:shadow-md transition"
               >
-                Get In Touch
+                <Mail className="h-4 w-4 text-pink-600" />
+                Email
+                <ChevronRight className="h-4 w-4 text-pink-500" />
               </a>
-            </div>
-          </div>
-        </div>
-
-        <div className="border-t border-gray-800 mt-16 pt-8 text-center">
-          <p className="text-gray-400">&copy; 2024 Shithaa. All rights reserved. Made with 💕 for mothers everywhere.</p>
-          
-          {/* Agency Credit with Better Spacing and Styling */}
-          <div className="mt-8 pt-6 border-t border-gray-700">
-            <p className="text-gray-500 text-sm">
-              Site by{' '}
               <a
-                href="https://www.instagram.com/elev8max/"
+                href={INSTAGRAM_URL}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="inline-flex items-center font-bold hover:opacity-80 transition-all duration-300 elev8max-gold text-base tracking-wide"
+                className="inline-flex items-center justify-center rounded-full border border-pink-200/70 bg-white p-2.5 text-[#3b2b52] shadow-sm hover:-translate-y-[1px] hover:shadow-md transition"
+                aria-label="JJTextiles on Instagram"
               >
-                Elev8Max
+                <Instagram className="h-4 w-4 text-pink-600" />
               </a>
-            </p>
+            </div>
+            <p className="text-xs text-gray-500">Support: {SUPPORT_EMAIL}</p>
           </div>
+
+          {/* Shop */}
+          <div className="space-y-4">
+            <p className="text-sm font-bold tracking-wide text-[#3b2b52]">Shop</p>
+            <ul className="space-y-2">
+              {categoryLinks.map((c) => (
+                <li key={c.slug}>
+                  <Link
+                    href={`/collections/${c.slug}`}
+                    className="inline-flex items-center gap-2 text-sm text-gray-700 hover:text-[#3b2b52] transition"
+                  >
+                    <span className="h-1.5 w-1.5 rounded-full bg-pink-400/80" />
+                    {c.label}
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          </div>
+
+          {/* Help */}
+          <div className="space-y-4">
+            <p className="text-sm font-bold tracking-wide text-[#3b2b52]">Help</p>
+            <ul className="space-y-2">
+              {helpLinks.map((l) => (
+                <li key={l.href}>
+                  <Link href={l.href} className="text-sm text-gray-700 hover:text-[#3b2b52] transition">
+                    {l.label}
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          </div>
+
+          {/* Legal */}
+          <div className="space-y-4">
+            <p className="text-sm font-bold tracking-wide text-[#3b2b52]">Legal</p>
+            <ul className="space-y-2">
+              {legalLinks.map((l) => (
+                <li key={l.href}>
+                  <Link href={l.href} className="text-sm text-gray-700 hover:text-[#3b2b52] transition">
+                    {l.label}
+                  </Link>
+                </li>
+              ))}
+            </ul>
+
+            <div className="pt-2">
+              <Link
+                href="/collections"
+                className="inline-flex items-center gap-2 rounded-full bg-[#3b2b52] px-4 py-2 text-sm font-semibold text-white shadow-sm hover:opacity-95 transition"
+              >
+                Browse all collections
+                <ChevronRight className="h-4 w-4" />
+              </Link>
+            </div>
+          </div>
+        </div>
+
+        <div className="mx-auto max-w-6xl mt-10 border-t border-black/10 pt-6 flex flex-col sm:flex-row items-center justify-between gap-3">
+          <p className="text-xs text-gray-600">
+            © {new Date().getFullYear()} JJTextiles. All rights reserved.
+          </p>
+          <p className="text-xs text-gray-500">
+            Payments secured • Fast support • Easy browsing
+          </p>
         </div>
       </div>
     </footer>
