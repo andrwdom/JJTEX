@@ -191,14 +191,8 @@ export default function CategoryPageClient({ categorySlug }: CategoryPageClientP
         })
 
         // Fetch products via category endpoint (supports non-leaf categories + descendants)
-        const baseUrl =
-          process.env.NEXT_PUBLIC_API_URL ||
-          (process.env.NODE_ENV === 'production'
-            ? (process.env.NEXT_PUBLIC_SITE_URL ||
-                (typeof window !== 'undefined' ? window.location.origin : 'https://jjtextiles.com'))
-            : 'http://localhost:4000')
-
-        const url = new URL(`${baseUrl}/api/categories/${category.slug}/products`)
+        // IMPORTANT: Use same-origin `/api/...` in the browser to avoid www/non-www mismatches.
+        const url = new URL(`/api/categories/${category.slug}/products`, window.location.origin)
         url.searchParams.set('limit', '1000')
         url.searchParams.set('sortBy', 'displayOrder')
         url.searchParams.set('sortOrder', 'asc')

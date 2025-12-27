@@ -53,9 +53,12 @@ type CategoryByPathResponse = {
 }
 
 export async function fetchCategoryByPath(path: string, forceRefresh: boolean = false) {
-  const baseUrl = process.env.NEXT_PUBLIC_API_URL || ''
+  // IMPORTANT: In the browser, prefer same-origin `/api/...` to avoid www/non-www mismatches.
+  // Use NEXT_PUBLIC_API_URL only for true cross-origin deployments.
+  const isBrowser = typeof window !== 'undefined'
+  const baseUrl = isBrowser ? '' : (process.env.NEXT_PUBLIC_API_URL || '')
   const basePath = baseUrl ? `${baseUrl.replace(/\/$/, '')}/api/categories/path/${path}` : `/api/categories/path/${path}`
-  const url = new URL(basePath, typeof window !== 'undefined' ? window.location.origin : 'http://localhost')
+  const url = new URL(basePath, isBrowser ? window.location.origin : 'http://localhost')
   if (forceRefresh) url.searchParams.set('_t', Date.now().toString())
 
   const res = await fetch(url.toString(), { headers: { Accept: 'application/json' } })
@@ -65,9 +68,12 @@ export async function fetchCategoryByPath(path: string, forceRefresh: boolean = 
 }
 
 export async function fetchCategoryBySlug(slug: string, forceRefresh: boolean = false) {
-  const baseUrl = process.env.NEXT_PUBLIC_API_URL || ''
+  // IMPORTANT: In the browser, prefer same-origin `/api/...` to avoid www/non-www mismatches.
+  // Use NEXT_PUBLIC_API_URL only for true cross-origin deployments.
+  const isBrowser = typeof window !== 'undefined'
+  const baseUrl = isBrowser ? '' : (process.env.NEXT_PUBLIC_API_URL || '')
   const basePath = baseUrl ? `${baseUrl.replace(/\/$/, '')}/api/categories/slug/${slug}` : `/api/categories/slug/${slug}`
-  const url = new URL(basePath, typeof window !== 'undefined' ? window.location.origin : 'http://localhost')
+  const url = new URL(basePath, isBrowser ? window.location.origin : 'http://localhost')
   if (forceRefresh) url.searchParams.set('_t', Date.now().toString())
 
   const res = await fetch(url.toString(), { headers: { Accept: 'application/json' } })

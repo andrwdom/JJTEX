@@ -486,15 +486,19 @@ export async function fetchProducts(
   params: Record<string, string> = {},
   forceRefresh: boolean = false
 ): Promise<Response> {
-  // IMPORTANT: Do NOT default to localhost in production.
-  // If env vars are missing, use same-origin / NEXT_PUBLIC_SITE_URL so live products render.
+  // IMPORTANT:
+  // In the browser, always prefer same-origin `/api/...` to avoid www/non-www mismatches in production.
+  // Use NEXT_PUBLIC_API_URL only for true cross-origin setups.
+  const isBrowser = typeof window !== 'undefined'
   const baseUrl =
-    process.env.NEXT_PUBLIC_API_URL ||
-    (process.env.NODE_ENV === 'production'
-      ? (process.env.NEXT_PUBLIC_SITE_URL ||
-          (typeof window !== 'undefined' ? window.location.origin : 'https://jjtextiles.com'))
-      : 'http://localhost:4000')
-  const url = new URL(`${baseUrl}/api/products`)
+    isBrowser
+      ? window.location.origin
+      : (process.env.NEXT_PUBLIC_API_URL ||
+          (process.env.NODE_ENV === 'production'
+            ? (process.env.NEXT_PUBLIC_SITE_URL || 'https://jjtextiles.com')
+            : 'http://localhost:4000'))
+
+  const url = new URL(isBrowser ? `/api/products` : `${baseUrl}/api/products`, baseUrl)
   
   // Add query parameters
   Object.entries(params).forEach(([key, value]) => {
