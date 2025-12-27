@@ -508,15 +508,19 @@ export async function fetchProducts(
     url.searchParams.append('_t', Date.now().toString())
   }
   
-  const cacheKey = `products-${JSON.stringify(params)}${forceRefresh ? '-fresh' : ''}`
+  // When forceRefresh is true, don't use cache at all (pass undefined as cacheKey)
+  // Otherwise, use a stable cache key for normal requests
+  const cacheKey = forceRefresh ? undefined : `products-${JSON.stringify(params)}`
   const cacheTTL = forceRefresh ? 0 : 2 * 60 * 1000 // No cache when force refresh, 2 minutes otherwise
   
   try {
     const response = await safeFetch(url.toString(), {
       method: 'GET',
       headers: {
-        'Accept': 'application/json'
-      }
+        'Accept': 'application/json',
+        'Cache-Control': forceRefresh ? 'no-cache, no-store, must-revalidate' : undefined,
+        'Pragma': forceRefresh ? 'no-cache' : undefined
+      } as HeadersInit
     }, cacheKey, cacheTTL)
     
     if (!response.ok) {
