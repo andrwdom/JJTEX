@@ -7,7 +7,7 @@ import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/component
 import { useAuth } from "@/components/auth/useAuth"
 import LoginModal from "@/components/auth/LoginModal"
 import { useRouter } from "next/navigation"
-import { fetchCategoryTree, withTotalProductCounts, getCategoryHref, CategoryTree } from "@/lib/category-utils"
+import { fetchCategoryTree, CategoryTree } from "@/lib/category-utils"
 
 interface MobileMenuSidebarProps {
 	isOpen: boolean
@@ -33,9 +33,7 @@ export default function MobileMenuSidebar({
 		async function loadCategories() {
 			setCategoriesLoading(true)
 			try {
-				const rawTree = await fetchCategoryTree(true)
-				// Only keep branches that have products somewhere under them (prevents dead/empty categories)
-				const tree = withTotalProductCounts(rawTree).filter((n) => Number((n as any).totalProductCount || 0) > 0)
+				const tree = await fetchCategoryTree()
 				setCategoryTree(tree)
 			} catch (error) {
 				console.error('Failed to load categories:', error)
@@ -66,8 +64,9 @@ export default function MobileMenuSidebar({
 		onClose()
 	}
 
-	const handleCategoryClick = (category: { slug: string; path?: string }) => {
-		router.push(getCategoryHref({ slug: category.slug, path: category.path || "" }))
+	const handleCategoryClick = (categorySlug: string) => {
+		// Use the actual slug from backend
+		router.push(`/collections/${categorySlug}`)
 		onClose()
 	}
 
@@ -180,7 +179,6 @@ export default function MobileMenuSidebar({
 											categoryTree.map((rootCategory) => {
 												const mainGroupKey = rootCategory.slug
 												const isMainOpen = openMainGroups[mainGroupKey] || false
-												const rootChildren = (rootCategory.children || []).filter((c) => Number((c as any).totalProductCount || 0) > 0)
 
 												return (
 													<Collapsible
@@ -199,15 +197,14 @@ export default function MobileMenuSidebar({
 															</button>
 														</CollapsibleTrigger>
 														<CollapsibleContent className="overflow-hidden data-[state=closed]:animate-collapsible-up data-[state=open]:animate-collapsible-down">
-															{rootChildren.length > 0 ? (
-																rootChildren.map((subCategory) => {
+															{rootCategory.children && rootCategory.children.length > 0 ? (
+																rootCategory.children.map((subCategory) => {
 																	const subGroupKey = `${mainGroupKey}-${subCategory.slug}`
 																	const isSubOpen = openSubGroups[subGroupKey] || false
-																	const subChildren = (subCategory.children || []).filter((c) => Number((c as any).totalProductCount || 0) > 0)
 
 																	return (
 																		<div key={subCategory._id}>
-																			{subChildren.length > 0 ? (
+																			{subCategory.children && subCategory.children.length > 0 ? (
 																				<Collapsible
 																					open={isSubOpen}
 																					onOpenChange={() => toggleSubGroup(subGroupKey)}
@@ -223,10 +220,10 @@ export default function MobileMenuSidebar({
 																						</button>
 																					</CollapsibleTrigger>
 																					<CollapsibleContent className="overflow-hidden data-[state=closed]:animate-collapsible-up data-[state=open]:animate-collapsible-down">
-																						{subChildren.map((leafCategory) => (
+																						{subCategory.children.map((leafCategory) => (
 																							<button
 																								key={leafCategory._id}
-																								onClick={() => handleCategoryClick({ slug: leafCategory.slug, path: leafCategory.path })}
+																								onClick={() => handleCategoryClick(leafCategory.slug)}
 																								className="w-full px-6 pl-24 py-2 text-left text-sm text-gray-700 hover:bg-pink-100/40 hover:text-pink-600 transition-colors duration-200"
 																							>
 																								{leafCategory.name}
@@ -237,7 +234,7 @@ export default function MobileMenuSidebar({
 																			) : (
 																				// If no children, make it clickable directly
 																				<button
-																					onClick={() => handleCategoryClick({ slug: subCategory.slug, path: subCategory.path })}
+																					onClick={() => handleCategoryClick(subCategory.slug)}
 																					className="w-full px-6 pl-20 py-2 text-left text-sm font-medium text-gray-800 hover:bg-pink-100/40 hover:text-pink-600 transition-colors duration-200"
 																				>
 																					{subCategory.name}
@@ -250,7 +247,7 @@ export default function MobileMenuSidebar({
 																// If root category has no children but is a leaf, make it clickable
 																rootCategory.isLeaf && (
 																	<button
-																		onClick={() => handleCategoryClick({ slug: rootCategory.slug, path: rootCategory.path })}
+																		onClick={() => handleCategoryClick(rootCategory.slug)}
 																		className="w-full px-6 pl-20 py-2 text-left text-sm font-medium text-gray-800 hover:bg-pink-100/40 hover:text-pink-600 transition-colors duration-200"
 																	>
 																		{rootCategory.name}

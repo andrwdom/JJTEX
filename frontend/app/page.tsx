@@ -1,7 +1,7 @@
 "use client"
 
 import React, { useEffect, useMemo, useRef, useState } from "react"
-import { fetchCategoryTree, withTotalProductCounts, getCategoryHref, CategoryTree } from "@/lib/category-utils"
+import { fetchCategoryTree, getLeafCategories, CategoryTree } from "@/lib/category-utils"
 import { useRouter } from "next/navigation"
 import SiteHeader from "@/components/site-header"
 import { fetchProducts } from "@/lib/api-utils"
@@ -11,12 +11,12 @@ import { ChevronRight } from "lucide-react"
 type Highlight = {
 	title: string
 	image: string
-	href: string // Path-safe link to collections page
+	slug?: string // Category slug for navigation
 }
 
 type CategoryChip = {
-	label: string
-	href: string
+	name: string
+	slug: string
 }
 
 // Map category slugs to unique images
@@ -43,13 +43,13 @@ const getCategoryImage = (slug: string, index: number): string => {
 // Fallback highlights if categories aren't loaded yet
 const fallbackHighlights: Highlight[] = [
 	// These slugs match the backend taxonomy seeding (`backend/scripts/seedTaxonomy.js`)
-	{ title: "Women's Kurtas", image: "/p_img1.png", href: "/collections/kurtas-kurtis" },
-	{ title: "Women's Sarees", image: "/p_img5.png", href: "/collections/traditional-saree" },
-	{ title: "Girls Dresses", image: "/p_img3.png", href: "/collections/dresses-jumpsuits" },
-	{ title: "Boys T-Shirts", image: "/p_img4.png", href: "/collections/tshirt" },
-	{ title: "Baby Rompers", image: "/p_img7.png", href: "/collections/rompers-body-suits" },
-	{ title: "Teens Jeans", image: "/p_img6.png", href: "/collections/jeans" },
-	{ title: "Jewellery", image: "/p_img8.png", href: "/collections/jewellery" },
+	{ title: "Women's Kurtas", image: "/p_img1.png", slug: "kurtas-kurtis" },
+	{ title: "Women's Sarees", image: "/p_img5.png", slug: "traditional-saree" },
+	{ title: "Girls Dresses", image: "/p_img3.png", slug: "dresses-jumpsuits" },
+	{ title: "Boys T-Shirts", image: "/p_img4.png", slug: "tshirt" },
+	{ title: "Baby Rompers", image: "/p_img7.png", slug: "rompers-body-suits" },
+	{ title: "Teens Jeans", image: "/p_img6.png", slug: "jeans" },
+	{ title: "Jewellery", image: "/p_img8.png", slug: "jewellery" },
 ]
 
 type HomeProduct = {
@@ -114,91 +114,28 @@ export default function Home() {
 		async function loadCategories() {
 			setCategoriesLoading(true)
 			try {
-				// Force refresh so the tree reflects newly added products/categories quickly.
-				const rawTree = await fetchCategoryTree(true)
-				const tree = withTotalProductCounts(rawTree)
-
-				type LeafItem = {
-					_id: string
-					name: string
-					slug: string
-					path: string
-					total: number
-					breadcrumbs: string[]
-				}
-
-				const leaves: LeafItem[] = []
-				const walk = (nodes: CategoryTree[], crumbs: string[] = []) => {
-					for (const n of nodes) {
-						const nextCrumbs = [...crumbs, n.name]
-						const children = n.children || []
-						const isLeaf = !!n.isLeaf || children.length === 0
-						const total = Number((n as any).totalProductCount || n.productCount || 0)
-
-						if (isLeaf) {
-							leaves.push({
-								_id: n._id,
-								name: n.name,
-								slug: n.slug,
-								path: n.path,
-								total,
-								breadcrumbs: nextCrumbs,
-							})
-						} else {
-							walk(children, nextCrumbs)
-						}
-					}
-				}
-				walk(tree, [])
-
-				// Only categories that actually contain products (prevents dead pages + confusion)
-				const leavesWithProducts = leaves.filter((l) => l.total > 0 && (l.path || l.slug))
-
-				if (leavesWithProducts.length === 0) {
+				const tree = await fetchCategoryTree()
+				const leafCategories = getLeafCategories(tree)
+				const chips: CategoryChip[] = leafCategories
+					.filter((c) => !!c?.slug && !!c?.name)
+					.map((c) => ({ name: c.name, slug: c.slug }))
+					// Keep it stable + easy to scan
+					.sort((a, b) => a.name.localeCompare(b.name))
+				setAllCategories(chips)
+				
+				// Map leaf categories to highlights (take first 7 or use fallback)
+				if (leafCategories.length > 0) {
+					const categoryHighlights: Highlight[] = leafCategories.slice(0, 7).map((cat, index) => ({
+						title: cat.name,
+						image: getCategoryImage(cat.slug, index), // Unique image per category
+						slug: cat.slug
+					}))
+					setHighlights(categoryHighlights)
+				} else {
+					// Use fallback if no categories found
 					setHighlights(fallbackHighlights)
 					setAllCategories([])
-					return
 				}
-
-				// Disambiguate duplicates by adding parent context
-				const nameCounts = new Map<string, number>()
-				for (const l of leavesWithProducts) {
-					const k = l.name.trim().toLowerCase()
-					nameCounts.set(k, (nameCounts.get(k) || 0) + 1)
-				}
-
-				const labelFor = (l: LeafItem) => {
-					const dup = (nameCounts.get(l.name.trim().toLowerCase()) || 0) > 1
-					if (!dup) return l.name
-					const tail = l.breadcrumbs.slice(-2)
-					return tail.join(" • ")
-				}
-
-				// Highlights: choose most “relevant” categories first (highest product volume)
-				const highlightItems: Highlight[] = [...leavesWithProducts]
-					.sort((a, b) => b.total - a.total || a.name.localeCompare(b.name))
-					.slice(0, 7)
-					.map((cat, index) => ({
-						title: labelFor(cat),
-						image: getCategoryImage(cat.slug, index),
-						href: getCategoryHref({ path: cat.path, slug: cat.slug }),
-					}))
-
-				setHighlights(highlightItems)
-
-				// Pills: dedupe by href (path is unique), keep alphabetical for scanning
-				const chips: CategoryChip[] = leavesWithProducts
-					.map((c) => ({
-						label: labelFor(c),
-						href: getCategoryHref({ path: c.path, slug: c.slug }),
-					}))
-					.reduce((acc: CategoryChip[], item) => {
-						if (!acc.some((x) => x.href === item.href)) acc.push(item)
-						return acc
-					}, [])
-					.sort((a, b) => a.label.localeCompare(b.label))
-
-				setAllCategories(chips)
 			} catch (error) {
 				console.error('Failed to load categories:', error)
 				// Use fallback on error
@@ -254,7 +191,16 @@ export default function Home() {
 	}, [])
 
 	const handleHighlightClick = (highlight: Highlight) => {
-		router.push(highlight.href)
+		if (highlight.slug) {
+			// Navigate to category page using slug
+			router.push(`/collections/${highlight.slug}`)
+		} else {
+			// Fallback: try to generate slug from title
+			const slug = highlight.title.toLowerCase()
+				.replace(/'/g, '')
+				.replace(/\s+/g, '-')
+			router.push(`/collections/${slug}`)
+		}
 	}
 
 
@@ -270,7 +216,7 @@ export default function Home() {
 				>
 					{highlights.map((item) => (
 						<button
-							key={item.href}
+							key={item.title}
 							onClick={() => handleHighlightClick(item)}
 							className="group flex w-[84px] flex-col items-center shrink-0 cursor-pointer transition-transform duration-300 ease-in-out"
 						>
@@ -319,7 +265,7 @@ export default function Home() {
 						</h3>
 						<button
 							type="button"
-							onClick={() => router.push(highlights?.[0]?.href || "/")}
+							onClick={() => router.push("/collections/dresses-jumpsuits")}
 							className="mt-4 inline-flex items-center justify-center rounded-full bg-[#E91E63] px-5 py-2 text-sm font-semibold text-white transition-all duration-300 ease-in-out hover:shadow-[0_0_24px_rgba(233,30,99,0.35)] hover:-translate-y-0.5"
 						>
 							Shop Now
@@ -432,15 +378,15 @@ export default function Home() {
 					) : (
 						allCategories.map((cat) => (
 							<button
-								key={cat.href}
+								key={cat.slug}
 								type="button"
-								onClick={() => router.push(cat.href)}
+								onClick={() => router.push(`/collections/${cat.slug}`)}
 								className="group relative"
-								aria-label={`Shop ${cat.label}`}
+								aria-label={`Shop ${cat.name}`}
 							>
 								<span className="absolute inset-0 rounded-full bg-gradient-to-r from-pink-500/40 via-fuchsia-500/35 to-purple-500/40 blur-[10px] opacity-0 transition-opacity duration-300 group-hover:opacity-100" />
 								<span className="relative inline-flex items-center gap-2 rounded-full border border-pink-200/70 bg-white/90 px-5 py-3 text-[13px] font-semibold text-[#3b2b52] shadow-sm transition-all duration-300 hover:-translate-y-[1px] hover:shadow-md">
-									<span className="max-w-[170px] truncate">{cat.label}</span>
+									<span className="max-w-[170px] truncate">{cat.name}</span>
 									<ChevronRight className="h-4 w-4 text-pink-500 transition-transform duration-300 group-hover:translate-x-[1px]" />
 								</span>
 							</button>

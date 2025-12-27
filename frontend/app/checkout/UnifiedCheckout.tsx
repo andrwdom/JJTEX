@@ -295,25 +295,17 @@ export default function UnifiedCheckout() {
       setCheckoutError(null);
       setProcessing(true);
       const token = await getIdToken();
-      const idempotencyKey = `phonepe_${currentSession.sessionId}`; // stable across retries
       
       // Create PhonePe payment session with retry logic
       const response = await fetchWithRetry('/api/payment/phonepe/create-session', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'x-request-id': `req_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
-          // Helps backend reuse the same draft order + transaction if user retries
-          'idempotency-key': idempotencyKey,
-          // Optional auth (backend supports guests too), but pass token when available
-          ...(token ? { 'Authorization': `Bearer ${token}` } : {})
+          'x-request-id': `req_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`
         },
         body: JSON.stringify({
           checkoutSessionId: currentSession.sessionId,
-          shipping,
-          email: user.email || shipping.email,
-          userId: user.uid,
-          checkoutMode
+          shipping
         })
       }, {
         maxRetries: 3,
@@ -333,13 +325,7 @@ export default function UnifiedCheckout() {
         // Redirect to PhonePe
         window.location.href = data.redirectUrl;
       } else {
-        // Surface backend + PhonePe reason when available
-        const msg =
-          data?.declineInfo?.message ||
-          data?.message ||
-          (data?.originalCode ? `Payment failed (${data.originalCode}). Please try again.` : null) ||
-          'Failed to create payment session';
-        setCheckoutError(msg);
+        setCheckoutError(data.message || 'Failed to create payment session');
       }
     } catch (err) {
       setCheckoutError(err instanceof Error ? err.message : 'Payment processing failed. Please try again.');

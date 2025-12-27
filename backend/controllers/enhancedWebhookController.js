@@ -272,13 +272,14 @@ async function verifyPhonePeSignature(req, correlationId) {
     }
 
     const saltIndex = parseInt(xVerifyIndexHeader);
-    const salt = process.env[`PHONEPE_SALT_${saltIndex}`];
+    const salt = process.env[`PHONEPE_SALT_${saltIndex}`] || process.env.PHONEPE_API_KEY;
     
     if (!salt) {
-      EnhancedLogger.criticalAlert('WEBHOOK: PhonePe salt not configured for index', {
+      EnhancedLogger.criticalAlert('WEBHOOK: PhonePe salt not configured', {
         correlationId,
         saltIndex,
-        availableSalts: Object.keys(process.env).filter(k => k.startsWith('PHONEPE_SALT_'))
+        availableSalts: Object.keys(process.env).filter(k => k.startsWith('PHONEPE_SALT_')),
+        hasApiKey: !!process.env.PHONEPE_API_KEY
       });
       return false;
     }

@@ -15,7 +15,6 @@ import { useCheckoutFlow } from "@/components/checkout-flow-manager";
 import { useRouter, useSearchParams } from "next/navigation"
 import WishlistButton from "@/components/WishlistButton"
 import { getCategoryHeroCopy, getProductDisplayTitle, getProductFeatureSummary, humanizeCategorySlug } from "@/lib/category-page-copy"
-import { decodeCategoryPathFromUrl, fetchCategoryByPath, fetchCategoryBySlug, isEncodedCategoryPath } from "@/lib/category-utils"
 
 interface Product {
   id: string // This will be the customId for routing
@@ -36,7 +35,7 @@ interface Product {
 }
 
 interface CategoryPageClientProps {
-  categorySlug: string // Can be a legacy slug OR an encoded category path
+  categorySlug: string
 }
 
 export default function CategoryPageClient({ categorySlug }: CategoryPageClientProps) {
@@ -54,12 +53,6 @@ export default function CategoryPageClient({ categorySlug }: CategoryPageClientP
   const { setBuyNowItem } = useBuyNow()
   const { addToCart, openCartSidebar } = useCart()
   const { setCheckoutFlow } = useCheckoutFlow();
-  const [resolvedCategory, setResolvedCategory] = useState<{
-    name: string
-    slug: string
-    path?: string
-    breadcrumbs?: Array<{ name: string; slug: string; path?: string }>
-  } | null>(null)
 
   // Available sizes for filtering (removed XS)
   const AVAILABLE_SIZES = ["S", "M", "L", "XL", "XXL", "3XL"]
@@ -150,8 +143,8 @@ export default function CategoryPageClient({ categorySlug }: CategoryPageClientP
     updateURL({ size: "", q: "" })
   }
 
-  // Compute category name (prefer backend category name to avoid confusion/duplicates)
-  const categoryName = resolvedCategory?.name || humanizeCategorySlug(categorySlug)
+  // Compute category name from slug
+  const categoryName = humanizeCategorySlug(categorySlug)
 
   // Sleeve filter availability is derived from the fetched products (no category hardcoding)
 
@@ -159,54 +152,34 @@ export default function CategoryPageClient({ categorySlug }: CategoryPageClientP
     async function getProducts() {
       setLoading(true);
       try {
-        // Resolve category from backend (slug can be ambiguous; path is unique)
-        let category: any = null
-        let breadcrumbs: Array<{ name: string; slug: string; path?: string }> = []
-
-        if (isEncodedCategoryPath(categorySlug)) {
-          const path = decodeCategoryPathFromUrl(categorySlug)
-          const data = await fetchCategoryByPath(path, true)
-          category = data?.category || null
-          breadcrumbs = (data?.breadcrumbs || []).map((b: any) => ({ name: b.name, slug: b.slug, path: b.path }))
-        } else {
-          category = await fetchCategoryBySlug(categorySlug, true)
-          // Try to build breadcrumbs from `ancestors` if present on the category doc
-          if (category?.ancestors && Array.isArray(category.ancestors)) {
-            breadcrumbs = [
-              ...category.ancestors.map((a: any) => ({ name: a.name, slug: a.slug, path: a.path })),
-              { name: category.name, slug: category.slug, path: category.path }
-            ]
-          }
+        // Import the specialized fetch function
+        const { fetchProducts: fetchProductsAPI } = await import('@/lib/api-utils')
+        
+        const params: Record<string, string> = {}
+        if (categorySlug) {
+          params.categorySlug = categorySlug
+          params.sortBy = 'displayOrder'
+          params.sortOrder = 'asc'
+        }
+        // Add size filter to API call if selected
+        if (selectedSize) {
+          params.size = selectedSize
         }
 
-        if (!category?.slug) {
-          throw new Error('Category could not be resolved')
-        }
-
-        setResolvedCategory({
-          name: category.name || humanizeCategorySlug(categorySlug),
-          slug: category.slug,
-          path: category.path,
-          breadcrumbs
-        })
-
-        // Fetch products via category endpoint (supports non-leaf categories + descendants)
-        // IMPORTANT: Use same-origin `/api/...` in the browser to avoid www/non-www mismatches.
-        const url = new URL(`/api/categories/${category.slug}/products`, window.location.origin)
-        url.searchParams.set('limit', '1000')
-        url.searchParams.set('sortBy', 'displayOrder')
-        url.searchParams.set('sortOrder', 'asc')
-        if (selectedSize) url.searchParams.set('size', selectedSize)
-
-        const response = await fetch(url.toString(), { headers: { Accept: 'application/json' } })
+        const response = await fetchProductsAPI(params)
 
         if (!response.ok) {
           throw new Error(`Failed to fetch products: ${response.status} ${response.statusText}`);
         }
 
         const data = await response.json();
-        // Handle backend response shape from paginatedResponse: { data: [...] }
-        const rawProducts = Array.isArray(data) ? data : (data?.data || data?.products || []);
+        // Handle multiple backend response shapes:
+        // - { products: [...] }  (GET /api/products)
+        // - { success: true, products: [...] } (admin list)
+        // - { data: [...] } (some wrappers)
+        const rawProducts = Array.isArray(data)
+          ? data
+          : (data?.products || data?.data?.products || data?.data || []);
 
         // Map backend fields to frontend
         const mappedProducts = (rawProducts || []).map((p: any) => ({
@@ -219,7 +192,7 @@ export default function CategoryPageClient({ categorySlug }: CategoryPageClientP
           image: (Array.isArray(p.images) && p.images.length > 0) ? p.images[0] : '/placeholder.svg',
           images: Array.isArray(p.images) ? p.images : [p.image || '/placeholder.svg'],
           category: p.category,
-          categorySlug: p.categorySlug || category.slug,
+          categorySlug: p.categorySlug || (typeof p.category === 'string' ? p.category.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '') : undefined),
           description: p.description,
           sizes: p.sizes || [],
           bestseller: p.bestseller,
@@ -274,8 +247,7 @@ export default function CategoryPageClient({ categorySlug }: CategoryPageClientP
   const handleProductClick = async (productId: string, productCategorySlug?: string) => {
     // Use new URL structure: /[category-name]/product/[product-id]
     const { getProductUrl } = await import('@/lib/product-url-utils')
-    const effectiveSlug = productCategorySlug || resolvedCategory?.slug || categorySlug
-    const url = getProductUrl(productId, effectiveSlug)
+    const url = getProductUrl(productId, productCategorySlug || categorySlug)
     window.location.href = url
   }
 
@@ -633,7 +605,7 @@ export default function CategoryPageClient({ categorySlug }: CategoryPageClientP
                       <div className="space-y-2">
                         {/* Product Title */}
                         <h3 className="text-sm lg:text-[15px] font-semibold text-gray-900 leading-snug">
-                          {product?.name || "Product"}
+                          {getProductDisplayTitle(product, categorySlug)}
                         </h3>
 
                         {/* 1-line premium feature summary */}

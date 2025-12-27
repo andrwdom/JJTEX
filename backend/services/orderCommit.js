@@ -150,13 +150,42 @@ export async function commitOrder(orderId, paymentInfo, options = {}) {
       }
 
       try {
-        // 🚨 CRITICAL FIX: Use atomic stock deduction directly (no reservation system)
-        let stockDeducted = await deductStockAtomic(
-          productId,
-          size,
-          quantity,
-          { session, correlationId }
-        );
+        // 🔑 CRITICAL FIX: Handle stock deduction based on reservation status
+        // If stock was already reserved during checkout, use confirmStockReservationAtomic
+        // If no reservation was made (fallback), use deductStockAtomic directly
+        let stockDeducted = false;
+        
+        if (order.stockReserved) {
+          EnhancedLogger.webhookLog('INFO', 'Order has reserved stock - confirming reservation', {
+            correlationId,
+            orderId,
+            productId,
+            size,
+            quantity
+          });
+          
+          stockDeducted = await confirmStockReservation(
+            productId,
+            size,
+            quantity,
+            { session, correlationId }
+          );
+        } else {
+          EnhancedLogger.webhookLog('INFO', 'Order has NO reserved stock - deducting directly', {
+            correlationId,
+            orderId,
+            productId,
+            size,
+            quantity
+          });
+          
+          stockDeducted = await deductStockAtomic(
+            productId,
+            size,
+            quantity,
+            { session, correlationId }
+          );
+        }
 
         // 🚨 CRITICAL FIX: With atomic operations, emergency fallback is no longer needed
         // If stock confirmation fails, it means there's a real stock issue that needs investigation
