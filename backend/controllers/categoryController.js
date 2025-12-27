@@ -107,7 +107,7 @@ export const getCategoryBySlug = async (req, res) => {
 
 export const getProductsByCategory = async (req, res) => {
     try {
-        const { page = 1, limit = 1000, sortBy = 'createdAt', search, minPrice, maxPrice } = req.query;
+        const { page = 1, limit = 1000, sortBy = 'createdAt', sortOrder = 'desc', search, minPrice, maxPrice, size } = req.query;
         
 		const category = await Category.findOne({ slug: req.params.slug });
         if (!category) {
@@ -137,13 +137,28 @@ export const getProductsByCategory = async (req, res) => {
             if (maxPrice) filter.price.$lte = Number(maxPrice);
         }
 
+        // Size filtering - require the selected size to have stock > 0
+        if (size) {
+            filter['sizes'] = {
+                $elemMatch: {
+                    'size': String(size),
+                    'stock': { $gt: 0 }
+                }
+            };
+        }
+
         // Build sort object
         const sort = {};
-        if (sortBy === 'createdAt') sort.createdAt = -1;
+        const dir = sortOrder === 'asc' ? 1 : -1;
+        if (sortBy === 'createdAt') sort.createdAt = dir;
         if (sortBy === 'rating') sort.rating = -1;
-        if (sortBy === 'price') sort.price = 1;
+        if (sortBy === 'price') sort.price = dir;
         if (sortBy === 'name') sort.name = 1;
-        if (sortBy === 'date') sort.date = -1;
+        if (sortBy === 'date') sort.date = dir;
+        if (sortBy === 'displayOrder') {
+            sort.displayOrder = dir;
+            sort.createdAt = dir;
+        }
 
         const skip = (page - 1) * limit;
         const products = await productModel.find(filter)

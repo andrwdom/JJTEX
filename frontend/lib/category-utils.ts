@@ -9,11 +9,114 @@ export interface CategoryNode {
   order?: number
   isLeaf: boolean
   productCount?: number
+  totalProductCount?: number
   children?: CategoryNode[]
 }
 
 export interface CategoryTree extends CategoryNode {
   children?: CategoryTree[]
+}
+
+/**
+ * Categories in this codebase are NOT guaranteed to have globally-unique slugs.
+ * The backend enforces uniqueness on (slug + parent) and globally-unique `path`.
+ *
+ * To avoid ambiguity and repeated names (e.g. multiple "Bottoms"), we route by `path`
+ * and encode it into a single URL segment using `--` as a separator.
+ */
+export function encodeCategoryPathForUrl(path: string): string {
+  return String(path || '').split('/').filter(Boolean).join('--')
+}
+
+export function decodeCategoryPathFromUrl(param: string): string {
+  return String(param || '').split('--').filter(Boolean).join('/')
+}
+
+export function isEncodedCategoryPath(param: string): boolean {
+  return String(param || '').includes('--')
+}
+
+export function getCategoryHref(category: Pick<CategoryNode, 'path' | 'slug'>): string {
+  const p = String(category?.path || '').trim()
+  if (p) return `/collections/${encodeCategoryPathForUrl(p)}`
+  // Fallback for legacy categories that don't have a path
+  return `/collections/${category.slug}`
+}
+
+type CategoryByPathResponse = {
+  success?: boolean
+  data?: {
+    category: CategoryNode
+    breadcrumbs?: Array<{ name: string; slug: string; path?: string }>
+    children?: CategoryNode[]
+  }
+}
+
+export async function fetchCategoryByPath(path: string, forceRefresh: boolean = false) {
+  const baseUrl = process.env.NEXT_PUBLIC_API_URL || ''
+  const basePath = baseUrl ? `${baseUrl.replace(/\/$/, '')}/api/categories/path/${path}` : `/api/categories/path/${path}`
+  const url = new URL(basePath, typeof window !== 'undefined' ? window.location.origin : 'http://localhost')
+  if (forceRefresh) url.searchParams.set('_t', Date.now().toString())
+
+  const res = await fetch(url.toString(), { headers: { Accept: 'application/json' } })
+  if (!res.ok) throw new Error(`Failed to fetch category by path (${path}): ${res.status}`)
+  const json = (await res.json()) as CategoryByPathResponse | any
+  return json?.data || json
+}
+
+export async function fetchCategoryBySlug(slug: string, forceRefresh: boolean = false) {
+  const baseUrl = process.env.NEXT_PUBLIC_API_URL || ''
+  const basePath = baseUrl ? `${baseUrl.replace(/\/$/, '')}/api/categories/slug/${slug}` : `/api/categories/slug/${slug}`
+  const url = new URL(basePath, typeof window !== 'undefined' ? window.location.origin : 'http://localhost')
+  if (forceRefresh) url.searchParams.set('_t', Date.now().toString())
+
+  const res = await fetch(url.toString(), { headers: { Accept: 'application/json' } })
+  if (!res.ok) throw new Error(`Failed to fetch category by slug (${slug}): ${res.status}`)
+  const json = (await res.json()) as { success?: boolean; data?: CategoryNode } | any
+  return json?.data || json
+}
+
+/**
+ * Compute totalProductCount for each node (self + descendants).
+ * The backend provides `productCount` per category slug, but parents can have 0 direct products while children have products.
+ */
+export function withTotalProductCounts(tree: CategoryTree[]): CategoryTree[] {
+  const clone = (node: CategoryTree): CategoryTree => ({
+    ...node,
+    children: node.children ? node.children.map(clone) : []
+  })
+
+  const roots = tree.map(clone)
+
+  const compute = (node: CategoryTree): number => {
+    const self = Number(node.productCount || 0)
+    const childrenTotal = (node.children || []).reduce((sum, c) => sum + compute(c), 0)
+    const total = self + childrenTotal
+    ;(node as any).totalProductCount = total
+    return total
+  }
+
+  roots.forEach(compute)
+  return roots
+}
+
+export function pruneEmptyCategories(tree: CategoryTree[], minTotalProducts: number = 1): CategoryTree[] {
+  const annotated = withTotalProductCounts(tree)
+
+  const prune = (node: CategoryTree): CategoryTree | null => {
+    const total = Number((node as any).totalProductCount || 0)
+    if (total < minTotalProducts) return null
+
+    const children = (node.children || []).map(prune).filter(Boolean) as CategoryTree[]
+    return { ...node, children }
+  }
+
+  return annotated.map(prune).filter(Boolean) as CategoryTree[]
+}
+
+export function getLeafCategoriesWithProducts(tree: CategoryTree[], minTotalProducts: number = 1): CategoryNode[] {
+  const pruned = pruneEmptyCategories(tree, minTotalProducts)
+  return getLeafCategories(pruned)
 }
 
 /**

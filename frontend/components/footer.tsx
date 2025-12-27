@@ -2,17 +2,17 @@
 
 import Link from "next/link"
 import { Instagram, Mail, ShieldCheck, RotateCcw, Truck, ChevronRight } from "lucide-react"
+import { useEffect, useState } from "react"
+import { fetchCategoryTree, withTotalProductCounts, getCategoryHref, type CategoryTree } from "@/lib/category-utils"
 
 const SUPPORT_EMAIL = "info.jjtextiles@gmail.com"
 const INSTAGRAM_URL = "https://www.instagram.com/jjtextiles"
 
-const categoryLinks = [
-  { label: "Dresses & Jumpsuits", slug: "dresses-jumpsuits" },
-  { label: "Ethnic Wear", slug: "ethnic-wear" },
-  { label: "Tops & Tees", slug: "tops-tees" },
-  { label: "Skirts", slug: "skirts" },
-  { label: "Jewellery", slug: "jewellery" },
-  { label: "Kids", slug: "kids" },
+type FooterCategoryLink = { label: string; href: string }
+
+const fallbackCategoryLinks: FooterCategoryLink[] = [
+  { label: "Shop New Arrivals", href: "/" },
+  { label: "Browse Categories", href: "/" },
 ]
 
 const helpLinks = [
@@ -28,6 +28,45 @@ const legalLinks = [
 ]
 
 export default function Footer() {
+  const [categoryLinks, setCategoryLinks] = useState<FooterCategoryLink[]>(fallbackCategoryLinks)
+
+  useEffect(() => {
+    let mounted = true
+    async function load() {
+      try {
+        const rawTree = await fetchCategoryTree(false)
+        const tree = withTotalProductCounts(rawTree)
+
+        type Leaf = { name: string; slug: string; path: string; total: number }
+        const leaves: Leaf[] = []
+        const walk = (nodes: CategoryTree[]) => {
+          for (const n of nodes) {
+            const children = n.children || []
+            const isLeaf = !!n.isLeaf || children.length === 0
+            const total = Number((n as any).totalProductCount || n.productCount || 0)
+            if (isLeaf) leaves.push({ name: n.name, slug: n.slug, path: n.path, total })
+            else walk(children)
+          }
+        }
+        walk(tree)
+
+        const popular = leaves
+          .filter((l) => l.total > 0 && (l.path || l.slug))
+          .sort((a, b) => b.total - a.total || a.name.localeCompare(b.name))
+          .slice(0, 6)
+          .map((c) => ({ label: c.name, href: getCategoryHref({ path: c.path, slug: c.slug }) }))
+
+        if (mounted && popular.length) setCategoryLinks(popular)
+      } catch {
+        // keep fallback
+      }
+    }
+    load()
+    return () => {
+      mounted = false
+    }
+  }, [])
+
   return (
     <footer className="mt-10 border-t border-black/10 bg-gradient-to-b from-white to-[#fce4ec]/35">
       {/* Trust row */}
@@ -110,12 +149,12 @@ export default function Footer() {
 
           {/* Shop */}
           <div className="space-y-4">
-            <p className="text-sm font-bold tracking-wide text-[#3b2b52]">Shop</p>
+            <p className="text-sm font-bold tracking-wide text-[#3b2b52]">Popular Categories</p>
             <ul className="space-y-2">
               {categoryLinks.map((c) => (
-                <li key={c.slug}>
+                <li key={c.href}>
                   <Link
-                    href={`/collections/${c.slug}`}
+                    href={c.href}
                     className="inline-flex items-center gap-2 text-sm text-gray-700 hover:text-[#3b2b52] transition"
                   >
                     <span className="h-1.5 w-1.5 rounded-full bg-pink-400/80" />
@@ -155,10 +194,10 @@ export default function Footer() {
 
             <div className="pt-2">
               <Link
-                href="/collections"
+                href="/"
                 className="inline-flex items-center gap-2 rounded-full bg-[#3b2b52] px-4 py-2 text-sm font-semibold text-white shadow-sm hover:opacity-95 transition"
               >
-                Browse all collections
+                Browse the store
                 <ChevronRight className="h-4 w-4" />
               </Link>
             </div>
