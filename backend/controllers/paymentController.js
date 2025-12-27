@@ -525,34 +525,25 @@ export const createPhonePeSession = async (req, res) => {
       });
     }
     
-    // 🔑 STEP 1: IDEMPOTENCY CHECK - If same key exists and not failed, reuse
-    const existingOrder = await orderModel.findOne({ 
-      idempotencyKey, 
-      status: { $ne: 'CANCELLED' } // Reuse if not cancelled
-    });
-    
+    // 🔑 STEP 1: IDEMPOTENCY CHECK
+    // IMPORTANT: `idempotencyKey` is UNIQUE in MongoDB. Even if an order was cancelled,
+    // we must NOT try to create another order with the same key (it will 11000).
+    // Instead, reuse the existing order (and if needed, re-initiate PhonePe for it).
+    let existingOrder = await orderModel.findOne({ idempotencyKey });
     if (existingOrder) {
-      console.log(`[${correlationId}] Reusing existing order for idempotency key: ${idempotencyKey}`);
-      return res.json({
-        success: true,
-        orderId: existingOrder._id, // Give customer order ref upfront
-        phonepeTransactionId: existingOrder.phonepeTransactionId,
-        redirectUrl: existingOrder.metadata?.phonepeRedirectUrl,
-        message: 'Session reused for safety'
-      });
+      console.log(`[${correlationId}] Found existing order for idempotency key: ${idempotencyKey} (status=${existingOrder.status})`);
     }
     
-    // 🔑 STEP 2: VALIDATE UPFRONT (stock, etc.) - Fail fast, no payment if issues
+    // 🔑 STEP 2: VALIDATE + ENSURE STOCK RESERVED
     console.log(`[${correlationId}] Validating stock and cart data upfront`);
-    
-    // 🔑 CRITICAL: Check if stock is already reserved
     if (checkoutSession.stockReserved) {
-      console.log(`[${correlationId}] ✅ Stock already reserved, proceeding to draft order creation`);
+      console.log(`[${correlationId}] ✅ Stock already reserved, proceeding`);
     } else {
-      console.log(`[${correlationId}] ⚠️  Stock NOT reserved yet - this should not happen in the new flow!`);
-      // Validate stock availability as fallback
-      const { checkStockAvailability } = await import('../utils/stock.js');
-          
+      console.log(`[${correlationId}] ⚠️ Stock NOT reserved yet - reserving now (fallback mode)`);
+      // Reserve stock now with rollback safety (standalone MongoDB friendly)
+      const { atomicBatchReservation, checkStockAvailability } = await import('../utils/stock.js');
+
+      // First, fail-fast availability check to provide clearer errors
       for (const item of checkoutSession.items) {
         const availability = await checkStockAvailability(item.productId, item.size, item.quantity);
         if (!availability.available) {
@@ -563,24 +554,48 @@ export const createPhonePeSession = async (req, res) => {
           });
         }
       }
+
+      // Then reserve atomically with rollback if anything fails
+      await atomicBatchReservation(
+        checkoutSession.items.map((i) => ({ productId: i.productId, size: i.size, quantity: i.quantity })),
+        { sessionId: checkoutSession.sessionId }
+      );
+
+      checkoutSession.stockReserved = true;
+      checkoutSession.status = 'awaiting_payment';
+      await checkoutSession.save();
+      console.log(`[${correlationId}] ✅ Stock reserved in fallback mode`);
     }
     
     const userEmail = email || checkoutSession.userEmail;
     
-    // 🔑 STEP 3: CREATE DRAFT ORDER IMMEDIATELY (with temp stock reserve)
-    console.log(`[${correlationId}] Creating DRAFT order immediately`);
+    // 🔑 STEP 3: GET OR CREATE DRAFT ORDER
+    // If we already have an order for this idempotency key, reuse it and continue.
+    console.log(`[${correlationId}] Getting/creating DRAFT order`);
     
-    const phonepeTransactionId = randomUUID();
-    const orderId = await getUniqueOrderId();
+    let phonepeTransactionId = existingOrder?.phonepeTransactionId || randomUUID();
+    const orderId = existingOrder?.orderId || await getUniqueOrderId();
     
     // NOTE: Many VPS installs run MongoDB as standalone (no replica set), where transactions are unsupported.
     // Draft order creation does NOT require a transaction here because stock is already reserved in CheckoutSession.
     // We keep this flow non-transactional and use best-effort cleanup on failure.
-    let createdDraftOrder;
+    let createdDraftOrder = existingOrder || null;
     
     try {
-        // Create DRAFT order immediately
-        createdDraftOrder = await orderModel.create({
+        // If existing order is present but cancelled/failed, revive it for retry (same idempotency key)
+        if (createdDraftOrder) {
+          if (createdDraftOrder.status === 'CANCELLED') {
+            await orderModel.findByIdAndUpdate(createdDraftOrder._id, {
+              status: 'DRAFT',
+              orderStatus: 'DRAFT',
+              paymentStatus: 'PENDING',
+              'metadata.cancellationReason': null
+            });
+            createdDraftOrder = await orderModel.findById(createdDraftOrder._id);
+          }
+        } else {
+          // Create DRAFT order immediately
+          createdDraftOrder = await orderModel.create({
       orderId,
       userInfo: {
         userId: checkoutSession.userId,
@@ -632,7 +647,8 @@ export const createPhonePeSession = async (req, res) => {
             source: checkoutSession.source,
             idempotencyKey
           }
-        });
+          });
+        }
 
         console.log(`[${correlationId}] DRAFT order created: ${createdDraftOrder.orderId}`);
 
@@ -659,6 +675,21 @@ export const createPhonePeSession = async (req, res) => {
       });
     } catch (error) {
       console.error(`[${correlationId}] Draft order creation failed:`, error);
+
+      // Handle duplicate idempotency key gracefully (race / retries)
+      if (error?.code === 11000 && (error?.keyPattern?.idempotencyKey || String(error?.message || '').includes('idempotencyKey'))) {
+        const dupOrder = await orderModel.findOne({ idempotencyKey });
+        if (dupOrder) {
+          console.log(`[${correlationId}] ✅ Duplicate idempotencyKey hit - reusing existing order ${dupOrder.orderId}`);
+          createdDraftOrder = dupOrder;
+        } else {
+          return res.status(500).json({
+            success: false,
+            message: 'Failed to create draft order (duplicate idempotency key)',
+            error: error.message
+          });
+        }
+      } else {
       
       // Best-effort cleanup: cancel the draft order if it was created
       if (createdDraftOrder?._id) {
@@ -673,15 +704,28 @@ export const createPhonePeSession = async (req, res) => {
         message: 'Failed to create draft order',
         error: error.message
       });
+      }
     }
 
     // 🔑 STEP 4: CREATE PHONEPE PAYMENT SESSION
     console.log(`[${correlationId}] Creating PhonePe payment session for draft order`);
     
-    // Get the created draft order
-    const draftOrder = await orderModel.findOne({ idempotencyKey });
+    // Get the draft order
+    const draftOrder = createdDraftOrder?._id ? await orderModel.findById(createdDraftOrder._id) : await orderModel.findOne({ idempotencyKey });
     if (!draftOrder) {
       throw new Error('Draft order not found after creation');
+    }
+
+    // If we already created a redirect URL previously, reuse it (true idempotency)
+    if (draftOrder.metadata?.phonepeRedirectUrl) {
+      console.log(`[${correlationId}] Reusing existing PhonePe redirect URL for order ${draftOrder.orderId}`);
+      return res.json({
+        success: true,
+        orderId: draftOrder._id,
+        phonepeTransactionId: draftOrder.phonepeTransactionId,
+        redirectUrl: draftOrder.metadata.phonepeRedirectUrl,
+        message: 'Session reused for safety'
+      });
     }
 
     // Create PhonePe payment request
