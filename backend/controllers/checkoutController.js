@@ -396,8 +396,8 @@ export const createCheckoutSession = async (req, res) => {
         }
         
       } else {
-        console.error(`[${correlationId}] ❌ Session creation failed:`, error.message);
-        throw error;
+      console.error(`[${correlationId}] ❌ Session creation failed:`, error.message);
+      throw error;
       }
     } finally {
       await mongoSession.endSession();

@@ -19,6 +19,27 @@ type CategoryChip = {
 	slug: string
 }
 
+// Map category slugs to unique images
+const getCategoryImage = (slug: string, index: number): string => {
+	// Category-specific images (if available in /images/categories/)
+	const categoryImageMap: Record<string, string> = {
+		'maternity-feeding-wear': '/images/categories/maternity-feeding.webp',
+		'zipless-feeding-lounge-wear': '/images/categories/zipless-feeding.webp',
+		'zipless-feeding-dupatta-lounge-wear': '/images/categories/dupatta-lounge.webp',
+		'non-feeding-lounge-wear': '/images/categories/non-feeding.webp',
+	}
+	
+	// If category has a specific image, use it
+	if (categoryImageMap[slug]) {
+		return categoryImageMap[slug]
+	}
+	
+	// Otherwise, cycle through available p_img files (p_img1 through p_img52)
+	// Use index to ensure different categories get different images
+	const imageNumber = ((index % 52) + 1) // Cycle through 1-52
+	return `/p_img${imageNumber}.png`
+}
+
 // Fallback highlights if categories aren't loaded yet
 const fallbackHighlights: Highlight[] = [
 	// These slugs match the backend taxonomy seeding (`backend/scripts/seedTaxonomy.js`)
@@ -104,9 +125,9 @@ export default function Home() {
 				
 				// Map leaf categories to highlights (take first 7 or use fallback)
 				if (leafCategories.length > 0) {
-					const categoryHighlights: Highlight[] = leafCategories.slice(0, 7).map(cat => ({
+					const categoryHighlights: Highlight[] = leafCategories.slice(0, 7).map((cat, index) => ({
 						title: cat.name,
-						image: "/p_img1.png", // Default image, can be enhanced later with category images
+						image: getCategoryImage(cat.slug, index), // Unique image per category
 						slug: cat.slug
 					}))
 					setHighlights(categoryHighlights)
