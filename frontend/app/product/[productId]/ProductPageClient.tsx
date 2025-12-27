@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react"
 import { Button } from "@/components/ui/button"
-import { ArrowLeft, Share2, Truck, ShieldCheck, RotateCcw, ChevronRight } from "lucide-react
+import { ArrowLeft, Share2, Truck, ShieldCheck, RotateCcw, ChevronRight } from "lucide-react";
 import Image from "next/image"
 import Script from "next/script"
 import PageLoading from "@/components/page-loading"
@@ -23,7 +23,7 @@ interface Product {
   images: string[]
   category: string
   description: string
-  sizes: { size: string; stock: number }[]
+  sizes: { size: string; stock: number; reserved?: number }[]
   features: string[]
   rating: number
   reviews: number
@@ -115,12 +115,12 @@ export default function ProductPageClient({ productId }: ProductPageClientProps)
           // 🔧 FIX: Ensure sizes array is properly formatted
           if (data.product.sizes && Array.isArray(data.product.sizes)) {
             console.log('✅ Sizes array is valid:', data.product.sizes.length, 'items');
-            data.product.sizes.forEach((size, index) => {
+            data.product.sizes.forEach((size: any, index: number) => {
               console.log(`  - Size ${index + 1}:`, size);
             });
             
             // 🔧 FIX: Validate each size object
-            const validSizes = data.product.sizes.filter(size => size && size.size);
+            const validSizes = data.product.sizes.filter((size: any) => size && size.size);
             console.log('✅ Valid sizes after filtering:', validSizes.length);
             if (validSizes.length !== data.product.sizes.length) {
               console.log('⚠️ Some sizes were invalid and filtered out');
