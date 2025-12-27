@@ -685,7 +685,18 @@ export const createPhonePeSession = async (req, res) => {
     }
 
     // Create PhonePe payment request
-    const redirectUrl = `${process.env.FRONTEND_URL || 'https://jjtextiles.in'}/payment/phonepe/callback?merchantTransactionId=${phonepeTransactionId}`;
+    // IMPORTANT:
+    // PhonePe validates redirect URLs against the merchant dashboard allow-list.
+    // Always prefer the dedicated env `PHONEPE_REDIRECT_URL` (or `config.phonepe.redirect_url`) over FRONTEND_URL
+    // to avoid .com/.in mismatch causing a 400 from PhonePe.
+    const redirectBase =
+      process.env.PHONEPE_REDIRECT_URL ||
+      config.phonepe.redirect_url ||
+      `${process.env.FRONTEND_URL || 'https://jjtextiles.in'}/payment/phonepe/callback`;
+
+    const redirectUrlObj = new URL(redirectBase);
+    redirectUrlObj.searchParams.set('merchantTransactionId', phonepeTransactionId);
+    const redirectUrl = redirectUrlObj.toString();
     
     // Calculate final amount including shipping
     const finalAmount = checkoutSession.total;

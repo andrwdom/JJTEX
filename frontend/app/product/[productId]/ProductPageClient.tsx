@@ -23,7 +23,7 @@ interface Product {
   images: string[]
   category: string
   description: string
-  sizes: { size: string; stock: number }[]
+  sizes: { size: string; stock: number; reserved?: number }[]
   features: string[]
   rating: number
   reviews: number
@@ -115,12 +115,12 @@ export default function ProductPageClient({ productId }: ProductPageClientProps)
           // 🔧 FIX: Ensure sizes array is properly formatted
           if (data.product.sizes && Array.isArray(data.product.sizes)) {
             console.log('✅ Sizes array is valid:', data.product.sizes.length, 'items');
-            data.product.sizes.forEach((size, index) => {
+            data.product.sizes.forEach((size: any, index: number) => {
               console.log(`  - Size ${index + 1}:`, size);
             });
             
             // 🔧 FIX: Validate each size object
-            const validSizes = data.product.sizes.filter(size => size && size.size);
+            const validSizes = data.product.sizes.filter((size: any) => size && size.size);
             console.log('✅ Valid sizes after filtering:', validSizes.length);
             if (validSizes.length !== data.product.sizes.length) {
               console.log('⚠️ Some sizes were invalid and filtered out');
@@ -165,7 +165,9 @@ export default function ProductPageClient({ productId }: ProductPageClientProps)
     ? product!.sizes.reduce((sum: number, s: any) => sum + Math.max(0, (s?.stock || 0) - (s?.reserved || 0)), 0)
     : (product?.stock || 0);
   const showLowStock = selectedSize ? (selectedSizeStock > 0 && selectedSizeStock <= 3) : (totalStockLeft > 0 && totalStockLeft <= 3)
-  const displayTitle = product ? getRomanticizedProductTitle(product) : ""
+  // IMPORTANT: Always prefer the exact product name entered in the admin panel.
+  // Only fall back to a generated title if the product has no name (legacy / bad data).
+  const displayTitle = product?.name?.trim() ? product.name : (product ? getRomanticizedProductTitle(product) : "")
   const designerNote = product ? getDesignerNote(product) : ""
 
   // Auto-adjust quantity if it exceeds stock when size changes
@@ -314,7 +316,7 @@ export default function ProductPageClient({ productId }: ProductPageClientProps)
                   {product.category}
                 </Button>
                 <ChevronRight className="h-4 w-4" />
-                <span className="text-gray-900 font-medium truncate">{displayTitle || product.name}</span>
+                <span className="text-gray-900 font-medium truncate">{displayTitle}</span>
               </div>
               
               {/* Product Title and Share */}
@@ -323,7 +325,7 @@ export default function ProductPageClient({ productId }: ProductPageClientProps)
                   <ArrowLeft className="h-5 w-5 mr-2" />
                   Back
                 </Button>
-                <h1 className="text-lg font-semibold text-gray-900 truncate flex-1">{displayTitle || product.name}</h1>
+                <h1 className="text-lg font-semibold text-gray-900 truncate flex-1">{displayTitle}</h1>
                 <div className="flex items-center space-x-2">
                   <WishlistButton productId={product.id?.toString() || product._id || productId} size="sm" />
                   <Button
@@ -333,7 +335,7 @@ export default function ProductPageClient({ productId }: ProductPageClientProps)
                     onClick={async () => {
                       if (navigator.share) {
                         const shareData = {
-                          title: (displayTitle || product.name) || 'Product',
+                          title: displayTitle || 'Product',
                           text: product.description || 'Check out this product',
                           url: window.location.href
                         };
@@ -491,7 +493,7 @@ export default function ProductPageClient({ productId }: ProductPageClientProps)
               <div className="bg-white/70 backdrop-blur-md border border-pink-100 rounded-2xl shadow-sm p-5 sm:p-6">
                 <p className="text-xs text-gray-500 uppercase tracking-[0.22em] mb-2">{product.category}</p>
                 <h1 className="text-3xl sm:text-4xl font-bold text-gray-900 mb-2 font-serif tracking-[0.01em]">
-                  {displayTitle || product.name}
+                  {displayTitle}
                 </h1>
 
                 {/* Price (directly under title) */}

@@ -639,7 +639,7 @@ export default function CategoryPageClient({ categorySlug }: CategoryPageClientP
                       <div className="space-y-2">
                         {/* Product Title */}
                         <h3 className="text-sm lg:text-[15px] font-semibold text-gray-900 leading-snug">
-                          {getProductDisplayTitle(product, categorySlug)}
+                          {product?.name || "Product"}
                         </h3>
 
                         {/* 1-line premium feature summary */}
