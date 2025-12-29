@@ -64,12 +64,13 @@ type HomeProduct = {
 	categorySlug?: string
 }
 
-function useRevealOnScroll() {
+function useRevealOnScroll(dependency: any) {
 	const refMap = useRef(new Map<string, HTMLElement>())
 	const [visible, setVisible] = useState<Record<string, boolean>>({})
 
 	useEffect(() => {
 		if (typeof IntersectionObserver === "undefined") return
+		
 		const obs = new IntersectionObserver(
 			(entries) => {
 				entries.forEach((e) => {
@@ -80,15 +81,22 @@ function useRevealOnScroll() {
 					obs.unobserve(e.target)
 				})
 			},
-			{ threshold: 0.15 },
+			{ threshold: 0.05, rootMargin: "50px" },
 		)
 
-		refMap.current.forEach((el) => obs.observe(el))
+		// Observe all registered elements
+		refMap.current.forEach((el) => {
+			if (el) obs.observe(el)
+		})
+
 		return () => obs.disconnect()
-	}, [])
+	}, [dependency]) // Re-run when products load
 
 	const register = (id: string) => (el: HTMLElement | null) => {
-		if (!el) return
+		if (!el) {
+			refMap.current.delete(id)
+			return
+		}
 		el.dataset.revealId = id
 		refMap.current.set(id, el)
 	}
@@ -103,7 +111,7 @@ export default function Home() {
 	const [homeProducts, setHomeProducts] = useState<HomeProduct[]>([])
 	const [productsLoading, setProductsLoading] = useState(true)
 	const router = useRouter()
-	const { register, visible } = useRevealOnScroll()
+	const { register, visible } = useRevealOnScroll(homeProducts)
 	// Home grid is 2 columns on mobile; cap to 6 rows => 12 items max.
 	const HOME_MAX_ROWS = 6
 	const HOME_GRID_COLS_MOBILE = 2
@@ -301,6 +309,9 @@ export default function Home() {
 						const originalPrice = typeof p?.originalPrice === "number" ? p.originalPrice : undefined
 						const url = p?.id ? getProductUrl(p.id, p.categorySlug) : "#"
 
+						// Fallback: If not using reveal, or for skeletons, just show.
+						const show = isVisible || productsLoading
+						
 						return (
 							<article
 								key={id}
@@ -308,8 +319,8 @@ export default function Home() {
 								onClick={() => url !== "#" && router.push(url)}
 								className={[
 									"group cursor-pointer",
-									"transition-all duration-300 ease-in-out",
-									isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-2",
+									"transition-all duration-500 ease-in-out",
+									show ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4",
 								].join(" ")}
 								style={{ willChange: "transform, opacity" }}
 							>
