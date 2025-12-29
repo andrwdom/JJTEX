@@ -337,7 +337,7 @@ export default function CategoryPageClient({ categorySlug }: CategoryPageClientP
 
   return (
     <ErrorBoundary>
-      <PageLoading loadingMessage="Loading JJTextiles Collection..." minLoadingTime={1500}>
+      <PageLoading loadingMessage="Curating your collection..." minLoadingTime={1500}>
         <div className="min-h-screen bg-[#f9f9f9] w-full overflow-x-hidden">
         <div className="flex w-full overflow-x-hidden">
 

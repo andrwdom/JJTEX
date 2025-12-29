@@ -200,11 +200,11 @@ export default function AccountPageClient() {
 
   if (authLoading || loading) {
     return (
-      <PageLoading loadingMessage="Loading your account..." minLoadingTime={1000}>
-        <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+      <PageLoading loadingMessage="Preparing your account..." minLoadingTime={1000}>
+        <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
           <div className="text-center">
-            <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-[#473C66] mx-auto"></div>
-            <p className="mt-6 text-lg text-gray-600 font-medium">Loading your account...</p>
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-pink-500 mx-auto"></div>
+            <p className="mt-6 text-sm text-gray-500 tracking-[0.2em] uppercase font-bold">Preparing your account...</p>
           </div>
         </div>
       </PageLoading>
@@ -213,11 +213,11 @@ export default function AccountPageClient() {
 
   if (showLogin) {
     return (
-      <PageLoading loadingMessage="Welcome to JJTextiles..." minLoadingTime={1000}>
+      <PageLoading loadingMessage="Authenticating..." minLoadingTime={1000}>
         <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
           <div className="w-full max-w-md">
             <div className="text-center mb-8">
-              <h2 className="text-3xl font-bold text-[#473C66] mb-3">Welcome to JJTextiles</h2>
+              <h2 className="text-3xl font-bold text-[#3b2b52] mb-3">Welcome to JJTextiles</h2>
               <p className="text-gray-600 text-lg">Sign in to access your account</p>
             </div>
             <LoginModal open={true} onClose={() => setShowLogin(false)} onSuccess={handleLoginSuccess} />
@@ -228,7 +228,7 @@ export default function AccountPageClient() {
   }
 
   return (
-    <PageLoading loadingMessage="Loading your account..." minLoadingTime={1000}>
+    <PageLoading loadingMessage="Preparing your account..." minLoadingTime={1000}>
       <div className="min-h-screen bg-gray-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
           {/* Profile Header */}
