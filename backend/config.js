@@ -93,7 +93,7 @@ export const config = {
     phonepe: {
         env: process.env.PHONEPE_ENV || 'SANDBOX',
         merchant_id: process.env.PHONEPE_MERCHANT_ID || '123456789',
-        api_key: process.env.PHONEPE_API_KEY || 'test_api_key',
+        api_key: process.env.PHONEPE_SALT_KEY || process.env.PHONEPE_API_KEY || 'test_api_key',
         salt_index: parseInt(process.env.PHONEPE_SALT_INDEX || '1', 10),
         redirect_url: process.env.PHONEPE_REDIRECT_URL || 'https://jjtextiles.in/payment/phonepe/callback',
         callback_url: process.env.PHONEPE_CALLBACK_URL || 'https://jjtextiles.in/api/payment/phonepe/webhook',

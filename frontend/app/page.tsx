@@ -6,7 +6,7 @@ import { useRouter } from "next/navigation"
 import SiteHeader from "@/components/site-header"
 import { fetchProducts } from "@/lib/api-utils"
 import { getProductUrl } from "@/lib/product-url-utils"
-import { ChevronRight } from "lucide-react"
+import { ChevronRight, ChevronDown, FolderTree } from "lucide-react"
 
 type Highlight = {
 	title: string
@@ -14,9 +14,60 @@ type Highlight = {
 	slug?: string // Category slug for navigation
 }
 
-type CategoryChip = {
-	name: string
-	slug: string
+function CategoryTreeNode({ node, level = 0 }: { node: CategoryTree, level?: number }) {
+	const [isOpen, setIsOpen] = useState(false)
+	const router = useRouter()
+	const hasChildren = node.children && node.children.length > 0
+
+	return (
+		<div className="w-full">
+			<div 
+				className={`group flex items-center justify-between py-4 cursor-pointer border-b border-pink-50/50 hover:bg-pink-50/30 transition-all`}
+				style={{ paddingLeft: `${level * 1.5 + 1}rem`, paddingRight: '1rem' }}
+				onClick={() => {
+					if (hasChildren) {
+						setIsOpen(!isOpen)
+					} else {
+						router.push(`/collections/${node.slug}`)
+					}
+				}}
+			>
+				<div className="flex items-center gap-3">
+					<div className={`h-2 w-2 rounded-full transition-all duration-300 ${hasChildren ? (isOpen ? 'bg-pink-500 scale-125' : 'bg-pink-300') : 'bg-pink-500'}`} />
+					<span className={`text-[14px] sm:text-[15px] transition-colors ${level === 0 ? 'font-bold text-[#3b2b52]' : 'text-gray-700'} group-hover:text-pink-600`}>
+						{node.name}
+					</span>
+				</div>
+				
+				{hasChildren ? (
+					<div className="flex items-center gap-3">
+						<button 
+							onClick={(e) => {
+								e.stopPropagation()
+								router.push(`/collections/${node.slug}`)
+							}}
+							className="text-[10px] uppercase tracking-[0.15em] font-bold text-pink-400 hover:text-pink-600 px-3 py-1.5 rounded-full border border-pink-100 bg-white/50 hover:bg-pink-50 transition-all"
+						>
+							View All
+						</button>
+						<div className={`transition-transform duration-300 ${isOpen ? 'rotate-180' : ''}`}>
+							<ChevronDown className="h-4 w-4 text-pink-400" />
+						</div>
+					</div>
+				) : (
+					<ChevronRight className="h-4 w-4 text-pink-200 group-hover:text-pink-500 group-hover:translate-x-1 transition-all" />
+				)}
+			</div>
+
+			{hasChildren && isOpen && (
+				<div className="bg-[#fff9fa]/40 overflow-hidden animate-in fade-in slide-in-from-top-2 duration-300">
+					{node.children!.map((child) => (
+						<CategoryTreeNode key={child._id} node={child} level={level + 1} />
+					))}
+				</div>
+			)}
+		</div>
+	)
 }
 
 // Map category slugs to unique images
@@ -107,7 +158,7 @@ function useRevealOnScroll(dependency: any) {
 export default function Home() {
 	const [highlights, setHighlights] = useState<Highlight[]>(fallbackHighlights)
 	const [categoriesLoading, setCategoriesLoading] = useState(true)
-	const [allCategories, setAllCategories] = useState<CategoryChip[]>([])
+	const [categoryTree, setCategoryTree] = useState<CategoryTree[]>([])
 	const [homeProducts, setHomeProducts] = useState<HomeProduct[]>([])
 	const [productsLoading, setProductsLoading] = useState(true)
 	const router = useRouter()
@@ -123,15 +174,10 @@ export default function Home() {
 			setCategoriesLoading(true)
 			try {
 				const tree = await fetchCategoryTree()
-				const leafCategories = getLeafCategories(tree)
-				const chips: CategoryChip[] = leafCategories
-					.filter((c) => !!c?.slug && !!c?.name)
-					.map((c) => ({ name: c.name, slug: c.slug }))
-					// Keep it stable + easy to scan
-					.sort((a, b) => a.name.localeCompare(b.name))
-				setAllCategories(chips)
+				setCategoryTree(tree)
 				
 				// Map leaf categories to highlights (take first 7 or use fallback)
+				const leafCategories = getLeafCategories(tree)
 				if (leafCategories.length > 0) {
 					const categoryHighlights: Highlight[] = leafCategories.slice(0, 7).map((cat, index) => ({
 						title: cat.name,
@@ -142,13 +188,13 @@ export default function Home() {
 				} else {
 					// Use fallback if no categories found
 					setHighlights(fallbackHighlights)
-					setAllCategories([])
+					setCategoryTree([])
 				}
 			} catch (error) {
 				console.error('Failed to load categories:', error)
 				// Use fallback on error
 				setHighlights(fallbackHighlights)
-				setAllCategories([])
+				setCategoryTree([])
 			} finally {
 				setCategoriesLoading(false)
 			}
@@ -366,44 +412,50 @@ export default function Home() {
 			</section>
 
 			{/* Shop more by Category */}
-			<section className="px-6 pb-24">
-				<div className="flex items-center">
-					<div className="h-px flex-1 bg-black/10" />
-					<h2 className="mx-3 text-center text-[14px] sm:text-[15px] font-bold tracking-[0.28em] text-gray-900">
-						SHOP MORE BY CATEGORY
-					</h2>
-					<div className="h-px flex-1 bg-black/10" />
+			<section className="px-4 sm:px-6 pb-32 max-w-3xl mx-auto">
+				<div className="flex items-center mb-10">
+					<div className="h-px flex-1 bg-gradient-to-r from-transparent to-black/10" />
+					<div className="flex flex-col items-center mx-6 text-center">
+						<div className="h-12 w-12 rounded-2xl bg-pink-50 flex items-center justify-center mb-3 border border-pink-100 shadow-sm transition-transform hover:rotate-6">
+							<FolderTree className="h-6 w-6 text-pink-500" />
+						</div>
+						<h2 className="text-[15px] sm:text-[17px] font-bold tracking-[0.25em] text-[#3b2b52] uppercase font-serif">
+							THE COLLECTION DIRECTORY
+						</h2>
+						<p className="mt-1.5 text-[11px] text-gray-500 italic tracking-wider">
+							Explore our world of textiles through our curated hierarchy
+						</p>
+					</div>
+					<div className="h-px flex-1 bg-gradient-to-l from-transparent to-black/10" />
 				</div>
-				<p className="mt-2 text-center text-[12px] text-gray-600">
-					Explore everything we make—tap a category to browse.
-				</p>
 
-				<div className="mt-5 flex flex-wrap justify-center gap-3">
+				<div className="bg-white rounded-[2.5rem] border border-pink-100/60 shadow-[0_20px_50px_rgba(255,182,193,0.15)] overflow-hidden">
 					{categoriesLoading ? (
-						Array.from({ length: 14 }).map((_, i) => (
-							<div
-								key={`cat-sk-${i}`}
-								className="h-11 w-[160px] rounded-full bg-gray-100 animate-pulse"
-							/>
-						))
+						<div className="p-8 space-y-6">
+							{Array.from({ length: 5 }).map((_, i) => (
+								<div key={i} className="flex items-center justify-between">
+									<div className="flex items-center gap-4">
+										<div className="h-2 w-2 rounded-full bg-pink-100 animate-pulse" />
+										<div className="h-5 w-40 bg-gray-50 rounded-lg animate-pulse" />
+									</div>
+									<div className="h-5 w-5 bg-gray-50 rounded-full animate-pulse" />
+								</div>
+							))}
+						</div>
 					) : (
-						allCategories.map((cat) => (
-							<button
-								key={cat.slug}
-								type="button"
-								onClick={() => router.push(`/collections/${cat.slug}`)}
-								className="group relative"
-								aria-label={`Shop ${cat.name}`}
-							>
-								<span className="absolute inset-0 rounded-full bg-gradient-to-r from-pink-500/40 via-fuchsia-500/35 to-purple-500/40 blur-[10px] opacity-0 transition-opacity duration-300 group-hover:opacity-100" />
-								<span className="relative inline-flex items-center gap-2 rounded-full border border-pink-200/70 bg-white/90 px-5 py-3 text-[13px] font-semibold text-[#3b2b52] shadow-sm transition-all duration-300 hover:-translate-y-[1px] hover:shadow-md">
-									<span className="max-w-[170px] truncate">{cat.name}</span>
-									<ChevronRight className="h-4 w-4 text-pink-500 transition-transform duration-300 group-hover:translate-x-[1px]" />
-								</span>
-							</button>
-						))
+						<div className="divide-y divide-pink-50/40">
+							{categoryTree.map((cat) => (
+								<CategoryTreeNode key={cat._id} node={cat} />
+							))}
+						</div>
 					)}
 				</div>
+				
+				{!categoriesLoading && categoryTree.length === 0 && (
+					<div className="text-center py-16 bg-gray-50 rounded-[2rem] border border-dashed border-gray-200">
+						<p className="text-sm text-gray-400">Our collection catalog is being updated.</p>
+					</div>
+				)}
 			</section>
 
 			{/* Hide horizontal scrollbar utility */}
