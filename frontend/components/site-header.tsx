@@ -126,66 +126,68 @@ export default function SiteHeader({
         ].join(" ")}
         style={seamless ? undefined : { boxShadow: "0 2px 0 rgba(0,0,0,0.02) inset" }}
       >
-        <div className={["flex items-center justify-between", seamless ? "mb-3" : "mb-4"].join(" ")}>
-          <button
-            aria-label="Menu"
-            className="p-2 hover:bg-white/30 rounded-lg transition-colors duration-200"
-            onClick={() => setIsMobileMenuOpen(true)}
-            type="button"
-          >
-            <AlignJustify className="h-6 w-6 text-[#1f1f1f]" />
-          </button>
-
-          <div className="flex items-center justify-center">
-            <button onClick={() => (window.location.href = "/")} className="cursor-pointer" type="button">
-              <img src="/logo1.png" alt="JJ Textiles" className="h-10 w-auto mx-auto" />
-            </button>
-          </div>
-
-          <div className="flex items-center gap-3">
+        <div className="max-w-7xl mx-auto w-full">
+          <div className={["flex items-center justify-between", seamless ? "mb-3" : "mb-4"].join(" ")}>
             <button
-              aria-label="Cart"
-              className="p-2 hover:bg-white/30 rounded-lg transition-colors duration-200 relative"
-              onClick={openCartSidebar}
-              type="button"
-            >
-              <ShoppingCart className="h-6 w-6 text-[#1f1f1f]" />
-              {cartCount > 0 && (
-                <span className="absolute top-0 right-0 bg-[#E91E63] text-white text-[10px] font-bold rounded-full h-5 w-5 flex items-center justify-center">
-                  {cartCount > 9 ? "9+" : cartCount}
-                </span>
-              )}
-            </button>
-            <button
-              aria-label="Account"
+              aria-label="Menu"
               className="p-2 hover:bg-white/30 rounded-lg transition-colors duration-200"
-              onClick={handleAccountClick}
+              onClick={() => setIsMobileMenuOpen(true)}
               type="button"
             >
-              <User className="h-6 w-6 text-[#1f1f1f]" />
+              <AlignJustify className="h-6 w-6 text-[#1f1f1f]" />
             </button>
-          </div>
-        </div>
 
-        {/* Search bar inside pink header */}
-        {showSearch && (
-          <div className={["px-0", seamless ? "pb-1" : "pb-2"].join(" ")}>
-            <div className="relative">
-              <div className={["flex items-center gap-2 bg-white rounded-full px-4 py-3", seamless ? "shadow-md" : "shadow-lg"].join(" ")}>
-                <SearchIcon className="h-5 w-5 text-gray-500" />
-                <input
-                  id="site-header-search"
-                  type="text"
-                  placeholder={searchPlaceholder}
-                  className="w-full bg-transparent text-sm outline-none placeholder:text-gray-400"
-                  aria-label="Search"
-                  value={effectiveSearchValue}
-                  onChange={(e) => handleSearchChange(e.target.value)}
-                />
-              </div>
+            <div className="flex items-center justify-center">
+              <button onClick={() => (window.location.href = "/")} className="cursor-pointer" type="button">
+                <img src="/logo1.png" alt="JJ Textiles" className="h-10 w-auto mx-auto" />
+              </button>
+            </div>
+
+            <div className="flex items-center gap-3">
+              <button
+                aria-label="Cart"
+                className="p-2 hover:bg-white/30 rounded-lg transition-colors duration-200 relative"
+                onClick={openCartSidebar}
+                type="button"
+              >
+                <ShoppingCart className="h-6 w-6 text-[#1f1f1f]" />
+                {cartCount > 0 && (
+                  <span className="absolute top-0 right-0 bg-[#E91E63] text-white text-[10px] font-bold rounded-full h-5 w-5 flex items-center justify-center">
+                    {cartCount > 9 ? "9+" : cartCount}
+                  </span>
+                )}
+              </button>
+              <button
+                aria-label="Account"
+                className="p-2 hover:bg-white/30 rounded-lg transition-colors duration-200"
+                onClick={handleAccountClick}
+                type="button"
+              >
+                <User className="h-6 w-6 text-[#1f1f1f]" />
+              </button>
             </div>
           </div>
-        )}
+
+          {/* Search bar inside pink header */}
+          {showSearch && (
+            <div className={["px-0", seamless ? "pb-1" : "pb-2"].join(" ")}>
+              <div className="relative max-w-2xl mx-auto">
+                <div className={["flex items-center gap-2 bg-white rounded-full px-4 py-3", seamless ? "shadow-md" : "shadow-lg"].join(" ")}>
+                  <SearchIcon className="h-5 w-5 text-gray-500" />
+                  <input
+                    id="site-header-search"
+                    type="text"
+                    placeholder={searchPlaceholder}
+                    className="w-full bg-transparent text-sm outline-none placeholder:text-gray-400"
+                    aria-label="Search"
+                    value={effectiveSearchValue}
+                    onChange={(e) => handleSearchChange(e.target.value)}
+                  />
+                </div>
+              </div>
+            </div>
+          )}
+        </div>
       </header>
 
       {/* Mobile Menu Sidebar */}

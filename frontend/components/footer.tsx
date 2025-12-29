@@ -76,12 +76,9 @@ export default function Footer() {
         <div className="mx-auto max-w-6xl grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
           {/* Brand */}
           <div className="space-y-4">
-            <div className="flex items-center gap-3">
-              <img src="/logo1.png" alt="JJTextiles" className="h-9 w-9 rounded-lg border border-pink-200/70 bg-white" />
-              <div>
-                <p className="text-lg font-bold tracking-wide text-[#3b2b52]">JJTextiles</p>
-                <p className="text-xs text-gray-600">Premium Apparel & Textiles</p>
-              </div>
+            <div className="space-y-3">
+              <img src="/logo1.png" alt="JJTextiles Logo" className="h-14 w-auto object-contain rounded-xl border border-pink-200/70 bg-white p-1 shadow-sm" />
+              <p className="text-xs text-gray-600 font-medium tracking-wider uppercase">Premium Apparel & Textiles</p>
             </div>
             <p className="text-sm text-gray-600 leading-relaxed">
               Curated styles, elevated essentials, and a smooth shopping experience—crafted for everyday confidence.
@@ -169,6 +166,14 @@ export default function Footer() {
           <p className="text-xs text-gray-600">
             © {new Date().getFullYear()} JJTextiles. All rights reserved.
           </p>
+          <a 
+            href="https://www.instagram.com/andrewwdominic" 
+            target="_blank" 
+            rel="noopener noreferrer"
+            className="text-[11px] font-medium text-pink-500/80 hover:text-pink-600 transition-colors"
+          >
+            site by @andrewwdominic
+          </a>
           <p className="text-xs text-gray-500">
             Payments secured • Fast support • Easy browsing
           </p>

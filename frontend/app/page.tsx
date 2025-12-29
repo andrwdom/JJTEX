@@ -22,8 +22,8 @@ function CategoryTreeNode({ node, level = 0 }: { node: CategoryTree, level?: num
 	return (
 		<div className="w-full">
 			<div 
-				className={`group flex items-center justify-between py-4 cursor-pointer border-b border-pink-50/50 hover:bg-pink-50/30 transition-all`}
-				style={{ paddingLeft: `${level * 1.5 + 1}rem`, paddingRight: '1rem' }}
+				className={`group flex items-center justify-between py-5 cursor-pointer border-b border-pink-50/50 hover:bg-pink-50/40 transition-all`}
+				style={{ paddingLeft: `${level * 2 + 1.5}rem`, paddingRight: '1.5rem' }}
 				onClick={() => {
 					if (hasChildren) {
 						setIsOpen(!isOpen)
@@ -32,35 +32,38 @@ function CategoryTreeNode({ node, level = 0 }: { node: CategoryTree, level?: num
 					}
 				}}
 			>
-				<div className="flex items-center gap-3">
-					<div className={`h-2 w-2 rounded-full transition-all duration-300 ${hasChildren ? (isOpen ? 'bg-pink-500 scale-125' : 'bg-pink-300') : 'bg-pink-500'}`} />
-					<span className={`text-[14px] sm:text-[15px] transition-colors ${level === 0 ? 'font-bold text-[#3b2b52]' : 'text-gray-700'} group-hover:text-pink-600`}>
+				<div className="flex items-center gap-4">
+					<div className={`h-2.5 w-2.5 rounded-full transition-all duration-500 ${hasChildren ? (isOpen ? 'bg-pink-500 scale-125 shadow-[0_0_8px_rgba(233,30,99,0.4)]' : 'bg-pink-200') : 'bg-pink-500 shadow-[0_0_8px_rgba(233,30,99,0.2)]'}`} />
+					<span className={`text-[15px] sm:text-[16px] lg:text-[17px] tracking-tight transition-colors ${level === 0 ? 'font-bold text-[#3b2b52]' : 'text-gray-700 font-medium'} group-hover:text-pink-600`}>
 						{node.name}
 					</span>
 				</div>
 				
 				{hasChildren ? (
-					<div className="flex items-center gap-3">
+					<div className="flex items-center gap-4">
 						<button 
 							onClick={(e) => {
 								e.stopPropagation()
 								router.push(`/collections/${node.slug}`)
 							}}
-							className="text-[10px] uppercase tracking-[0.15em] font-bold text-pink-400 hover:text-pink-600 px-3 py-1.5 rounded-full border border-pink-100 bg-white/50 hover:bg-pink-50 transition-all"
+							className="hidden sm:inline-flex text-[10px] lg:text-[11px] uppercase tracking-[0.2em] font-bold text-pink-400 hover:text-white px-4 py-2 rounded-full border border-pink-100 bg-white hover:bg-pink-500 hover:border-pink-500 transition-all duration-300"
 						>
 							View All
 						</button>
-						<div className={`transition-transform duration-300 ${isOpen ? 'rotate-180' : ''}`}>
-							<ChevronDown className="h-4 w-4 text-pink-400" />
+						<div className={`transition-transform duration-500 ${isOpen ? 'rotate-180' : ''}`}>
+							<ChevronDown className="h-5 w-5 text-pink-400" />
 						</div>
 					</div>
 				) : (
-					<ChevronRight className="h-4 w-4 text-pink-200 group-hover:text-pink-500 group-hover:translate-x-1 transition-all" />
+					<div className="flex items-center gap-2">
+						<span className="hidden group-hover:inline text-[10px] uppercase tracking-widest text-pink-400 font-bold animate-in fade-in slide-in-from-right-2 duration-300">Browse</span>
+						<ChevronRight className="h-5 w-5 text-pink-100 group-hover:text-pink-500 group-hover:translate-x-1.5 transition-all duration-300" />
+					</div>
 				)}
 			</div>
 
 			{hasChildren && isOpen && (
-				<div className="bg-[#fff9fa]/40 overflow-hidden animate-in fade-in slide-in-from-top-2 duration-300">
+				<div className="bg-[#fff9fa]/60 overflow-hidden animate-in fade-in slide-in-from-top-4 duration-500">
 					{node.children!.map((child) => (
 						<CategoryTreeNode key={child._id} node={child} level={level + 1} />
 					))}
@@ -259,13 +262,13 @@ export default function Home() {
 
 
 	return (
-		<div className="min-h-screen bg-white font-sans text-gray-900">
+		<div className="min-h-screen bg-white font-sans text-gray-900 overflow-x-hidden">
       <SiteHeader seamless sticky glassOnScroll />
 
 			{/* Category rail */}
-			<section className="bg-[#fce4ec] pt-3 pb-4">
+			<section className="bg-[#fce4ec] pt-3 pb-4 border-b border-pink-100/50 flex justify-center">
 				<div
-					className="no-scrollbar flex gap-5 overflow-x-auto px-4 py-2"
+					className="no-scrollbar flex gap-5 overflow-x-auto px-4 py-2 sm:px-10 lg:gap-12"
 					style={{ WebkitOverflowScrolling: "touch" }}
 				>
 					{highlights.map((item) => (
@@ -291,15 +294,15 @@ export default function Home() {
 			</section>
 
 			{/* Hero banner */}
-			<section className="bg-gradient-to-b from-[#fce4ec] to-white px-4 pb-6">
-				<div className="relative overflow-hidden rounded-2xl">
+			<section className="bg-gradient-to-b from-[#fce4ec] to-white px-4 pb-6 sm:px-6 lg:px-8">
+				<div className="relative overflow-hidden rounded-2xl max-w-7xl mx-auto shadow-sm">
 					{/* Atmospheric blend background */}
 					<div className="absolute inset-0 bg-gradient-to-b from-[#fce4ec] via-[#fce4ec] to-black/10" />
 
 					<img
 						src="/hero_img.png"
 						alt="Winter editorial"
-						className="h-72 sm:h-[340px] w-full object-cover"
+						className="h-72 sm:h-[400px] lg:h-[500px] w-full object-cover"
 						style={{
 							WebkitMaskImage: "linear-gradient(to bottom, rgba(0,0,0,0.98), rgba(0,0,0,0.92) 55%, rgba(0,0,0,0.55), rgba(0,0,0,0.2))",
 							maskImage: "linear-gradient(to bottom, rgba(0,0,0,0.98), rgba(0,0,0,0.92) 55%, rgba(0,0,0,0.55), rgba(0,0,0,0.2))",
@@ -310,17 +313,17 @@ export default function Home() {
 					{/* Editorial overlay */}
 					<div className="absolute inset-0 bg-gradient-to-t from-black/35 via-black/10 to-transparent" />
 
-					<div className="absolute left-5 top-6">
-						<p className="text-[11px] uppercase tracking-[0.22em] text-white/90 font-medium">
+					<div className="absolute left-5 top-6 sm:left-10 sm:top-12 lg:left-16 lg:top-20">
+						<p className="text-[11px] sm:text-xs lg:text-sm uppercase tracking-[0.22em] text-white/90 font-medium">
 							Big Winter Bonanza
 						</p>
-						<h3 className="mt-2 text-2xl sm:text-3xl font-semibold text-white font-serif tracking-[0.06em]">
+						<h3 className="mt-2 text-2xl sm:text-4xl lg:text-5xl font-semibold text-white font-serif tracking-[0.06em]">
 							40–80% OFF
 						</h3>
 						<button
 							type="button"
 							onClick={() => router.push("/collections/dresses-jumpsuits")}
-							className="mt-4 inline-flex items-center justify-center rounded-full bg-[#E91E63] px-5 py-2 text-sm font-semibold text-white transition-all duration-300 ease-in-out hover:shadow-[0_0_24px_rgba(233,30,99,0.35)] hover:-translate-y-0.5"
+							className="mt-4 sm:mt-6 lg:mt-8 inline-flex items-center justify-center rounded-full bg-[#E91E63] px-6 py-2.5 sm:px-8 sm:py-3 text-sm lg:text-base font-semibold text-white transition-all duration-300 ease-in-out hover:shadow-[0_0_32px_rgba(233,30,99,0.45)] hover:-translate-y-1 active:scale-95"
 						>
 							Shop Now
 						</button>
@@ -329,22 +332,22 @@ export default function Home() {
 			</section>
 
 			{/* Latest Collections */}
-			<section className="mt-10 sm:mt-14 px-6">
+			<section className="mt-10 sm:mt-16 lg:mt-24 px-6 max-w-7xl mx-auto w-full">
 				<div className="flex items-center">
 					<div className="h-px flex-1 bg-black/10" />
-					<h2 className="mx-3 text-center text-[14px] sm:text-[15px] font-bold tracking-[0.28em] text-gray-900">
+					<h2 className="mx-4 text-center text-[14px] sm:text-[16px] lg:text-[18px] font-bold tracking-[0.3em] text-gray-900 uppercase">
 						LATEST COLLECTIONS
 					</h2>
 					<div className="h-px flex-1 bg-black/10" />
 				</div>
-				<p className="mt-2 text-center text-[12px] text-gray-600">
+				<p className="mt-3 text-center text-[12px] sm:text-[13px] text-gray-600 max-w-2xl mx-auto leading-relaxed">
 					{seasonalSubtitle}
 				</p>
 			</section>
 
 			{/* Product grid */}
-			<section className="mt-6 px-4 pb-20">
-				<div className="grid grid-cols-2 lg:grid-cols-4 gap-6">
+			<section className="mt-8 lg:mt-12 px-4 sm:px-6 lg:px-8 pb-20 max-w-7xl mx-auto w-full">
+				<div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-4 gap-x-4 gap-y-10 sm:gap-8 lg:gap-10">
 					{(productsLoading ? Array.from({ length: HOME_MAX_ITEMS }).map((_, i) => ({ id: `sk-${i}` })) : homeProducts).map((p: any, idx: number) => {
 						const id = p.id || `sk-${idx}`
 						const isVisible = visible[id]
@@ -412,24 +415,24 @@ export default function Home() {
 			</section>
 
 			{/* Shop more by Category */}
-			<section className="px-4 sm:px-6 pb-32 max-w-3xl mx-auto">
-				<div className="flex items-center mb-10">
+			<section className="px-4 sm:px-6 pb-32 max-w-4xl mx-auto w-full">
+				<div className="flex items-center mb-12 lg:mb-16">
 					<div className="h-px flex-1 bg-gradient-to-r from-transparent to-black/10" />
-					<div className="flex flex-col items-center mx-6 text-center">
-						<div className="h-12 w-12 rounded-2xl bg-pink-50 flex items-center justify-center mb-3 border border-pink-100 shadow-sm transition-transform hover:rotate-6">
-							<FolderTree className="h-6 w-6 text-pink-500" />
+					<div className="flex flex-col items-center mx-8 text-center">
+						<div className="h-14 w-14 rounded-2xl bg-pink-50 flex items-center justify-center mb-4 border border-pink-100 shadow-sm transition-all duration-500 hover:rotate-12 hover:scale-110">
+							<FolderTree className="h-7 w-7 text-pink-500" />
 						</div>
-						<h2 className="text-[15px] sm:text-[17px] font-bold tracking-[0.25em] text-[#3b2b52] uppercase font-serif">
+						<h2 className="text-[16px] sm:text-[18px] lg:text-[20px] font-bold tracking-[0.25em] text-[#3b2b52] uppercase font-serif">
 							THE COLLECTION DIRECTORY
 						</h2>
-						<p className="mt-1.5 text-[11px] text-gray-500 italic tracking-wider">
-							Explore our world of textiles through our curated hierarchy
+						<p className="mt-2 text-[12px] text-gray-500 italic tracking-widest uppercase">
+							Explore our curated hierarchy
 						</p>
 					</div>
 					<div className="h-px flex-1 bg-gradient-to-l from-transparent to-black/10" />
 				</div>
 
-				<div className="bg-white rounded-[2.5rem] border border-pink-100/60 shadow-[0_20px_50px_rgba(255,182,193,0.15)] overflow-hidden">
+				<div className="bg-white rounded-[2.5rem] lg:rounded-[3rem] border border-pink-100/60 shadow-[0_20px_60px_rgba(255,182,193,0.18)] overflow-hidden transition-all duration-500 hover:shadow-[0_30px_80px_rgba(255,182,193,0.22)]">
 					{categoriesLoading ? (
 						<div className="p-8 space-y-6">
 							{Array.from({ length: 5 }).map((_, i) => (
