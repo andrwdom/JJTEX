@@ -1,8 +1,6 @@
 "use client"
 import { motion } from "framer-motion"
 import { Heart, Instagram, Sparkles, Quote, Baby, Users, Smile } from "lucide-react"
-import Image from "next/image"
-import OptimizedStaticImage from "@/components/optimized-static-image"
 
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
@@ -99,32 +97,9 @@ export default function AboutPage() {
               </motion.div>
 
               {/* Story Content */}
-              <motion.div variants={fadeInUp} className="grid md:grid-cols-3 gap-8 lg:gap-12 items-start">
-                {/* Founder Image */}
-                <div className="relative">
-                  <div className="bg-white rounded-2xl p-3 shadow-lg transform rotate-2">
-                    <OptimizedStaticImage
-                      src="/about-us.jpg"
-                      alt="JJTextiles"
-                      width={250}
-                      height={300}
-                      className="w-full h-72 object-cover rounded-xl"
-                    />
-                  </div>
-                  <PaperPin className="top-2 right-2" />
-                  <BabyDoodle className="bottom-4 left-4" />
-
-                  {/* Instagram Badge */}
-                  <div className="absolute -bottom-4 -right-4 bg-white rounded-full p-3 shadow-lg border border-pink-100">
-                    <div className="flex items-center space-x-2">
-                      <Instagram className="w-5 h-5 text-pink-500" />
-                      <span className="text-sm font-semibold text-gray-700">32k+</span>
-                    </div>
-                  </div>
-                </div>
-
+              <motion.div variants={fadeInUp} className="max-w-4xl mx-auto">
                 {/* Story Text */}
-                <div className="md:col-span-2 space-y-6">
+                <div className="space-y-6">
                   <div className="bg-white rounded-2xl p-8 shadow-lg relative overflow-hidden">
                     {/* Decorative corner */}
                     <div className="absolute top-0 right-0 w-16 h-16 bg-gradient-to-bl from-pink-100 to-transparent rounded-bl-full"></div>
@@ -272,65 +247,6 @@ export default function AboutPage() {
                 ))}
               </motion.div>
 
-              {/* Testimonial */}
-              <motion.div variants={fadeInUp} className="mb-16">
-                <div className="text-center mb-12">
-                  <div className="relative inline-block">
-                    <WashiTape className="-top-2 -right-4" rotation={8} />
-                    <BabyDoodle className="-top-4 left-4" />
-                    <h3 className="text-3xl md:text-4xl font-light text-[#473C66] relative">
-                      What <span className="font-semibold">Moms Say</span>
-                    </h3>
-                    <PaperPin className="top-2 left-0" />
-                    <HeartDoodle className="bottom-2 right-4" />
-                  </div>
-                  <p className="text-lg text-gray-600 mt-4 italic">
-                    Here's what our community shares on Instagram
-                  </p>
-                </div>
-                
-                {/* Testimonials Grid */}
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-6 md:gap-8 lg:gap-10">
-                  {[
-                    { id: 1, image: "/testi1.jpeg" },
-                    { id: 2, image: "/testi2.jpeg" },
-                    { id: 3, image: "/testi3.jpeg" },
-                    { id: 4, image: "/testi4.jpeg" },
-                    { id: 5, image: "/testi5.jpeg" },
-                    { id: 6, image: "/testi6.jpeg" },
-                    { id: 7, image: "/testi7.jpeg" },
-                    { id: 8, image: "/testi8.jpeg" },
-                  ].map((testimonial, index) => (
-                    <motion.div
-                      key={testimonial.id}
-                      variants={fadeInUp}
-                      className="group relative overflow-hidden rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105"
-                      whileHover={{ y: -5 }}
-                    >
-                      <div className="aspect-square relative">
-                        <img
-                          src={testimonial.image}
-                          alt={`Testimonial ${testimonial.id}`}
-                          className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-110"
-                          onLoad={() => console.log(`Image loaded: ${testimonial.image}`)}
-                          onError={(e) => {
-                            console.error(`Failed to load image: ${testimonial.image}`, e);
-                            // Fallback to a placeholder
-                            const target = e.target as HTMLImageElement;
-                            target.src = "/placeholder.svg?height=300&width=300";
-                          }}
-                        />
-                        {/* Instagram overlay */}
-                        <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                          <div className="absolute bottom-3 right-3 bg-white/90 backdrop-blur-sm rounded-full p-2">
-                            <Instagram className="w-4 h-4 text-pink-500" />
-                          </div>
-                        </div>
-                      </div>
-                    </motion.div>
-                  ))}
-                </div>
-              </motion.div>
             </motion.div>
           </section>
 

@@ -15,6 +15,7 @@ export default function LayoutClient({ children }: { children: React.ReactNode }
   const isHomePage = pathname === '/';
   const isCollectionsPage = pathname?.startsWith('/collections/');
   const isProductPage = pathname?.startsWith('/product/') || pathname?.includes('/product/');
+  const isSearchPage = pathname?.startsWith('/search');
   
   // Header: hidden on checkout + homepage (homepage has its own header)
   const shouldShowHeader = !isCheckoutPage && !isHomePage;
@@ -32,7 +33,7 @@ export default function LayoutClient({ children }: { children: React.ReactNode }
         <>
           <SiteHeader
             seamless={isCollectionsPage || isProductPage}
-            syncSearchToUrl={isCollectionsPage}
+            syncSearchToUrl={isCollectionsPage || isSearchPage}
           />
         </>
       )}

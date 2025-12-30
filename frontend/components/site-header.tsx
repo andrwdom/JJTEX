@@ -110,6 +110,27 @@ export default function SiteHeader({
     router.replace(qs ? `${pathname}?${qs}` : `${pathname}`, { scroll: false })
   }
 
+  const handleSearchSubmit = (e?: React.FormEvent) => {
+    if (e) {
+      e.preventDefault()
+    }
+
+    const searchTerm = effectiveSearchValue.trim()
+    
+    if (!searchTerm) {
+      return
+    }
+
+    // Navigate to search results page with search query
+    router.push(`/search?q=${encodeURIComponent(searchTerm)}`)
+  }
+
+  const handleSearchKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === 'Enter') {
+      handleSearchSubmit()
+    }
+  }
+
   return (
     <>
       {/* Light pink header with soft bottom curve (Home-style) */}
@@ -171,7 +192,10 @@ export default function SiteHeader({
           {/* Search bar inside pink header */}
           {showSearch && (
             <div className={["px-0", seamless ? "pb-1" : "pb-2"].join(" ")}>
-              <div className="relative max-w-2xl mx-auto">
+              <form 
+                onSubmit={handleSearchSubmit}
+                className="relative max-w-2xl mx-auto"
+              >
                 <div className={["flex items-center gap-2 bg-white rounded-full px-4 py-3", seamless ? "shadow-md" : "shadow-lg"].join(" ")}>
                   <SearchIcon className="h-5 w-5 text-gray-500" />
                   <input
@@ -182,9 +206,17 @@ export default function SiteHeader({
                     aria-label="Search"
                     value={effectiveSearchValue}
                     onChange={(e) => handleSearchChange(e.target.value)}
+                    onKeyDown={handleSearchKeyDown}
                   />
+                  <button
+                    type="submit"
+                    className="ml-2 text-gray-500 hover:text-gray-700 transition-colors"
+                    aria-label="Submit search"
+                  >
+                    <SearchIcon className="h-5 w-5" />
+                  </button>
                 </div>
-              </div>
+              </form>
             </div>
           )}
         </div>

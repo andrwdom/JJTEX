@@ -5,7 +5,8 @@ import { backendUrl } from '../App';
 
 const CouponManagement = ({ token }) => {
   const [coupons, setCoupons] = useState([]);
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const [fetching, setFetching] = useState(false);
   const [formData, setFormData] = useState({
     discountPercentage: '',
     validFrom: '',
@@ -20,15 +21,35 @@ const CouponManagement = ({ token }) => {
 
   const fetchCoupons = async () => {
     try {
+      setFetching(true);
       const response = await axios.get(`${backendUrl}/api/coupons`, {
         headers: {
           token: token
         }
       });
-      setCoupons(response.data);
+      
+      // Handle different response formats
+      let couponsData = [];
+      if (Array.isArray(response.data)) {
+        couponsData = response.data;
+      } else if (response.data && Array.isArray(response.data.data)) {
+        couponsData = response.data.data;
+      } else if (response.data && Array.isArray(response.data.coupons)) {
+        couponsData = response.data.coupons;
+      } else {
+        console.warn('Unexpected response format:', response.data);
+        couponsData = [];
+      }
+      
+      setCoupons(couponsData);
     } catch (error) {
-      toast.error('Failed to fetch coupons');
       console.error('Error fetching coupons:', error);
+      const errorMessage = error.response?.data?.message || error.message || 'Failed to fetch coupons';
+      toast.error(errorMessage);
+      setCoupons([]); // Set empty array on error
+    } finally {
+      setLoading(false);
+      setFetching(false);
     }
   };
 
@@ -36,23 +57,27 @@ const CouponManagement = ({ token }) => {
     e.preventDefault();
     setLoading(true);
     try {
-      await axios.post(`${backendUrl}/api/coupons`, formData, {
+      const response = await axios.post(`${backendUrl}/api/coupons`, formData, {
         headers: {
           token: token
         }
       });
-      toast.success('Coupon created successfully');
-      setFormData({
-        discountPercentage: '',
-        validFrom: '',
-        validUntil: '',
-        usageLimit: '',
-        code: ''
-      });
-      fetchCoupons();
+      
+      if (response.status === 201 || response.status === 200) {
+        toast.success('Coupon created successfully');
+        setFormData({
+          discountPercentage: '',
+          validFrom: '',
+          validUntil: '',
+          usageLimit: '',
+          code: ''
+        });
+        fetchCoupons();
+      }
     } catch (error) {
-      toast.error('Failed to create coupon');
       console.error('Error creating coupon:', error);
+      const errorMessage = error.response?.data?.message || error.message || 'Failed to create coupon';
+      toast.error(errorMessage);
     } finally {
       setLoading(false);
     }
@@ -61,16 +86,20 @@ const CouponManagement = ({ token }) => {
   const handleDelete = async (id) => {
     if (window.confirm('Are you sure you want to delete this coupon?')) {
       try {
-        await axios.delete(`${backendUrl}/api/coupons/${id}`, {
+        const response = await axios.delete(`${backendUrl}/api/coupons/${id}`, {
           headers: {
             token: token
           }
         });
-        toast.success('Coupon deleted successfully');
-        fetchCoupons();
+        
+        if (response.status === 200 || response.status === 204) {
+          toast.success('Coupon deleted successfully');
+          fetchCoupons();
+        }
       } catch (error) {
-        toast.error('Failed to delete coupon');
         console.error('Error deleting coupon:', error);
+        const errorMessage = error.response?.data?.message || error.message || 'Failed to delete coupon';
+        toast.error(errorMessage);
       }
     }
   };
@@ -165,45 +194,78 @@ const CouponManagement = ({ token }) => {
       {/* Coupons List */}
       <div className="bg-white p-6 rounded-lg shadow-md">
         <h2 className="text-xl font-semibold mb-4">Existing Coupons</h2>
-        <div className="overflow-x-auto">
-          <table className="min-w-full divide-y divide-gray-200">
-            <thead className="bg-gray-50">
-              <tr>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Code</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Discount</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Valid From</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Valid Until</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Usage</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
-              </tr>
-            </thead>
-            <tbody className="bg-white divide-y divide-gray-200">
-              {coupons.map((coupon) => (
-                <tr key={coupon._id}>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{coupon.code}</td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{coupon.discountPercentage}%</td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                    {new Date(coupon.validFrom).toLocaleString()}
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                    {new Date(coupon.validUntil).toLocaleString()}
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                    {coupon.usedCount} / {coupon.usageLimit || '∞'}
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                    <button
-                      onClick={() => handleDelete(coupon._id)}
-                      className="text-red-600 hover:text-red-900"
-                    >
-                      Delete
-                    </button>
-                  </td>
+        {loading ? (
+          <div className="text-center py-8">
+            <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-indigo-600"></div>
+            <p className="mt-2 text-gray-600">Loading coupons...</p>
+          </div>
+        ) : coupons.length === 0 ? (
+          <div className="text-center py-8">
+            <p className="text-gray-500">No coupons found. Create your first coupon above.</p>
+          </div>
+        ) : (
+          <div className="overflow-x-auto">
+            <table className="min-w-full divide-y divide-gray-200">
+              <thead className="bg-gray-50">
+                <tr>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Code</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Discount</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Valid From</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Valid Until</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Usage</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+              </thead>
+              <tbody className="bg-white divide-y divide-gray-200">
+                {coupons.map((coupon) => {
+                  const now = new Date();
+                  const validFrom = new Date(coupon.validFrom);
+                  const validUntil = new Date(coupon.validUntil);
+                  const isActive = now >= validFrom && now <= validUntil;
+                  const isExpired = now > validUntil;
+                  const isUpcoming = now < validFrom;
+                  const usageExceeded = coupon.usageLimit && coupon.usedCount >= coupon.usageLimit;
+                  
+                  return (
+                    <tr key={coupon._id}>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{coupon.code}</td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{coupon.discountPercentage}%</td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                        {new Date(coupon.validFrom).toLocaleString()}
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                        {new Date(coupon.validUntil).toLocaleString()}
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                        {coupon.usedCount || 0} / {coupon.usageLimit || '∞'}
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm">
+                        {isExpired ? (
+                          <span className="px-2 py-1 text-xs font-semibold rounded-full bg-red-100 text-red-800">Expired</span>
+                        ) : isUpcoming ? (
+                          <span className="px-2 py-1 text-xs font-semibold rounded-full bg-yellow-100 text-yellow-800">Upcoming</span>
+                        ) : usageExceeded ? (
+                          <span className="px-2 py-1 text-xs font-semibold rounded-full bg-orange-100 text-orange-800">Limit Reached</span>
+                        ) : (
+                          <span className="px-2 py-1 text-xs font-semibold rounded-full bg-green-100 text-green-800">Active</span>
+                        )}
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                        <button
+                          onClick={() => handleDelete(coupon._id)}
+                          className="text-red-600 hover:text-red-900 font-medium"
+                        >
+                          Delete
+                        </button>
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
+        )}
       </div>
     </div>
   );
