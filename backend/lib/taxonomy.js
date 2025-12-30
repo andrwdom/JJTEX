@@ -14,7 +14,7 @@ export function slugify(str) {
  * IMPORTANT:
  * - Root slugs are kept stable to match existing URLs/docs:
  *   - "Types For Kids" => "types-for-kids"
- *   - "TYPES FOR WOMAN" => "types-for-woman"
+ *   - "Types for Women" => "types-for-woman"
  * - Leaf slugs are globally unique to avoid Product.categorySlug collisions.
  */
 export const taxonomy = [
@@ -78,7 +78,7 @@ export const taxonomy = [
     ]
   },
   {
-    name: 'TYPES FOR WOMAN',
+    name: 'Types for Women',
     slug: 'types-for-woman',
     children: [
       {
@@ -119,6 +119,8 @@ export const taxonomy = [
     ]
   }
 ];
+
+
 
 
 

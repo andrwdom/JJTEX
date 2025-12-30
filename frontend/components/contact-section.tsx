@@ -33,7 +33,7 @@ export default function ContactSection() {
 
     const { name, email, subject, message } = formData
 
-    const supportEmail = "info.shithaa@gmail.com"
+    const supportEmail = "info.jjtextiles@gmail.com"
     
     // Encode the subject and body for the URL
     const gmailSubject = encodeURIComponent(subject)
@@ -65,8 +65,8 @@ export default function ContactSection() {
       icon: Mail,
       title: "General Inquiries",
       subtitle: "Questions about products, orders, or shipping",
-      value: "info.shithaa@gmail.com",
-      action: () => window.open("mailto:info.shithaa@gmail.com"),
+      value: "info.jjtextiles@gmail.com",
+      action: () => window.open("mailto:info.jjtextiles@gmail.com"),
       bgColor: "bg-purple-50",
       iconColor: "text-purple-600",
       hoverColor: "hover:bg-purple-100",
@@ -76,8 +76,8 @@ export default function ContactSection() {
       icon: Instagram,
       title: "Instagram Support",
       subtitle: "Quick questions and product assistance",
-      value: "@shithaa.in",
-      action: () => window.open("https://www.instagram.com/shithaa.in", "_blank"),
+      value: "@jjtextiles",
+      action: () => window.open("https://www.instagram.com/jjtextiles", "_blank"),
       bgColor: "bg-pink-50",
       iconColor: "text-pink-600",
       hoverColor: "hover:bg-pink-100",
@@ -269,7 +269,7 @@ export default function ContactSection() {
                         type="button"
                         size="sm"
                         className="bg-gradient-to-r from-pink-600 to-purple-600 hover:from-pink-700 hover:to-purple-700 text-white rounded-lg"
-                        onClick={() => window.open("https://www.instagram.com/shithaa.in", "_blank")}
+                        onClick={() => window.open("https://www.instagram.com/jjtextiles", "_blank")}
                       >
                         DM Us Now
                       </Button>

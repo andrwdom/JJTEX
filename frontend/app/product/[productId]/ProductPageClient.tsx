@@ -291,19 +291,19 @@ export default function ProductPageClient({ productId }: ProductPageClientProps)
     <>
       <div className="min-h-screen bg-white">
         {/* Header */}
-        <div className="sticky top-20 z-40 bg-gradient-to-b from-[#fce4ec] via-[#fce4ec]/70 to-white/90 backdrop-blur-md border-b border-transparent">
+        <div className="sticky top-20 z-40 bg-white/95 backdrop-blur-md border-b border-gray-100">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="flex flex-col h-auto py-3">
               {/* Breadcrumb */}
               <div className="flex items-center space-x-2 text-sm text-gray-600 mb-2">
-                <Button variant="link" size="sm" className="p-0 h-auto text-[#E91E63] hover:text-[#d81b60]" onClick={() => (window.location.href = "/")}>
+                <Button variant="link" size="sm" className="p-0 h-auto text-gray-600 hover:text-gray-900" onClick={() => (window.location.href = "/")}>
                   Home
                 </Button>
                 <ChevronRight className="h-4 w-4" />
                 <Button 
                   variant="link" 
                   size="sm" 
-                  className="p-0 h-auto text-[#E91E63] hover:text-[#d81b60]" 
+                  className="p-0 h-auto text-gray-600 hover:text-gray-900" 
                   onClick={() => {
                     const slug =
                       product.categorySlug ||
@@ -362,7 +362,7 @@ export default function ProductPageClient({ productId }: ProductPageClientProps)
           </div>
         </div>
 
-        <div className="bg-gradient-to-b from-[#fce4ec] to-white">
+        <div className="bg-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-4 pb-10">
           {/* Add Product structured data */}
           {product && (
@@ -470,7 +470,7 @@ export default function ProductPageClient({ productId }: ProductPageClientProps)
                       key={index}
                       onClick={() => setSelectedImage(index)}
                       className={`flex-none w-16 aspect-[2/3] rounded-[8px] overflow-hidden border transition-all duration-300 ${
-                        selectedImage === index ? "border-[#E91E63]" : "border-black/10 hover:border-pink-200"
+                        selectedImage === index ? "border-gray-900" : "border-gray-200 hover:border-gray-400"
                       }`}
                     >
                       <Image
@@ -488,7 +488,7 @@ export default function ProductPageClient({ productId }: ProductPageClientProps)
 
             {/* Product Details */}
             <div className="space-y-6">
-              <div className="bg-white/70 backdrop-blur-md border border-pink-100 rounded-2xl shadow-sm p-5 sm:p-6">
+              <div className="bg-white border border-gray-200 rounded-2xl shadow-sm p-5 sm:p-6">
                 <p className="text-xs text-gray-500 uppercase tracking-[0.22em] mb-2">{product.category}</p>
                 <h1 className="text-3xl sm:text-4xl font-bold text-gray-900 mb-2 font-serif tracking-[0.01em]">
                   {displayTitle || product.name}
@@ -505,8 +505,8 @@ export default function ProductPageClient({ productId }: ProductPageClientProps)
                 {/* Scarcity only when low */}
                 {showLowStock && (
                   <div className="mb-4">
-                    <span className="inline-flex items-center gap-2 rounded-full bg-white/70 border border-pink-200 px-3 py-1 text-sm text-gray-700">
-                      <span className="h-2 w-2 rounded-full bg-[#E91E63]" />
+                    <span className="inline-flex items-center gap-2 rounded-full bg-amber-50 border border-amber-200 px-3 py-1 text-sm text-gray-700">
+                      <span className="h-2 w-2 rounded-full bg-amber-500" />
                       <span className="font-medium">Only</span>
                       <span className="font-semibold tabular-nums">{selectedSize ? selectedSizeStock : totalStockLeft}</span>
                       <span className="font-medium">left</span>
@@ -561,10 +561,10 @@ export default function ProductPageClient({ productId }: ProductPageClientProps)
                             className={[
                               "relative h-11 rounded-full px-3 text-sm font-semibold transition-all duration-300 ease-in-out focus:outline-none border",
                               isSelected
-                                ? "border-[#E91E63] bg-[#E91E63] text-white shadow-[0_0_0_3px_rgba(233,30,99,0.18)]"
+                                ? "border-gray-900 bg-gray-900 text-white shadow-[0_0_0_3px_rgba(0,0,0,0.1)]"
                                 : isOutOfStock
-                                  ? "border-black/10 bg-white/60 text-gray-400 opacity-50 cursor-not-allowed"
-                                  : "border-black/10 bg-white text-gray-800 hover:border-pink-200 hover:bg-pink-50",
+                                  ? "border-gray-200 bg-gray-50 text-gray-400 opacity-50 cursor-not-allowed"
+                                  : "border-gray-300 bg-white text-gray-800 hover:border-gray-900 hover:bg-gray-50",
                             ].join(" ")}
                             title={isOutOfStock ? "Out of Stock" : `Select size ${size}`}
                           >
@@ -636,10 +636,10 @@ export default function ProductPageClient({ productId }: ProductPageClientProps)
                       type="button"
                       className={`flex-1 border rounded-full h-11 font-semibold transition-all duration-300 ease-in-out text-sm disabled:opacity-50 disabled:cursor-not-allowed
                         ${!selectedSize 
-                          ? "border-pink-200 bg-pink-50 text-pink-700 hover:bg-pink-100" 
+                          ? "border-gray-300 bg-gray-50 text-gray-600 hover:bg-gray-100" 
                           : selectedSizeStock === 0 
                             ? "border-gray-300 bg-gray-100 text-gray-500 cursor-not-allowed"
-                            : "border-pink-200 bg-white text-gray-900 hover:bg-pink-50"
+                            : "border-gray-900 bg-white text-gray-900 hover:bg-gray-50"
                         }
                       `}
                       disabled={!selectedSize || selectedSizeStock === 0 || quantity > selectedSizeStock}
@@ -688,20 +688,20 @@ export default function ProductPageClient({ productId }: ProductPageClientProps)
                   </button>
                 </div>
 
-                {/* Trust row (thin pink icons) */}
+                {/* Trust row */}
                 <div className="mt-6 grid grid-cols-1 sm:grid-cols-3 gap-3">
-                  <div className="flex items-center gap-3 rounded-2xl border border-pink-100 bg-white/60 backdrop-blur px-4 py-3">
-                    <Truck className="h-5 w-5 text-[#E91E63]" strokeWidth={1.25} />
+                  <div className="flex items-center gap-3 rounded-2xl border border-gray-200 bg-gray-50 px-4 py-3">
+                    <Truck className="h-5 w-5 text-gray-700" strokeWidth={1.25} />
                     <span className="text-sm text-gray-800">Delivery in 3–5 days</span>
                   </div>
-                  <div className="flex items-center gap-3 rounded-2xl border border-pink-100 bg-white/60 backdrop-blur px-4 py-3">
-                    <ShieldCheck className="h-5 w-5 text-[#E91E63]" strokeWidth={1.25} />
+                  <div className="flex items-center gap-3 rounded-2xl border border-gray-200 bg-gray-50 px-4 py-3">
+                    <ShieldCheck className="h-5 w-5 text-gray-700" strokeWidth={1.25} />
                     <span className="text-sm text-gray-800">Secure checkout</span>
                   </div>
-                  <div className="flex items-center gap-3 rounded-2xl border border-pink-100 bg-white/60 backdrop-blur px-4 py-3">
-                    <RotateCcw className="h-5 w-5 text-[#E91E63]" strokeWidth={1.25} />
+                  <div className="flex items-center gap-3 rounded-2xl border border-gray-200 bg-gray-50 px-4 py-3">
+                    <RotateCcw className="h-5 w-5 text-gray-700" strokeWidth={1.25} />
                     <span className="text-sm text-gray-800">
-                      <a href="/return-policy" className="underline underline-offset-4 hover:text-[#E91E63] transition-colors duration-300">
+                      <a href="/return-policy" className="underline underline-offset-4 hover:text-gray-900 transition-colors duration-300">
                         Refund policy
                       </a>
                     </span>
@@ -709,7 +709,7 @@ export default function ProductPageClient({ productId }: ProductPageClientProps)
                 </div>
 
                 {/* Minimal accordions */}
-                <div className="mt-6 rounded-2xl border border-pink-100 bg-white/70 backdrop-blur-md">
+                <div className="mt-6 rounded-2xl border border-gray-200 bg-white">
                   <Accordion type="single" collapsible>
                     <AccordionItem value="desc" className="px-5">
                       <AccordionTrigger className="text-gray-900 hover:no-underline">
@@ -722,7 +722,7 @@ export default function ProductPageClient({ productId }: ProductPageClientProps)
                             if (line.trim().startsWith('*') && !line.trim().startsWith('**')) {
                               return (
                                 <div key={index} className="flex items-start">
-                                  <span className="text-[#E91E63] mr-2 mt-1 font-bold">•</span>
+                                  <span className="text-gray-700 mr-2 mt-1 font-bold">•</span>
                                   <span>{formatWhatsAppStyle(line.trim().substring(1).trim())}</span>
                                 </div>
                               );

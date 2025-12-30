@@ -75,7 +75,7 @@
 
 ### 2. WOMEN CATEGORY TREE
 **Root:** `types-for-woman` (slug) / `types-for-woman` (path)
-**Note:** Taxonomy object has explicit slug `'women'`, but code uses `slugify('TYPES FOR WOMAN')` → `'types-for-woman'`
+**Note:** Taxonomy object has explicit slug `'women'`, but code uses `slugify('Types for Women')` → `'types-for-woman'`
 
 #### 2.1 Ethnic Wear
 - **Slug:** `ethnic-wear`
