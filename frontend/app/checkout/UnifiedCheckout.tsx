@@ -212,14 +212,24 @@ export default function UnifiedCheckout() {
     return Object.keys(errors).length === 0;
   };
 
-  // Create checkout session
+  // Create checkout session (works for both authenticated and guest users)
   const handleCreateSession = async () => {
-    if (!user || !validateShipping()) return;
+    if (!validateShipping()) return;
 
     try {
       setCheckoutError(null);
       setProcessing(true);
-      const token = await getIdToken();
+      
+      // Get token only if user is logged in (optional for guest checkout)
+      let token: string | null = null;
+      try {
+        if (user) {
+          token = await getIdToken();
+        }
+      } catch (err) {
+        // If token fetch fails, continue without token for guest checkout
+        console.log('Continuing as guest user');
+      }
       
       const items = getCheckoutItems();
       if (items.length === 0) {
@@ -230,7 +240,7 @@ export default function UnifiedCheckout() {
       // Calculate order summary with offers
       const orderSummary = calculateOrderSummary();
       
-      // Create checkout session
+      // Create checkout session (email is required for guest checkout)
       const response = await createCheckoutSession({
         source: isBuyNow ? 'buynow' : 'cart',
         items,
@@ -260,14 +270,24 @@ export default function UnifiedCheckout() {
     }
   };
 
-  // Reserve stock and proceed to payment
+  // Reserve stock and proceed to payment (works for guest users)
   const handleProceedToPayment = async () => {
-    if (!currentSession || !user) return;
+    if (!currentSession) return;
 
     try {
       setCheckoutError(null);
       setProcessing(true);
-      const token = await getIdToken();
+      
+      // Get token only if user is logged in (optional for guest checkout)
+      let token: string | null = null;
+      try {
+        if (user) {
+          token = await getIdToken();
+        }
+      } catch (err) {
+        // If token fetch fails, continue without token for guest checkout
+        console.log('Continuing as guest user');
+      }
       
       const success = await reserveStock(currentSession.sessionId, token);
       if (success) {

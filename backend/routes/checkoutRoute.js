@@ -24,7 +24,7 @@ checkoutRouter.post('/session/:sessionId/reserve-stock', optionalAuth, reserveSt
 checkoutRouter.post('/session/:sessionId/release-stock', verifyToken, releaseStockForSession);
 
 // Cancel checkout session (requires authentication)
-checkoutRouter.post('/session/:sessionId/cancel', verifyToken, cancelCheckoutSession);
+checkoutRouter.post('/session/:sessionId/cancel', optionalAuth, cancelCheckoutSession);
 
 // 🚀 NEW: Validate stock availability (optional auth for guest users)
 checkoutRouter.post('/validate-stock', optionalAuth, validateStock);

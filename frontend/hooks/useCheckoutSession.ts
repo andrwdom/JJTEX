@@ -91,26 +91,33 @@ export const useCheckoutSession = () => {
 
   const createCheckoutSession = useCallback(async (
     request: CreateCheckoutSessionRequest,
-    token: string,
+    token?: string | null,
     email?: string
   ): Promise<CreateCheckoutSessionResponse> => {
     setIsLoading(true);
     setError(null);
     
     try {
-      // Add email to request if provided
+      // Add email to request if provided (required for guest checkout)
       const requestWithEmail = {
         ...request,
         ...(email && { email })
       };
       
+      const headers: Record<string, string> = {
+        'Content-Type': 'application/json',
+        'x-request-id': `req_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`
+      };
+      
+      // Only add Authorization header if token is provided
+      if (token) {
+        headers['Authorization'] = `Bearer ${token}`;
+      }
+      
       const response = await fetchWithRetry('/api/checkout/session', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`,
-          'x-request-id': `req_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`
-        },
+        headers,
+        credentials: 'include',
         body: JSON.stringify(requestWithEmail)
       }, {
         maxRetries: 3,
@@ -232,19 +239,26 @@ export const useCheckoutSession = () => {
 
   const reserveStock = useCallback(async (
     sessionId: string,
-    token: string
+    token?: string | null
   ): Promise<boolean> => {
     setIsLoading(true);
     setError(null);
     
     try {
+      const headers: Record<string, string> = {
+        'Content-Type': 'application/json',
+        'x-request-id': `req_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`
+      };
+      
+      // Only add Authorization header if token is provided
+      if (token) {
+        headers['Authorization'] = `Bearer ${token}`;
+      }
+      
       const response = await fetchWithRetry(`/api/checkout/session/${sessionId}/reserve-stock`, {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`,
-          'x-request-id': `req_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`
-        }
+        headers,
+        credentials: 'include'
       }, {
         maxRetries: 3,
         baseDelay: 1000,
@@ -325,19 +339,26 @@ export const useCheckoutSession = () => {
 
   const cancelCheckoutSession = useCallback(async (
     sessionId: string,
-    token: string
+    token?: string | null
   ): Promise<boolean> => {
     setIsLoading(true);
     setError(null);
     
     try {
+      const headers: Record<string, string> = {
+        'Content-Type': 'application/json',
+        'x-request-id': `req_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`
+      };
+      
+      // Only add Authorization header if token is provided
+      if (token) {
+        headers['Authorization'] = `Bearer ${token}`;
+      }
+      
       const response = await fetchWithRetry(`/api/checkout/session/${sessionId}/cancel`, {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`,
-          'x-request-id': `req_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`
-        }
+        headers,
+        credentials: 'include'
       }, {
         maxRetries: 2,
         baseDelay: 1000,
