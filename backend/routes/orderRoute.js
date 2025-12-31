@@ -49,8 +49,8 @@ orderRouter.get('/user/count', (req, res, next) => {
 // Admin route for updating order status
 orderRouter.post('/status', verifyToken, updateOrderStatus);
 
-// COD order creation (requires authentication)
-orderRouter.post('/create-cod', verifyToken, createCODOrder);
+// COD order creation (optional auth - allows guest checkout)
+orderRouter.post('/create-cod', optionalAuth, createCODOrder);
 
 // Admin route for deleting order (permanent deletion with stock restoration)
 orderRouter.delete('/:orderId', verifyToken, deleteOrder);

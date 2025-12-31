@@ -155,16 +155,10 @@ export default function UnifiedCheckout() {
     };
   };
 
-  // Initialize checkout
+  // Initialize checkout (allow guest checkout)
   useEffect(() => {
-    if (!user) {
-      const redirectUrl = isBuyNow ? '/checkout?mode=buynow' : '/checkout';
-      router.push(`/login?redirect=${encodeURIComponent(redirectUrl)}`);
-      return;
-    }
-
-    // Pre-fill user email
-    if (user.email && !shipping.email) {
+    // Pre-fill user email if logged in
+    if (user?.email && !shipping.email) {
       setShipping(prev => ({
         ...prev,
         email: user.email || '',
@@ -290,27 +284,32 @@ export default function UnifiedCheckout() {
 
   // Handle COD order creation
   const handleCODOrder = async () => {
-    if (!currentSession || !user) return;
+    if (!currentSession) return;
 
     try {
       setCheckoutError(null);
       setProcessing(true);
-      const token = await getIdToken();
       
-      // Create COD order directly
-      const response = await authenticatedFetchJson('/api/orders/create-cod', {
+      // Create COD order directly (works for both authenticated and guest users)
+      const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000';
+      const response = await fetch(`${apiUrl}/api/orders/create-cod`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
           'x-request-id': `cod_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`
         },
+        credentials: 'include',
         body: JSON.stringify({
           checkoutSessionId: currentSession.sessionId,
           shipping
         })
-      }, token);
+      });
 
-      if (response.success && response.order) {
+      if (!response.ok) {
+        throw new Error(data.message || `Server error: ${response.status}`);
+      }
+
+      if (data.success && data.order) {
         // Clear cart/buy-now after successful order
         if (isCart) {
           clearCartAfterSuccessfulCheckout();
@@ -319,9 +318,9 @@ export default function UnifiedCheckout() {
         }
         
         // Navigate to order success page
-        router.push(`/order-success?orderId=${response.order.orderId}&paymentMethod=COD`);
+        router.push(`/order-success?orderId=${data.order.orderId}&paymentMethod=COD`);
       } else {
-        setCheckoutError(response.message || 'Failed to create COD order');
+        setCheckoutError(data.message || 'Failed to create COD order');
       }
     } catch (err) {
       setCheckoutError(err instanceof Error ? err.message : 'Failed to create COD order. Please try again.');
@@ -332,11 +331,17 @@ export default function UnifiedCheckout() {
 
   // Handle payment initiation
   const handlePayment = async () => {
-    if (!currentSession || !user) return;
+    if (!currentSession) return;
 
-    // If COD is selected, handle differently
+    // If COD is selected, handle differently (works for guest users)
     if (paymentMethod === 'cod') {
       await handleCODOrder();
+      return;
+    }
+
+    // PhonePe payment requires authentication
+    if (!user) {
+      setCheckoutError('Please log in to proceed with online payment');
       return;
     }
 
