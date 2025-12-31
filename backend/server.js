@@ -139,28 +139,56 @@ const corsOptions = {
         
         // Allow requests with no origin (like mobile apps, curl requests, or server-to-server)
         // Also allow all origins in development
-        if (!origin || allowedOrigins.indexOf(origin) !== -1 || process.env.NODE_ENV === 'development') {
-            Logger.debug('cors_allowed', { origin: origin ? 'provided' : 'none' });
+        if (!origin || process.env.NODE_ENV === 'development') {
+            Logger.debug('cors_allowed', { origin: origin ? 'provided' : 'none', reason: !origin ? 'no_origin' : 'development' });
             callback(null, true);
-        } else {
-            // Special handling for Instagram in-app browser
-            // Instagram in-app browser sometimes sends different origin headers
-            if (origin && (
-                origin.includes('instagram.com') || 
-                origin.includes('facebook.com') ||
-                origin.includes('fbcdn.net') ||
-                origin.includes('cdninstagram.com')
-            )) {
-                Logger.debug('cors_allowed_instagram', { origin });
-                callback(null, true);
-            } else {
-                Logger.warn('cors_blocked', { 
-                    origin: origin ? 'provided' : 'none',
-                    allowedOriginsCount: allowedOrigins.length
-                });
-                callback(new Error('Not allowed by CORS'));
-            }
+            return;
         }
+
+        // Normalize origin for comparison (handle www and non-www variants)
+        const normalizedOrigin = origin.toLowerCase().trim();
+        const isAllowed = allowedOrigins.some(allowed => {
+            const normalizedAllowed = allowed.toLowerCase().trim();
+            return normalizedOrigin === normalizedAllowed;
+        });
+
+        // Check if origin matches any allowed origin
+        if (isAllowed) {
+            Logger.debug('cors_allowed', { origin, reason: 'in_allowed_list' });
+            callback(null, true);
+            return;
+        }
+
+        // Special handling for Instagram in-app browser
+        // Instagram in-app browser sometimes sends different origin headers
+        if (origin && (
+            origin.includes('instagram.com') || 
+            origin.includes('facebook.com') ||
+            origin.includes('fbcdn.net') ||
+            origin.includes('cdninstagram.com')
+        )) {
+            Logger.debug('cors_allowed_instagram', { origin });
+            callback(null, true);
+            return;
+        }
+
+        // Special handling for jjtextiles.com and www.jjtextiles.com variants
+        if (origin && (
+            normalizedOrigin.includes('jjtextiles.com') ||
+            normalizedOrigin.includes('jjtextiles.in')
+        )) {
+            Logger.debug('cors_allowed_jjtextiles', { origin, normalizedOrigin });
+            callback(null, true);
+            return;
+        }
+
+        Logger.warn('cors_blocked', { 
+            origin: origin ? 'provided' : 'none',
+            normalizedOrigin,
+            allowedOriginsCount: allowedOrigins.length,
+            allowedOrigins: allowedOrigins
+        });
+        callback(new Error('Not allowed by CORS'));
     },
     credentials: true,
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS', 'PATCH'],
@@ -170,6 +198,8 @@ const corsOptions = {
         'Authorization',
         'token',
         'x-requested-with',
+        'x-request-id',
+        'X-Request-Id',
         'Accept',
         'Origin',
         'if-none-match',
