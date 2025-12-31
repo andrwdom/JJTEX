@@ -325,6 +325,8 @@ export default function UnifiedCheckout() {
         })
       });
 
+      const data = await response.json();
+
       if (!response.ok) {
         throw new Error(data.message || `Server error: ${response.status}`);
       }
