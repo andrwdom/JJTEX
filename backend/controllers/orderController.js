@@ -1278,11 +1278,45 @@ export const createCODOrder = async (req, res) => {
 
     // Send COD order confirmation email (non-blocking)
     try {
-      const { sendCODOrderConfirmationEmail } = await import('../utils/emailService.js');
-      await sendCODOrderConfirmationEmail(order);
-      console.log('COD order confirmation email sent successfully');
+      const orderEmail = order.email || order.userInfo?.email || order.shippingInfo?.email;
+      console.log('📧 Attempting to send COD order confirmation email:', {
+        orderId: order.orderId,
+        email: orderEmail,
+        hasEmail: !!orderEmail
+      });
+      
+      if (!orderEmail) {
+        console.warn('⚠️ No email found for COD order, skipping email send:', {
+          orderId: order.orderId,
+          orderEmail: order.email,
+          userInfoEmail: order.userInfo?.email,
+          shippingInfoEmail: order.shippingInfo?.email
+        });
+      } else {
+        const { sendCODOrderConfirmationEmail } = await import('../utils/emailService.js');
+        const emailResult = await sendCODOrderConfirmationEmail(order);
+        
+        if (emailResult.success) {
+          console.log('✅ COD order confirmation email sent successfully:', {
+            orderId: order.orderId,
+            email: orderEmail,
+            correlationId: emailResult.correlationId
+          });
+        } else {
+          console.error('❌ Failed to send COD order confirmation email:', {
+            orderId: order.orderId,
+            email: orderEmail,
+            error: emailResult.error,
+            correlationId: emailResult.correlationId
+          });
+        }
+      }
     } catch (emailError) {
-      console.error('Failed to send COD order confirmation email:', emailError);
+      console.error('❌ Exception while sending COD order confirmation email:', {
+        orderId: order.orderId,
+        error: emailError.message,
+        stack: emailError.stack
+      });
       // Don't fail the order creation if email fails
     }
 

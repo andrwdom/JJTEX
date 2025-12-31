@@ -420,18 +420,41 @@ export const sendCODOrderConfirmationEmail = async (order) => {
   const correlationId = `COD-ORDER-${Date.now()}`;
   
   try {
+    console.log('📧 [COD Email] Starting email send process:', {
+      correlationId,
+      orderId: order.orderId || order._id,
+      hasEmail: !!(order.email || order.userInfo?.email || order.shippingInfo?.email)
+    });
+    
     const transporter = createTransporter();
     
     const shipping = order.shippingInfo || order.address || {};
     const toEmail = order.email || order.userInfo?.email || shipping.email;
     
     if (!toEmail) {
-      throw new Error('No recipient email found for COD order confirmation');
+      const errorMsg = 'No recipient email found for COD order confirmation';
+      console.error('❌ [COD Email]', errorMsg, {
+        correlationId,
+        orderId: order.orderId || order._id,
+        orderEmail: order.email,
+        userInfoEmail: order.userInfo?.email,
+        shippingInfoEmail: order.shippingInfo?.email
+      });
+      throw new Error(errorMsg);
     }
 
+    console.log('📧 [COD Email] Generating invoice PDF...', { correlationId, orderId: order.orderId || order._id });
+    
     // Generate invoice PDF
     const { generateInvoiceBuffer } = await import('./invoiceGenerator.js');
     const pdfBuffer = await generateInvoiceBuffer(order);
+    
+    console.log('📧 [COD Email] PDF generated, preparing email...', {
+      correlationId,
+      orderId: order.orderId || order._id,
+      pdfSize: pdfBuffer.length,
+      toEmail
+    });
     
     const mailOptions = {
       from: process.env.SMTP_FROM || process.env.EMAIL_FROM || 'noreply@jjtextiles.in',
@@ -446,17 +469,44 @@ export const sendCODOrderConfirmationEmail = async (order) => {
       ],
     };
     
-    await transporter.sendMail(mailOptions);
+    console.log('📧 [COD Email] Sending email via SMTP...', {
+      correlationId,
+      orderId: order.orderId || order._id,
+      from: mailOptions.from,
+      to: toEmail,
+      hasSMTPConfig: !!(process.env.SMTP_HOST && process.env.SMTP_USER && process.env.SMTP_PASS)
+    });
+    
+    const emailResult = await transporter.sendMail(mailOptions);
+    
+    console.log('✅ [COD Email] Email sent successfully!', {
+      correlationId,
+      orderId: order.orderId || order._id,
+      email: toEmail,
+      messageId: emailResult.messageId
+    });
     
     EnhancedLogger.webhookLog('SUCCESS', 'COD order confirmation email sent', {
       correlationId,
       orderId: order.orderId || order._id,
-      email: toEmail
+      email: toEmail,
+      messageId: emailResult.messageId
     });
     
     return { success: true, correlationId };
     
   } catch (error) {
+    console.error('❌ [COD Email] Failed to send email:', {
+      correlationId,
+      orderId: order.orderId || order._id,
+      error: error.message,
+      stack: error.stack,
+      hasSMTPConfig: !!(process.env.SMTP_HOST && process.env.SMTP_USER && process.env.SMTP_PASS),
+      smtpHost: process.env.SMTP_HOST,
+      smtpUser: process.env.SMTP_USER ? 'SET' : 'NOT SET',
+      smtpPass: process.env.SMTP_PASS ? 'SET' : 'NOT SET'
+    });
+    
     EnhancedLogger.webhookLog('ERROR', 'Failed to send COD order confirmation email', {
       correlationId,
       orderId: order.orderId || order._id,

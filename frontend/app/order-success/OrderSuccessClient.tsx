@@ -82,8 +82,12 @@ function OrderSuccessContent() {
         endpoint = `${apiUrl}/api/payment/order/${transactionId}`;
       }
 
-      // 🔑 FIX: Implement a more robust retry mechanism to handle database update delays.
-      for (let attempt = 1; attempt <= 20; attempt++) {
+      // For COD orders, accept immediately - no need to retry
+      const isCOD = paymentMethod === 'COD';
+      const maxAttempts = isCOD ? 3 : 10; // Fewer retries for COD, more for payment gateway orders
+      const retryDelay = isCOD ? 500 : 1000; // Faster retries for COD
+      
+      for (let attempt = 1; attempt <= maxAttempts; attempt++) {
         try {
           console.log(`Fetching order details, attempt #${attempt}`);
           const orderRes = await authenticatedFetch(endpoint);
@@ -92,17 +96,32 @@ function OrderSuccessContent() {
           if (orderRes.ok && responseData.success) {
             const orderDetails = responseData.order || responseData.data;
             if (orderDetails) {
-              // Check for a final, successful status
-              const isPaid = orderDetails.paymentStatus === 'PAID' || orderDetails.paymentStatus === 'paid' || 
-                           orderDetails.status === 'CONFIRMED' || orderDetails.status === 'Paid' || 
+              // For COD orders, accept immediately regardless of payment status
+              // For other orders, check for successful payment status
+              const isCODOrder = orderDetails.paymentMethod === 'COD';
+              const isPaid = isCODOrder || 
+                           orderDetails.paymentStatus === 'PAID' || 
+                           orderDetails.paymentStatus === 'paid' || 
+                           orderDetails.status === 'CONFIRMED' || 
+                           orderDetails.status === 'Paid' || 
                            orderDetails.status === 'Order Placed';
-              if (isPaid) {
+              
+              if (isPaid || isCODOrder) {
                 setOrder(orderDetails);
                 setError(""); // Clear any previous errors
                 setLoading(false);
                 return; // Success! Exit the loop.
               }
-              console.log(`Order status is '${orderDetails.paymentStatus}' / '${orderDetails.status}', retrying...`);
+              
+              // For non-COD orders, only retry if status is still pending
+              if (!isCODOrder && attempt < maxAttempts) {
+                console.log(`Order status is '${orderDetails.paymentStatus}' / '${orderDetails.status}', retrying...`);
+              } else {
+                // Accept the order even if status is pending (for COD or after max retries)
+                setOrder(orderDetails);
+                setLoading(false);
+                return;
+              }
             } else {
               // If the API returns success but no data, that's a hard failure.
               setError("Order data not found for this transaction.");
@@ -110,6 +129,12 @@ function OrderSuccessContent() {
               return;
             }
           } else if (orderRes.status === 404) {
+            // For COD orders, if not found after first attempt, show optimistic message
+            if (isCOD && attempt === 1) {
+              // COD order might not be indexed yet, show success message
+              setLoading(false);
+              return;
+            }
             // A 404 is a definitive "not found", so we stop retrying.
             setError(responseData.message || 'Order not found. It may still be processing.');
             setLoading(false);
@@ -118,18 +143,27 @@ function OrderSuccessContent() {
           // For other non-ok responses, we'll just let it retry.
         } catch (error: any) {
           console.error(`Attempt ${attempt} failed:`, error.message);
-          // Don't set a fatal error on network issues, just let it retry.
+          // For COD orders, if first attempt fails, show success anyway
+          if (isCOD && attempt === 1) {
+            setLoading(false);
+            return;
+          }
         }
         
-        // Wait 1.5 seconds before the next attempt.
-        if (attempt < 20) {
-          await new Promise(resolve => setTimeout(resolve, 1500));
+        // Wait before the next attempt (shorter delay for COD)
+        if (attempt < maxAttempts) {
+          await new Promise(resolve => setTimeout(resolve, retryDelay));
         }
       }
       
       // If all retries fail, show a reassuring fallback message.
-      setError("Your payment was successful and your order is being processed. You can view the final details on your account page shortly.");
-      setLoading(false);
+      if (isCOD) {
+        // For COD, always show success even if we couldn't fetch
+        setLoading(false);
+      } else {
+        setError("Your payment was successful and your order is being processed. You can view the final details on your account page shortly.");
+        setLoading(false);
+      }
     };
 
     fetchOrderDetails();
@@ -170,25 +204,37 @@ function OrderSuccessContent() {
   }
 
   // For COD orders, consider them "placed" even if payment status is PENDING
-  const isCOD = paymentMethod === 'COD' || displayOrder.paymentMethod === 'COD';
-  const isPaid = isCOD || displayOrder.paymentStatus === 'PAID' || displayOrder.paymentStatus === 'paid' || 
-                displayOrder.status === 'CONFIRMED' || displayOrder.status === 'Paid' || 
-                displayOrder.status === 'Order Placed' || displayOrder.orderStatus === 'CONFIRMED';
-  const isFailed = displayOrder.paymentStatus === 'failed' || displayOrder.paymentStatus === 'FAILED' ||
-                  displayOrder.status === 'Payment Failed' || displayOrder.status === 'FAILED';
+  const isCOD = paymentMethod === 'COD' || displayOrder?.paymentMethod === 'COD';
+  const isPaid = isCOD || displayOrder?.paymentStatus === 'PAID' || displayOrder?.paymentStatus === 'paid' || 
+                displayOrder?.status === 'CONFIRMED' || displayOrder?.status === 'Paid' || 
+                displayOrder?.status === 'Order Placed' || displayOrder?.orderStatus === 'CONFIRMED';
+  const isFailed = !isCOD && (displayOrder?.paymentStatus === 'failed' || displayOrder?.paymentStatus === 'FAILED' ||
+                  displayOrder?.status === 'Payment Failed' || displayOrder?.status === 'FAILED');
+
+  // For COD orders, always show success
+  const showSuccess = isCOD || isPaid;
 
   return (
     <div className="max-w-2xl mx-auto p-6 sm:p-10 text-center flex flex-col items-center justify-center min-h-[70vh] container-responsive">
       {/* Success/Failure Animation */}
       <div className="mb-6 animate-bounce-in">
-        {isPaid ? (
+        {showSuccess ? (
           <CheckCircle className="h-20 w-20 text-green-500 drop-shadow-lg" />
         ) : (
           <div className="text-6xl text-red-500">❌</div>
         )}
       </div>
-      <h1 className={`text-3xl sm:text-4xl font-bold mb-2 ${isPaid ? 'text-green-700' : 'text-red-700'}`}>{isPaid ? 'Order Placed Successfully!' : 'Payment Failed'}</h1>
-      <p className="text-lg text-gray-700 mb-4">{isPaid ? 'Thank you for shopping with JJTextiles. Your order is confirmed.' : 'Your payment was not successful. Please try again.'}</p>
+      {isCOD ? (
+        <>
+          <h1 className="text-3xl sm:text-4xl font-bold mb-2 text-green-700">Order Placed Successfully!</h1>
+          <p className="text-lg text-gray-700 mb-4">Thank you for shopping with JJTextiles! We've received your Cash on Delivery order request.</p>
+        </>
+      ) : (
+        <>
+          <h1 className={`text-3xl sm:text-4xl font-bold mb-2 ${showSuccess ? 'text-green-700' : 'text-red-700'}`}>{showSuccess ? 'Order Placed Successfully!' : 'Payment Failed'}</h1>
+          <p className="text-lg text-gray-700 mb-4">{showSuccess ? 'Thank you for shopping with JJTextiles. Your order is confirmed.' : 'Your payment was not successful. Please try again.'}</p>
+        </>
+      )}
       <div className="bg-white rounded-xl shadow p-6 mb-6 w-full max-w-lg mx-auto flex flex-col gap-2">
         <div className="flex flex-wrap justify-between text-left text-gray-800">
           <div className="font-semibold">Order ID:</div>
@@ -201,46 +247,56 @@ function OrderSuccessContent() {
           </div>
         )}
         <div className="flex flex-wrap justify-between text-left text-gray-800">
-          <div className="font-semibold">Amount Paid:</div>
+          <div className="font-semibold">{isCOD ? 'Order Amount:' : 'Amount Paid:'}</div>
           <div>₹{displayOrder.amountPaid || displayOrder.total || displayOrder.totalPrice}</div>
         </div>
         <div className="flex flex-wrap justify-between text-left text-gray-800">
           <div className="font-semibold">Payment Method:</div>
-          <div className="capitalize">{displayOrder.paymentMethod || 'N/A'}</div>
+          <div className="capitalize">{displayOrder.paymentMethod || (isCOD ? 'Cash on Delivery' : 'N/A')}</div>
         </div>
         <div className="flex flex-wrap justify-between text-left text-gray-800">
           <div className="font-semibold">Status:</div>
-          <div className={`capitalize font-bold ${isPaid ? 'text-green-700' : 'text-red-700'}`}>{displayOrder.paymentStatus || displayOrder.status || 'N/A'}</div>
+          <div className={`capitalize font-bold ${showSuccess ? 'text-green-700' : 'text-red-700'}`}>
+            {isCOD ? 'Order Placed' : (displayOrder.paymentStatus || displayOrder.status || 'N/A')}
+          </div>
         </div>
-        {displayOrder.items && displayOrder.items.length > 0 && (
+        {((displayOrder.items && displayOrder.items.length > 0) || (displayOrder.cartItems && displayOrder.cartItems.length > 0)) && (
           <div className="mt-4 pt-4 border-t border-gray-200">
             <div className="font-semibold text-left text-gray-800 mb-2">Order Items:</div>
             <div className="space-y-2">
-              {displayOrder.items.map((item: any, index: number) => (
+              {(displayOrder.items || displayOrder.cartItems || []).map((item: any, index: number) => (
                 <div key={index} className="flex justify-between text-sm text-gray-700">
-                  <span>{item.name} (Size: {item.size}) x {item.quantity}</span>
-                  <span>₹{item.price * item.quantity}</span>
+                  <span>{item.name} {item.size ? `(Size: ${item.size})` : ''} x {item.quantity}</span>
+                  <span>₹{(item.price || 0) * (item.quantity || 1)}</span>
                 </div>
               ))}
             </div>
           </div>
         )}
       </div>
-      {isPaid ? (
+      {showSuccess ? (
         <>
-          {paymentMethod === 'COD' || displayOrder.paymentMethod === 'COD' ? (
-            <div className="bg-amber-50 border border-amber-200 rounded-lg p-4 mb-6 max-w-lg mx-auto">
+          {isCOD ? (
+            <div className="bg-green-50 border border-green-200 rounded-lg p-6 mb-6 max-w-lg mx-auto">
               <div className="flex items-start gap-3">
                 <div className="flex-shrink-0 mt-0.5">
-                  <svg className="h-5 w-5 text-amber-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                  </svg>
+                  <CheckCircle className="h-6 w-6 text-green-600" />
                 </div>
-                <div className="flex-1">
-                  <p className="text-sm font-semibold text-amber-900 mb-1">Cash on Delivery Order Placed</p>
-                  <p className="text-xs text-amber-700">
-                    Your order will be confirmed once we receive a call or WhatsApp message confirmation from you. 
-                    Please keep your phone available for our team to contact you.
+                <div className="flex-1 text-left">
+                  <p className="text-base font-semibold text-green-900 mb-2">🎉 Your Order Has Been Placed Successfully!</p>
+                  <p className="text-sm text-green-800 mb-3">
+                    We've received your Cash on Delivery order request. Your order details have been saved and our team will process it shortly.
+                  </p>
+                  <div className="bg-white rounded-lg p-4 border border-green-200">
+                    <p className="text-sm font-semibold text-green-900 mb-2">📞 What Happens Next?</p>
+                    <ol className="text-xs text-green-800 space-y-1 list-decimal list-inside">
+                      <li>Our team will call or WhatsApp you to confirm your order</li>
+                      <li>Once confirmed, we'll prepare and ship your order</li>
+                      <li>You can pay cash when the order is delivered</li>
+                    </ol>
+                  </div>
+                  <p className="text-xs text-green-700 mt-3">
+                    <strong>Please keep your phone available</strong> - We'll contact you at the number provided during checkout.
                   </p>
                 </div>
               </div>
