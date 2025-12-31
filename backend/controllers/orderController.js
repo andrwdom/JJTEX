@@ -1303,6 +1303,5 @@ export {
     getAllOrders, 
   updateOrderStatus,
     createStructuredOrder,
-    getUniqueOrderId,
-    createCODOrder
+    getUniqueOrderId
 };
