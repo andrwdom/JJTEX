@@ -1276,6 +1276,16 @@ export const createCODOrder = async (req, res) => {
       }
     }
 
+    // Send COD order confirmation email (non-blocking)
+    try {
+      const { sendCODOrderConfirmationEmail } = await import('../utils/emailService.js');
+      await sendCODOrderConfirmationEmail(order);
+      console.log('COD order confirmation email sent successfully');
+    } catch (emailError) {
+      console.error('Failed to send COD order confirmation email:', emailError);
+      // Don't fail the order creation if email fails
+    }
+
     return successResponse(res, { 
       order,
       message: 'COD order created successfully. Order will be confirmed after call/WhatsApp confirmation.'

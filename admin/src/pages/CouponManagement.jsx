@@ -64,15 +64,15 @@ const CouponManagement = ({ token }) => {
       });
       
       if (response.status === 201 || response.status === 200) {
-        toast.success('Coupon created successfully');
-        setFormData({
-          discountPercentage: '',
-          validFrom: '',
-          validUntil: '',
-          usageLimit: '',
-          code: ''
-        });
-        fetchCoupons();
+      toast.success('Coupon created successfully');
+      setFormData({
+        discountPercentage: '',
+        validFrom: '',
+        validUntil: '',
+        usageLimit: '',
+        code: ''
+      });
+      fetchCoupons();
       }
     } catch (error) {
       console.error('Error creating coupon:', error);
@@ -93,8 +93,8 @@ const CouponManagement = ({ token }) => {
         });
         
         if (response.status === 200 || response.status === 204) {
-          toast.success('Coupon deleted successfully');
-          fetchCoupons();
+        toast.success('Coupon deleted successfully');
+        fetchCoupons();
         }
       } catch (error) {
         console.error('Error deleting coupon:', error);
@@ -204,20 +204,20 @@ const CouponManagement = ({ token }) => {
             <p className="text-gray-500">No coupons found. Create your first coupon above.</p>
           </div>
         ) : (
-          <div className="overflow-x-auto">
-            <table className="min-w-full divide-y divide-gray-200">
-              <thead className="bg-gray-50">
-                <tr>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Code</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Discount</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Valid From</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Valid Until</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Usage</th>
+        <div className="overflow-x-auto">
+          <table className="min-w-full divide-y divide-gray-200">
+            <thead className="bg-gray-50">
+              <tr>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Code</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Discount</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Valid From</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Valid Until</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Usage</th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
-                </tr>
-              </thead>
-              <tbody className="bg-white divide-y divide-gray-200">
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+              </tr>
+            </thead>
+            <tbody className="bg-white divide-y divide-gray-200">
                 {coupons.map((coupon) => {
                   const now = new Date();
                   const validFrom = new Date(coupon.validFrom);
@@ -228,16 +228,16 @@ const CouponManagement = ({ token }) => {
                   const usageExceeded = coupon.usageLimit && coupon.usedCount >= coupon.usageLimit;
                   
                   return (
-                    <tr key={coupon._id}>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{coupon.code}</td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{coupon.discountPercentage}%</td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                        {new Date(coupon.validFrom).toLocaleString()}
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                        {new Date(coupon.validUntil).toLocaleString()}
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                <tr key={coupon._id}>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{coupon.code}</td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{coupon.discountPercentage}%</td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                    {new Date(coupon.validFrom).toLocaleString()}
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                    {new Date(coupon.validUntil).toLocaleString()}
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                         {coupon.usedCount || 0} / {coupon.usageLimit || '∞'}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm">
@@ -250,21 +250,21 @@ const CouponManagement = ({ token }) => {
                         ) : (
                           <span className="px-2 py-1 text-xs font-semibold rounded-full bg-green-100 text-green-800">Active</span>
                         )}
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                        <button
-                          onClick={() => handleDelete(coupon._id)}
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                    <button
+                      onClick={() => handleDelete(coupon._id)}
                           className="text-red-600 hover:text-red-900 font-medium"
-                        >
-                          Delete
-                        </button>
-                      </td>
-                    </tr>
+                    >
+                      Delete
+                    </button>
+                  </td>
+                </tr>
                   );
                 })}
-              </tbody>
-            </table>
-          </div>
+            </tbody>
+          </table>
+        </div>
         )}
       </div>
     </div>

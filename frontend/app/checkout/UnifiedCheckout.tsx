@@ -331,7 +331,10 @@ export default function UnifiedCheckout() {
         throw new Error(data.message || `Server error: ${response.status}`);
       }
 
-      if (data.success && data.order) {
+      // Response structure: { success: true, data: { order }, message }
+      const order = data.data?.order || data.order;
+      
+      if (data.success && order) {
         // Clear cart/buy-now after successful order
         if (isCart) {
           clearCartAfterSuccessfulCheckout();
@@ -340,7 +343,7 @@ export default function UnifiedCheckout() {
         }
         
         // Navigate to order success page
-        router.push(`/order-success?orderId=${data.order.orderId}&paymentMethod=COD`);
+        router.push(`/order-success?orderId=${order.orderId}&paymentMethod=COD`);
       } else {
         setCheckoutError(data.message || 'Failed to create COD order');
       }

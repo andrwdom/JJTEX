@@ -6,8 +6,26 @@ import EnhancedLogger from './enhancedLogger.js';
  * Implements industry-standard email recovery patterns from Klaviyo/Emarsys
  */
 
-// Create email transporter
+// Create email transporter (prefers SMTP_* config, falls back to EMAIL_*)
 const createTransporter = () => {
+  // Prefer explicit SMTP_* configuration (like invoice generator)
+  const hasSmtpConfig = Boolean(
+    process.env.SMTP_HOST && process.env.SMTP_PORT && process.env.SMTP_USER && process.env.SMTP_PASS
+  );
+
+  if (hasSmtpConfig) {
+    return nodemailer.createTransport({
+      host: process.env.SMTP_HOST,
+      port: Number(process.env.SMTP_PORT),
+      secure: String(process.env.SMTP_SECURE).toLowerCase() === 'true',
+      auth: {
+        user: process.env.SMTP_USER,
+        pass: process.env.SMTP_PASS,
+      },
+    });
+  }
+
+  // Fall back to Gmail via EMAIL_* variables
   return nodemailer.createTransporter({
     service: 'gmail',
     auth: {
@@ -394,6 +412,174 @@ const generateOrderStatusHTML = (emailData) => {
     </html>
   `;
 };
+
+/**
+ * Send COD order confirmation email
+ */
+export const sendCODOrderConfirmationEmail = async (order) => {
+  const correlationId = `COD-ORDER-${Date.now()}`;
+  
+  try {
+    const transporter = createTransporter();
+    
+    const shipping = order.shippingInfo || order.address || {};
+    const toEmail = order.email || order.userInfo?.email || shipping.email;
+    
+    if (!toEmail) {
+      throw new Error('No recipient email found for COD order confirmation');
+    }
+
+    // Generate invoice PDF
+    const { generateInvoiceBuffer } = await import('./invoiceGenerator.js');
+    const pdfBuffer = await generateInvoiceBuffer(order);
+    
+    const mailOptions = {
+      from: process.env.SMTP_FROM || process.env.EMAIL_FROM || 'noreply@jjtextiles.in',
+      to: toEmail,
+      subject: `Your COD Order Placed - Order #${order.orderId || order._id} | JJTEXTILES`,
+      html: generateCODOrderConfirmationHTML(order),
+      attachments: [
+        {
+          filename: `Order_${order.orderId || order._id}.pdf`,
+          content: pdfBuffer,
+        },
+      ],
+    };
+    
+    await transporter.sendMail(mailOptions);
+    
+    EnhancedLogger.webhookLog('SUCCESS', 'COD order confirmation email sent', {
+      correlationId,
+      orderId: order.orderId || order._id,
+      email: toEmail
+    });
+    
+    return { success: true, correlationId };
+    
+  } catch (error) {
+    EnhancedLogger.webhookLog('ERROR', 'Failed to send COD order confirmation email', {
+      correlationId,
+      orderId: order.orderId || order._id,
+      error: error.message
+    });
+    
+    return { success: false, error: error.message, correlationId };
+  }
+};
+
+/**
+ * Generate HTML email template for COD order confirmation
+ */
+function generateCODOrderConfirmationHTML(order) {
+  const shipping = order.shippingInfo || order.address || {};
+  const items = order.cartItems || order.items || [];
+  
+  const itemsHTML = items.map(item => 
+    `<tr>
+      <td style="padding: 12px; border-bottom: 1px solid #eee;">${item.name}</td>
+      <td style="padding: 12px; border-bottom: 1px solid #eee; text-align: center;">${item.size || 'N/A'}</td>
+      <td style="padding: 12px; border-bottom: 1px solid #eee; text-align: center;">${item.quantity}</td>
+      <td style="padding: 12px; border-bottom: 1px solid #eee; text-align: right;">₹${item.price * item.quantity}</td>
+    </tr>`
+  ).join('');
+
+  return `
+    <!DOCTYPE html>
+    <html>
+    <head>
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width, initial-scale=1.0">
+      <title>COD Order Placed - ${order.orderId}</title>
+    </head>
+    <body style="font-family: Arial, sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: 0 auto; padding: 20px;">
+      
+      <!-- Header -->
+      <div style="background: #28a745; color: white; padding: 20px; text-align: center; border-radius: 8px 8px 0 0;">
+        <h1 style="margin: 0; font-size: 24px;">Cash on Delivery Order Placed</h1>
+        <p style="margin: 10px 0 0 0; opacity: 0.9;">Order #${order.orderId || order._id}</p>
+      </div>
+      
+      <!-- Main Content -->
+      <div style="background: #f8f9fa; padding: 30px; border-radius: 0 0 8px 8px;">
+        <p style="font-size: 16px; margin-bottom: 20px;">Hi ${shipping.fullName || 'Customer'},</p>
+        
+        <p style="font-size: 16px; margin-bottom: 20px;">
+          Thank you for placing your order with JJTEXTILES! We have received your Cash on Delivery (COD) order request.
+        </p>
+        
+        <!-- Important Notice -->
+        <div style="background: #fff3cd; border-left: 4px solid #ffc107; padding: 15px; margin: 20px 0; border-radius: 4px;">
+          <p style="margin: 0; font-weight: bold; color: #856404;">
+            ⚠️ Order Confirmation Required
+          </p>
+          <p style="margin: 10px 0 0 0; color: #856404;">
+            Your order will be confirmed once we receive a call or WhatsApp message confirmation from you. 
+            Please keep your phone <strong>${shipping.phone || ''}</strong> available for our team to contact you.
+          </p>
+        </div>
+        
+        <!-- Order Summary -->
+        <div style="background: white; padding: 20px; border-radius: 8px; margin: 20px 0;">
+          <h3 style="margin-top: 0; color: #007bff;">Order Summary</h3>
+          
+          <table style="width: 100%; border-collapse: collapse; margin: 15px 0;">
+            <thead>
+              <tr style="background: #f8f9fa;">
+                <th style="padding: 12px; text-align: left; border-bottom: 2px solid #dee2e6;">Item</th>
+                <th style="padding: 12px; text-align: center; border-bottom: 2px solid #dee2e6;">Size</th>
+                <th style="padding: 12px; text-align: center; border-bottom: 2px solid #dee2e6;">Qty</th>
+                <th style="padding: 12px; text-align: right; border-bottom: 2px solid #dee2e6;">Price</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${itemsHTML}
+            </tbody>
+          </table>
+          
+          <div style="text-align: right; margin-top: 15px; padding-top: 15px; border-top: 2px solid #dee2e6;">
+            <p style="margin: 5px 0;"><strong>Subtotal:</strong> ₹${order.subtotal || order.totalPrice || 0}</p>
+            ${order.shippingCost ? `<p style="margin: 5px 0;"><strong>Shipping:</strong> ₹${order.shippingCost}</p>` : ''}
+            <h3 style="margin: 10px 0 0 0; color: #007bff;">Total: ₹${order.total || order.totalPrice || 0}</h3>
+          </div>
+        </div>
+        
+        <!-- Shipping Address -->
+        <div style="background: white; padding: 20px; border-radius: 8px; margin: 20px 0;">
+          <h3 style="margin-top: 0; color: #007bff;">Delivery Address</h3>
+          <p style="margin: 5px 0;">${shipping.fullName || ''}</p>
+          <p style="margin: 5px 0;">${shipping.addressLine1 || shipping.line1 || ''}</p>
+          ${shipping.addressLine2 || shipping.line2 ? `<p style="margin: 5px 0;">${shipping.addressLine2 || shipping.line2}</p>` : ''}
+          <p style="margin: 5px 0;">${shipping.city || ''}, ${shipping.state || ''} ${shipping.postalCode || shipping.pincode || ''}</p>
+          <p style="margin: 5px 0;"><strong>Phone:</strong> ${shipping.phone || ''}</p>
+        </div>
+        
+        <!-- Next Steps -->
+        <div style="background: #e7f3ff; padding: 20px; border-radius: 8px; margin: 20px 0;">
+          <h3 style="margin-top: 0; color: #007bff;">What Happens Next?</h3>
+          <ol style="padding-left: 20px; margin: 10px 0;">
+            <li style="margin: 10px 0;">Our team will call or WhatsApp you to confirm your order</li>
+            <li style="margin: 10px 0;">Once confirmed, we will prepare and ship your order</li>
+            <li style="margin: 10px 0;">You can pay cash when the order is delivered</li>
+          </ol>
+        </div>
+        
+        <!-- Footer -->
+        <div style="margin-top: 30px; padding-top: 20px; border-top: 1px solid #dee2e6; text-align: center;">
+          <p style="font-size: 14px; color: #6c757d; margin: 5px 0;">
+            Need help? Contact us at <a href="mailto:info.jjtextiles@gmail.com" style="color: #007bff;">info.jjtextiles@gmail.com</a>
+          </p>
+          <p style="font-size: 14px; color: #6c757d; margin: 5px 0;">
+            WhatsApp: <a href="https://wa.me/919876543210" style="color: #007bff;">+91 9876543210</a>
+          </p>
+          <p style="font-size: 12px; color: #999; margin-top: 20px;">
+            Thank you for shopping with JJTEXTILES!
+          </p>
+        </div>
+      </div>
+    </body>
+    </html>
+  `;
+}
 
 /**
  * Generate HTML for shipping notification email
