@@ -18,6 +18,7 @@ function OrderSuccessContent() {
   const router = useRouter();
   const orderId = params.get("orderId");
   const transactionId = params.get("transactionId"); // 🔑 ADDED: Get transactionId from URL
+  const paymentMethod = params.get("paymentMethod"); // Get payment method from URL
   const [order, setOrder] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -168,7 +169,9 @@ function OrderSuccessContent() {
     );
   }
 
-  const isPaid = displayOrder.paymentStatus === 'PAID' || displayOrder.paymentStatus === 'paid' || 
+  // For COD orders, consider them "placed" even if payment status is PENDING
+  const isCOD = paymentMethod === 'COD' || displayOrder.paymentMethod === 'COD';
+  const isPaid = isCOD || displayOrder.paymentStatus === 'PAID' || displayOrder.paymentStatus === 'paid' || 
                 displayOrder.status === 'CONFIRMED' || displayOrder.status === 'Paid' || 
                 displayOrder.status === 'Order Placed' || displayOrder.orderStatus === 'CONFIRMED';
   const isFailed = displayOrder.paymentStatus === 'failed' || displayOrder.paymentStatus === 'FAILED' ||
@@ -225,8 +228,29 @@ function OrderSuccessContent() {
       </div>
       {isPaid ? (
         <>
-          <div className="text-green-700 font-medium mb-2">Your invoice has been emailed to you.</div>
-          <div className="text-gray-600 mb-6">You can also view your order in your account.</div>
+          {paymentMethod === 'COD' || displayOrder.paymentMethod === 'COD' ? (
+            <div className="bg-amber-50 border border-amber-200 rounded-lg p-4 mb-6 max-w-lg mx-auto">
+              <div className="flex items-start gap-3">
+                <div className="flex-shrink-0 mt-0.5">
+                  <svg className="h-5 w-5 text-amber-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
+                </div>
+                <div className="flex-1">
+                  <p className="text-sm font-semibold text-amber-900 mb-1">Cash on Delivery Order Placed</p>
+                  <p className="text-xs text-amber-700">
+                    Your order will be confirmed once we receive a call or WhatsApp message confirmation from you. 
+                    Please keep your phone available for our team to contact you.
+                  </p>
+                </div>
+              </div>
+            </div>
+          ) : (
+            <>
+              <div className="text-green-700 font-medium mb-2">Your invoice has been emailed to you.</div>
+              <div className="text-gray-600 mb-6">You can also view your order in your account.</div>
+            </>
+          )}
           
           {/* Cart preservation message for buy now users */}
           <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6 max-w-lg mx-auto">

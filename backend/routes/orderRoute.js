@@ -9,7 +9,8 @@ import {
     generateInvoice,
     getAllOrders,
     updateOrderStatus,
-    deleteOrder
+    deleteOrder,
+    createCODOrder
 } from '../controllers/orderController.js';
 import { 
     verifyToken, 
@@ -47,6 +48,9 @@ orderRouter.get('/user/count', (req, res, next) => {
 
 // Admin route for updating order status
 orderRouter.post('/status', verifyToken, updateOrderStatus);
+
+// COD order creation (requires authentication)
+orderRouter.post('/create-cod', verifyToken, createCODOrder);
 
 // Admin route for deleting order (permanent deletion with stock restoration)
 orderRouter.delete('/:orderId', verifyToken, deleteOrder);

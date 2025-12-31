@@ -60,6 +60,7 @@ export default function UnifiedCheckout() {
   const [checkoutError, setCheckoutError] = useState<string | null>(null);
   const [processing, setProcessing] = useState(false);
   const [checkoutSessionId, setCheckoutSessionId] = useState<string | null>(null);
+  const [paymentMethod, setPaymentMethod] = useState<'phonepe' | 'cod'>('phonepe');
 
   // Shipping form state
   const [shipping, setShipping] = useState<ShippingInfo>({
@@ -287,9 +288,57 @@ export default function UnifiedCheckout() {
     }
   };
 
+  // Handle COD order creation
+  const handleCODOrder = async () => {
+    if (!currentSession || !user) return;
+
+    try {
+      setCheckoutError(null);
+      setProcessing(true);
+      const token = await getIdToken();
+      
+      // Create COD order directly
+      const response = await authenticatedFetchJson('/api/orders/create-cod', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'x-request-id': `cod_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`
+        },
+        body: JSON.stringify({
+          checkoutSessionId: currentSession.sessionId,
+          shipping
+        })
+      }, token);
+
+      if (response.success && response.order) {
+        // Clear cart/buy-now after successful order
+        if (isCart) {
+          clearCartAfterSuccessfulCheckout();
+        } else {
+          clearBuyNowAfterSuccessfulCheckout();
+        }
+        
+        // Navigate to order success page
+        router.push(`/order-success?orderId=${response.order.orderId}&paymentMethod=COD`);
+      } else {
+        setCheckoutError(response.message || 'Failed to create COD order');
+      }
+    } catch (err) {
+      setCheckoutError(err instanceof Error ? err.message : 'Failed to create COD order. Please try again.');
+    } finally {
+      setProcessing(false);
+    }
+  };
+
   // Handle payment initiation
   const handlePayment = async () => {
     if (!currentSession || !user) return;
+
+    // If COD is selected, handle differently
+    if (paymentMethod === 'cod') {
+      await handleCODOrder();
+      return;
+    }
 
     try {
       setCheckoutError(null);
@@ -374,6 +423,7 @@ export default function UnifiedCheckout() {
         offerDetails={isCart ? offerDetails : null}
         mode={isBuyNow ? 'buy-now' : 'cart'}
         shippingInfo={shipping}
+        paymentMethod={step === 'payment' ? paymentMethod : undefined}
       />
     );
   };
@@ -630,47 +680,123 @@ export default function UnifiedCheckout() {
   // Render payment step
   if (step === 'payment') {
     return (
-      <div className="container mx-auto px-4 py-8 max-w-2xl text-center">
-        <CheckCircle className="h-16 w-16 text-green-500 mx-auto mb-4" />
-        <h1 className="text-3xl font-bold mb-4">Ready for Payment</h1>
-        <p className="text-gray-600 mb-8">
-          Stock has been reserved. Click below to proceed with PhonePe payment.
-        </p>
+      <div className="container mx-auto px-4 py-8 max-w-4xl">
+        <div className="text-center mb-8">
+          <CheckCircle className="h-16 w-16 text-green-500 mx-auto mb-4" />
+          <h1 className="text-3xl font-bold mb-4">Choose Payment Method</h1>
+          <p className="text-gray-600 mb-8">
+            Stock has been reserved. Select your preferred payment method.
+          </p>
+        </div>
 
         {checkoutError && (
-          <Alert className="mb-6">
+          <Alert className="mb-6 max-w-2xl mx-auto">
             <XCircle className="h-4 w-4" />
             <AlertDescription>{checkoutError}</AlertDescription>
           </Alert>
         )}
 
-        <Button 
-          onClick={handlePayment}
-          disabled={processing}
-          size="lg"
-          className="w-full mb-4"
-        >
-          {processing ? (
-            <>
-              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-              Processing...
-            </>
-          ) : (
-            <>
-              <CreditCard className="mr-2 h-4 w-4" />
-              Pay with PhonePe
-            </>
-          )}
-        </Button>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-4xl mx-auto mb-8">
+          {/* PhonePe Payment Option */}
+          <Card 
+            className={`cursor-pointer transition-all ${
+              paymentMethod === 'phonepe' 
+                ? 'border-2 border-indigo-500 shadow-lg' 
+                : 'border border-gray-200 hover:border-gray-300'
+            }`}
+            onClick={() => setPaymentMethod('phonepe')}
+          >
+            <CardContent className="p-6">
+              <div className="flex items-center justify-between mb-4">
+                <div className="flex items-center gap-3">
+                  <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center ${
+                    paymentMethod === 'phonepe' ? 'border-indigo-500' : 'border-gray-300'
+                  }`}>
+                    {paymentMethod === 'phonepe' && (
+                      <div className="w-3 h-3 rounded-full bg-indigo-500" />
+                    )}
+                  </div>
+                  <CreditCard className="h-6 w-6 text-indigo-600" />
+                  <h3 className="text-lg font-semibold">Online Payment</h3>
+                </div>
+              </div>
+              <p className="text-sm text-gray-600">
+                Pay securely with PhonePe. Instant order confirmation.
+              </p>
+            </CardContent>
+          </Card>
 
-        <Button 
-          variant="outline" 
-          onClick={() => setStep('checkout')}
-          className="w-full"
-        >
-          <ArrowLeft className="mr-2 h-4 w-4" />
-          Back to Review
-        </Button>
+          {/* Cash on Delivery Option */}
+          <Card 
+            className={`cursor-pointer transition-all ${
+              paymentMethod === 'cod' 
+                ? 'border-2 border-green-500 shadow-lg' 
+                : 'border border-gray-200 hover:border-gray-300'
+            }`}
+            onClick={() => setPaymentMethod('cod')}
+          >
+            <CardContent className="p-6">
+              <div className="flex items-center justify-between mb-4">
+                <div className="flex items-center gap-3">
+                  <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center ${
+                    paymentMethod === 'cod' ? 'border-green-500' : 'border-gray-300'
+                  }`}>
+                    {paymentMethod === 'cod' && (
+                      <div className="w-3 h-3 rounded-full bg-green-500" />
+                    )}
+                  </div>
+                  <ShoppingCart className="h-6 w-6 text-green-600" />
+                  <h3 className="text-lg font-semibold">Cash on Delivery</h3>
+                </div>
+              </div>
+              <p className="text-sm text-gray-600">
+                Pay when you receive. Order confirmation via call/WhatsApp.
+              </p>
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* Order Summary */}
+        <div className="max-w-2xl mx-auto mb-6">
+          {renderOrderSummary()}
+        </div>
+
+        {/* Action Buttons */}
+        <div className="max-w-2xl mx-auto space-y-4">
+          <Button 
+            onClick={handlePayment}
+            disabled={processing}
+            size="lg"
+            className="w-full"
+            variant={paymentMethod === 'cod' ? 'default' : 'default'}
+          >
+            {processing ? (
+              <>
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                {paymentMethod === 'cod' ? 'Placing Order...' : 'Processing...'}
+              </>
+            ) : paymentMethod === 'cod' ? (
+              <>
+                <CheckCircle className="mr-2 h-4 w-4" />
+                Place COD Order
+              </>
+            ) : (
+              <>
+                <CreditCard className="mr-2 h-4 w-4" />
+                Pay with PhonePe
+              </>
+            )}
+          </Button>
+
+          <Button 
+            variant="outline" 
+            onClick={() => setStep('checkout')}
+            className="w-full"
+          >
+            <ArrowLeft className="mr-2 h-4 w-4" />
+            Back to Review
+          </Button>
+        </div>
       </div>
     );
   }

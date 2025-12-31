@@ -1236,6 +1236,49 @@ export const confirmOrderStock = async (orderId) => {
     }
 };
 
+// Create COD order from checkout session
+export const createCODOrder = async (req, res) => {
+  try {
+    const { checkoutSessionId, shipping } = req.body;
+    
+    if (!checkoutSessionId) {
+      return errorResponse(res, 400, 'Checkout session ID is required');
+    }
+
+    if (!shipping) {
+      return errorResponse(res, 400, 'Shipping information is required');
+    }
+
+    const { createCODOrderFromCheckoutSession } = await import('../services/orderFromSession.js');
+    
+    // Create COD order
+    const order = await createCODOrderFromCheckoutSession(checkoutSessionId, shipping);
+    
+    // Reserve stock for COD order (temporary reservation - will be confirmed after call/WhatsApp)
+    const { reserveStock } = await import('../utils/stock.js');
+    const itemsToReserve = order.cartItems || order.items || [];
+    
+    for (const item of itemsToReserve) {
+      if (item.productId && item.size && item.quantity) {
+        try {
+          await reserveStock(item.productId, item.size, item.quantity);
+        } catch (stockError) {
+          console.error('Stock reservation error for COD order:', stockError);
+          // Continue with other items even if one fails
+        }
+      }
+    }
+
+    return successResponse(res, { 
+      order,
+      message: 'COD order created successfully. Order will be confirmed after call/WhatsApp confirmation.'
+    }, 'COD order created successfully');
+  } catch (error) {
+    console.error('Create COD Order Error:', error);
+    return errorResponse(res, 500, error.message || 'Failed to create COD order');
+  }
+};
+
 export { 
     placeOrder, 
     processCardPayment, 
@@ -1247,5 +1290,6 @@ export {
     getAllOrders, 
   updateOrderStatus,
     createStructuredOrder,
-    getUniqueOrderId
+    getUniqueOrderId,
+    createCODOrder
 };
