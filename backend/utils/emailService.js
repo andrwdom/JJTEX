@@ -459,8 +459,24 @@ export const sendCODOrderConfirmationEmail = async (order) => {
     const mailOptions = {
       from: process.env.SMTP_FROM || process.env.EMAIL_FROM || 'noreply@jjtextiles.in',
       to: toEmail,
+      replyTo: process.env.SUPPORT_EMAIL || process.env.SMTP_USER || process.env.EMAIL_USER || 'jjtex001@gmail.com',
       subject: `Your COD Order Placed - Order #${order.orderId || order._id} | JJTEXTILES`,
       html: generateCODOrderConfirmationHTML(order),
+      // Add headers to improve deliverability
+      headers: {
+        'X-Priority': '1',
+        'X-MSMail-Priority': 'High',
+        'Importance': 'high',
+        'List-Unsubscribe': `<mailto:${process.env.SUPPORT_EMAIL || 'jjtex001@gmail.com'}?subject=Unsubscribe>`,
+      },
+      // Add text version for better deliverability
+      text: `Your COD Order #${order.orderId || order._id} has been placed successfully!\n\n` +
+            `Order Amount: ₹${order.total || order.totalPrice || 0}\n` +
+            `Payment Method: Cash on Delivery\n\n` +
+            `Your order will be confirmed once we receive a call or WhatsApp message confirmation from you.\n` +
+            `Please keep your phone available for our team to contact you.\n\n` +
+            `Thank you for shopping with JJTEXTILES!\n\n` +
+            `Order details are attached in the PDF.`,
       attachments: [
         {
           filename: `Order_${order.orderId || order._id}.pdf`,
@@ -483,8 +499,18 @@ export const sendCODOrderConfirmationEmail = async (order) => {
       correlationId,
       orderId: order.orderId || order._id,
       email: toEmail,
-      messageId: emailResult.messageId
+      messageId: emailResult.messageId,
+      response: emailResult.response,
+      accepted: emailResult.accepted,
+      rejected: emailResult.rejected,
+      pending: emailResult.pending,
+      envelope: emailResult.envelope
     });
+    
+    // Log full SMTP response for debugging
+    if (emailResult.response) {
+      console.log('📧 [COD Email] Full SMTP Response:', emailResult.response);
+    }
     
     EnhancedLogger.webhookLog('SUCCESS', 'COD order confirmation email sent', {
       correlationId,
