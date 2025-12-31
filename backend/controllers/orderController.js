@@ -1239,6 +1239,13 @@ export const confirmOrderStock = async (orderId) => {
 // Create COD order from checkout session
 export const createCODOrder = async (req, res) => {
   try {
+    // Ensure CORS headers are set even if there's an error
+    const origin = req.headers.origin;
+    if (origin) {
+      res.setHeader('Access-Control-Allow-Origin', origin);
+      res.setHeader('Access-Control-Allow-Credentials', 'true');
+    }
+
     const { checkoutSessionId, shipping } = req.body;
     
     if (!checkoutSessionId) {
@@ -1275,6 +1282,12 @@ export const createCODOrder = async (req, res) => {
     }, 'COD order created successfully');
   } catch (error) {
     console.error('Create COD Order Error:', error);
+    // Ensure CORS headers are set even on error
+    const origin = req.headers.origin;
+    if (origin) {
+      res.setHeader('Access-Control-Allow-Origin', origin);
+      res.setHeader('Access-Control-Allow-Credentials', 'true');
+    }
     return errorResponse(res, 500, error.message || 'Failed to create COD order');
   }
 };

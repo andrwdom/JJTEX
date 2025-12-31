@@ -84,13 +84,13 @@ export async function createCODOrderFromCheckoutSession(sessionId, shippingInfo)
   // Generate unique order ID
   const orderId = await generateUniqueOrderId();
 
-    // Merge shipping info from request with session data
-    const finalShippingInfo = {
-      ...(s.shippingInfo || {}),
-      ...(shippingInfo || {})
-    };
+  // Merge shipping info from request with session data
+  const finalShippingInfo = {
+    ...(s.shippingInfo || {}),
+    ...(shippingInfo || {})
+  };
 
-    const order = new orderModel({
+  const order = new orderModel({
     checkoutSessionId: s.sessionId,
     source: s.source,
     userInfo: s.userId ? { userId: s.userId, email: s.userEmail } : { email: s.userEmail },
