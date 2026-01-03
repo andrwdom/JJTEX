@@ -149,7 +149,11 @@ const corsOptions = {
         const normalizedOrigin = origin.toLowerCase().trim();
         const isAllowed = allowedOrigins.some(allowed => {
             const normalizedAllowed = allowed.toLowerCase().trim();
-            return normalizedOrigin === normalizedAllowed;
+            const matches = normalizedOrigin === normalizedAllowed;
+            if (matches) {
+                Logger.debug('cors_exact_match', { origin, normalizedOrigin, allowed, normalizedAllowed });
+            }
+            return matches;
         });
 
         // Check if origin matches any allowed origin
@@ -158,6 +162,13 @@ const corsOptions = {
             callback(null, true);
             return;
         }
+        
+        // Log for debugging if exact match fails
+        Logger.debug('cors_exact_match_failed', { 
+            origin, 
+            normalizedOrigin, 
+            allowedOrigins: allowedOrigins.map(a => a.toLowerCase().trim())
+        });
 
         // Special handling for Instagram in-app browser
         // Instagram in-app browser sometimes sends different origin headers
@@ -173,9 +184,12 @@ const corsOptions = {
         }
 
         // Special handling for jjtextiles.com and www.jjtextiles.com variants
+        // This includes admin.jjtextiles.com, admin.jjtextiles.in, etc.
         if (origin && (
             normalizedOrigin.includes('jjtextiles.com') ||
-            normalizedOrigin.includes('jjtextiles.in')
+            normalizedOrigin.includes('jjtextiles.in') ||
+            normalizedOrigin.includes('admin.jjtextiles.com') ||
+            normalizedOrigin.includes('admin.jjtextiles.in')
         )) {
             Logger.debug('cors_allowed_jjtextiles', { origin, normalizedOrigin });
             callback(null, true);
@@ -221,6 +235,8 @@ const corsOptions = {
 
 // CRITICAL: Handle CORS and preflight requests BEFORE any other middleware
 app.use(cors(corsOptions));
+
+// Explicit OPTIONS handler for all routes to ensure preflight requests work correctly
 app.options('*', cors(corsOptions));
 
 // CRITICAL: Mount raw webhook route BEFORE body parsers to capture raw payload
