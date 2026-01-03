@@ -656,16 +656,62 @@ const updateStatus = async (req,res) => {
 
         // Send email notifications
         try {
-            if (status === 'Shipped' && shippingPartner && trackingId) {
-                console.log('🔧 Sending shipping notification email for order:', order.orderId);
-                // Send shipping notification email with tracking details
-                await sendShippingNotification(order, { partner: shippingPartner, trackingId });
-                console.log('🔧 Shipping notification email sent successfully');
+            // Extract customer email from various possible locations
+            const customerEmail = updatedOrder.shippingInfo?.email || 
+                                 updatedOrder.userInfo?.email || 
+                                 updatedOrder.email || 
+                                 updatedOrder.shippingAddress?.email;
+            
+            if (!customerEmail) {
+                console.warn('⚠️ No customer email found for order:', updatedOrder.orderId);
             } else {
-                console.log('🔧 Sending general status update email for order:', order.orderId, 'Status:', status);
-                // Send general status update email for all other statuses (including Shipped without tracking)
-                await sendOrderStatusUpdate(order, status);
-                console.log('🔧 Status update email sent successfully');
+                // Get order items (support both cartItems and items)
+                const orderItems = updatedOrder.cartItems?.length ? updatedOrder.cartItems : updatedOrder.items || [];
+                const formattedItems = orderItems.map(item => ({
+                    name: item.name || 'Product',
+                    size: item.size || '-',
+                    quantity: item.quantity || 1,
+                    price: item.price || 0
+                }));
+
+                // Get order total
+                const orderTotal = updatedOrder.totalAmount || 
+                                 updatedOrder.total || 
+                                 updatedOrder.totalPrice || 
+                                 updatedOrder.amount || 
+                                 0;
+
+                // Normalize status to uppercase for email service
+                const normalizedStatus = status.toUpperCase();
+                
+                if (normalizedStatus === 'SHIPPED' && shippingPartner && trackingId) {
+                    console.log('🔧 Sending shipping notification email for order:', updatedOrder.orderId);
+                    // Format email data for shipping notification
+                    const shippingEmailData = {
+                        to: customerEmail,
+                        orderId: updatedOrder.orderId || updatedOrder._id.toString(),
+                        trackingNumber: trackingId,
+                        carrier: shippingPartner,
+                        items: formattedItems,
+                        amount: orderTotal
+                    };
+                    await sendShippingNotification(shippingEmailData);
+                    console.log('🔧 Shipping notification email sent successfully');
+                } else {
+                    console.log('🔧 Sending general status update email for order:', updatedOrder.orderId, 'Status:', normalizedStatus);
+                    // Format email data for status update
+                    const statusEmailData = {
+                        to: customerEmail,
+                        orderId: updatedOrder.orderId || updatedOrder._id.toString(),
+                        status: normalizedStatus,
+                        amount: orderTotal,
+                        items: formattedItems,
+                        trackingNumber: updatedOrder.shippingTracking?.trackingId || updatedOrder.trackingId || null,
+                        estimatedDelivery: null // Can be added if available
+                    };
+                    await sendOrderStatusUpdate(statusEmailData);
+                    console.log('🔧 Status update email sent successfully');
+                }
             }
         } catch (emailError) {
             console.error('❌ Error sending email notification:', emailError);
@@ -903,7 +949,7 @@ export const generateInvoice = async (req, res) => {
     // --- HEADER ---
     doc.font('Helvetica-Bold').fontSize(30).fillColor('#473C66').text('Shithaa', { align: 'center' });
     doc.moveDown(0.1);
-    doc.font('Helvetica').fontSize(13).fillColor('#B39DDB').text('Elegance for Every Mother', { align: 'center' });
+    doc.font('Helvetica').fontSize(13).fillColor('#B39DDB').text('Quality Clothing for Everyone', { align: 'center' });
     doc.moveDown(0.5);
     if (order.isTestOrder) {
       doc.font('Helvetica-Bold').fontSize(14).fillColor('#1976D2').text('TEST ORDER', { align: 'center' });

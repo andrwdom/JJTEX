@@ -19,7 +19,7 @@ export async function generateInvoiceBuffer(order) {
       // --- HEADER ---
       doc.font('Helvetica-Bold').fontSize(30).fillColor(BRAND_COLOR).text(BRAND_NAME, { align: 'center' });
       doc.moveDown(0.1);
-      doc.font('Helvetica').fontSize(13).fillColor('#B39DDB').text('Elegance for Every Mother', { align: 'center' });
+      doc.font('Helvetica').fontSize(13).fillColor('#B39DDB').text('Quality Clothing for Everyone', { align: 'center' });
       doc.moveDown(0.5);
       if (order.isTestOrder) {
         doc.font('Helvetica-Bold').fontSize(14).fillColor('#1976D2').text('TEST ORDER', { align: 'center' });

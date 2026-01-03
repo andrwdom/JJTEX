@@ -16,6 +16,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   useEffect(() => {
     let auth;
+    let refreshInterval: NodeJS.Timeout | null = null;
+    
     try {
       auth = getFirebaseAuth();
     } catch (e) {
@@ -29,6 +31,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       console.log("Auth state changed:", firebaseUser ? "User logged in" : "No user");
       setUser(firebaseUser);
       setLoading(false);
+      
+      // Clear any existing refresh interval
+      if (refreshInterval) {
+        clearInterval(refreshInterval);
+        refreshInterval = null;
+      }
+      
       // SECURITY: Fetch backend user profile using HttpOnly cookies
       if (firebaseUser) {
         try {
@@ -47,33 +56,52 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             }
             
             // Start proactive token refresh (refresh every 23 hours to stay ahead of 24-hour expiration)
-            const startProactiveRefresh = () => {
-              const refreshInterval = setInterval(async () => {
-                try {
-                  console.log('🔄 Proactively refreshing token...');
-                  const refreshRes = await fetch(
-                    `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000'}/api/user/refresh-token`,
-                    {
-                      method: 'POST',
-                      credentials: 'include',
-                    }
-                  );
-                  
-                  if (refreshRes.ok) {
-                    console.log('✅ Token proactively refreshed');
-                  } else {
-                    console.log('❌ Proactive token refresh failed');
+            // Only start if we have a valid backend session
+            const performRefresh = async () => {
+              try {
+                // Check if we still have a session before attempting refresh
+                const hasSession = document.cookie.includes('refresh_token') || 
+                                  document.cookie.includes('token') ||
+                                  localStorage.getItem('token') ||
+                                  localStorage.getItem('refreshToken');
+                
+                if (!hasSession) {
+                  // No session, clear interval and stop
+                  if (refreshInterval) {
+                    clearInterval(refreshInterval);
+                    refreshInterval = null;
                   }
-                } catch (error) {
-                  console.log('❌ Proactive token refresh error:', error);
+                  return;
                 }
-              }, 23 * 60 * 60 * 1000); // 23 hours
-              
-              // Clean up interval when component unmounts
-              return () => clearInterval(refreshInterval);
+                
+                  // Silently attempt refresh without logging
+                  const refreshRes = await fetch(
+                  `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000'}/api/user/refresh-token`,
+                  {
+                    method: 'POST',
+                    credentials: 'include',
+                  }
+                );
+                
+                  if (refreshRes.ok) {
+                    // Only log successful refreshes
+                    if (process.env.NODE_ENV === 'development') {
+                      console.log('✅ Token proactively refreshed');
+                    }
+                  } else if (refreshRes.status === 401) {
+                    // Session expired, stop proactive refresh silently
+                    if (refreshInterval) {
+                      clearInterval(refreshInterval);
+                      refreshInterval = null;
+                    }
+                  }
+                  // Silently handle other errors - don't log
+                } catch (error) {
+                  // Silently handle errors - don't log as this is expected in some cases
+                }
             };
             
-            startProactiveRefresh();
+            refreshInterval = setInterval(performRefresh, 23 * 60 * 60 * 1000); // 23 hours
           } else if (res.status === 200 && !data.data) {
             // User not authenticated to backend (expected for new users)
             setMongoUser(null);
@@ -85,14 +113,20 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             setMongoUser(null);
           }
         } catch (e) {
-          // Silently handle network errors
+          // Silently handle network errors and 401s (expected when user is not logged in)
           setMongoUser(null);
         }
       } else {
         setMongoUser(null);
       }
     });
-    return () => unsubscribe();
+    
+    return () => {
+      unsubscribe();
+      if (refreshInterval) {
+        clearInterval(refreshInterval);
+      }
+    };
   }, []);
 
   async function logout() {

@@ -270,7 +270,11 @@ export async function authenticatedFetch(
   const maxRetries = 1; // Only retry once to avoid infinite loops
   
   try {
-    console.log(`🔐 Making authenticated request to: ${url}`);
+    // Only log authenticated requests in development or for debugging
+    // Suppress in production to reduce console noise
+    if (process.env.NODE_ENV === 'development') {
+      console.log(`🔐 Making authenticated request to: ${url}`);
+    }
     
     // Detect Instagram browser for special handling
     const isInstagramBrowser = typeof window !== 'undefined' && 
@@ -293,12 +297,14 @@ export async function authenticatedFetch(
       },
     });
 
-    console.log(`🔐 Response status: ${response.status}`);
+    // Only log non-401 responses to reduce console noise
+    if (response.status !== 401) {
+      console.log(`🔐 Response status: ${response.status}`);
+    }
 
     // If we get a 401 and haven't retried yet, try to refresh the token
     if (response.status === 401 && retryCount < maxRetries) {
-      console.log('🔐 Access token expired, attempting to refresh...');
-      
+      // Silently attempt token refresh - don't log unless successful
       try {
         // Try to refresh the token using the refresh token endpoint
         const refreshResponse = await fetch(
@@ -312,34 +318,26 @@ export async function authenticatedFetch(
           }
         );
 
-        console.log(`🔐 Refresh response status: ${refreshResponse.status}`);
-
         if (refreshResponse.ok) {
+          // Only log successful refreshes
           console.log('✅ Token refreshed successfully, retrying original request...');
           // Token refreshed, retry the original request
           return authenticatedFetch(url, options, retryCount + 1);
         } else {
-          console.log('❌ Token refresh failed, user needs to log in again');
-          const refreshData = await refreshResponse.json().catch(() => ({}));
-          
-          // If refresh token is also expired, clear local storage and redirect to login
+          // Silently handle 401 from refresh endpoint (expected when no refresh token exists or expired)
+          // Don't log - this is expected behavior
           if (refreshResponse.status === 401) {
             // Clear any stored tokens
             localStorage.removeItem('token');
             localStorage.removeItem('refreshToken');
-            
-            // Show user-friendly message
-            throw new Error('Your session has expired. Please log in again to continue.');
           }
-          
-          throw new Error(refreshData.message || 'Your session has expired. Please log in again.');
+          // Return the original 401 response without logging
+          return response;
         }
       } catch (refreshError) {
-        console.log('❌ Token refresh error:', refreshError);
-        if (refreshError instanceof Error) {
-          throw refreshError;
-        }
-        throw new Error('Your session has expired. Please log in again.');
+        // Silently handle refresh errors (network issues, etc.)
+        // Don't log - this is expected in some scenarios
+        return response; // Return the original 401 response
       }
     }
 

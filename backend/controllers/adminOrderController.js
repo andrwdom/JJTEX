@@ -47,13 +47,55 @@ export const updateOrderStatus = async (req, res) => {
         }
 
         // Send email notification based on status
-        if (status === 'SHIPPED' && shippingPartner && trackingId) {
-            await sendShippingNotification(order, {
-                partner: shippingPartner,
-                trackingId: trackingId
-            });
+        // Extract customer email from various possible locations
+        const customerEmail = order.shippingInfo?.email || 
+                             order.userInfo?.email || 
+                             order.email || 
+                             order.shippingAddress?.email;
+        
+        if (!customerEmail) {
+            console.warn('⚠️ No customer email found for order:', order.orderId || order._id);
         } else {
-            await sendOrderStatusUpdate(order, status);
+            // Get order items (support both cartItems and items)
+            const orderItems = order.cartItems?.length ? order.cartItems : order.items || [];
+            const formattedItems = orderItems.map(item => ({
+                name: item.name || 'Product',
+                size: item.size || '-',
+                quantity: item.quantity || 1,
+                price: item.price || 0
+            }));
+
+            // Get order total
+            const orderTotal = order.totalAmount || 
+                             order.total || 
+                             order.totalPrice || 
+                             order.amount || 
+                             0;
+
+            if (status === 'SHIPPED' && shippingPartner && trackingId) {
+                // Format email data for shipping notification
+                const shippingEmailData = {
+                    to: customerEmail,
+                    orderId: order.orderId || order._id.toString(),
+                    trackingNumber: trackingId,
+                    carrier: shippingPartner,
+                    items: formattedItems,
+                    amount: orderTotal
+                };
+                await sendShippingNotification(shippingEmailData);
+            } else {
+                // Format email data for status update
+                const statusEmailData = {
+                    to: customerEmail,
+                    orderId: order.orderId || order._id.toString(),
+                    status: status,
+                    amount: orderTotal,
+                    items: formattedItems,
+                    trackingNumber: order.shippingDetails?.trackingId || order.shippingTracking?.trackingId || null,
+                    estimatedDelivery: null // Can be added if available
+                };
+                await sendOrderStatusUpdate(statusEmailData);
+            }
         }
 
         res.json({
