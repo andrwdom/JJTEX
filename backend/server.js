@@ -147,6 +147,8 @@ const corsOptions = {
 
         // Normalize origin for comparison (handle www and non-www variants)
         const normalizedOrigin = origin.toLowerCase().trim();
+        
+        // First check exact matches
         const isAllowed = allowedOrigins.some(allowed => {
             const normalizedAllowed = allowed.toLowerCase().trim();
             const matches = normalizedOrigin === normalizedAllowed;
@@ -163,12 +165,19 @@ const corsOptions = {
             return;
         }
         
-        // Log for debugging if exact match fails
-        Logger.debug('cors_exact_match_failed', { 
-            origin, 
-            normalizedOrigin, 
-            allowedOrigins: allowedOrigins.map(a => a.toLowerCase().trim())
-        });
+        // Special handling for jjtextiles.com and jjtextiles.in domains (including subdomains)
+        // This MUST come before Instagram check to catch admin.jjtextiles.com
+        // Check for any jjtextiles domain (main site, admin panel, etc.)
+        if (origin && (
+            normalizedOrigin.includes('jjtextiles.com') ||
+            normalizedOrigin.includes('jjtextiles.in')
+        )) {
+            // Also log to console for production debugging
+            console.log('✅ CORS: Allowing jjtextiles domain:', origin);
+            Logger.debug('cors_allowed_jjtextiles', { origin, normalizedOrigin });
+            callback(null, true);
+            return;
+        }
 
         // Special handling for Instagram in-app browser
         // Instagram in-app browser sometimes sends different origin headers
@@ -183,19 +192,7 @@ const corsOptions = {
             return;
         }
 
-        // Special handling for jjtextiles.com and www.jjtextiles.com variants
-        // This includes admin.jjtextiles.com, admin.jjtextiles.in, etc.
-        if (origin && (
-            normalizedOrigin.includes('jjtextiles.com') ||
-            normalizedOrigin.includes('jjtextiles.in') ||
-            normalizedOrigin.includes('admin.jjtextiles.com') ||
-            normalizedOrigin.includes('admin.jjtextiles.in')
-        )) {
-            Logger.debug('cors_allowed_jjtextiles', { origin, normalizedOrigin });
-            callback(null, true);
-            return;
-        }
-
+        // Log for debugging if all checks fail
         Logger.warn('cors_blocked', { 
             origin: origin ? 'provided' : 'none',
             normalizedOrigin,
