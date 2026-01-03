@@ -24,7 +24,7 @@ import {
   Package
 } from 'lucide-react';
 
-const API_URL = import.meta.env.VITE_BACKEND_URL || 'https://shithaa.in';
+const API_URL = import.meta.env.VITE_BACKEND_URL || 'https://jjtextiles.com';
 
 const Dashboard = ({ token }) => {
   const [health, setHealth] = useState(null);
