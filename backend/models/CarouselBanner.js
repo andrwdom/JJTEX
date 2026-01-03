@@ -17,6 +17,10 @@ const carouselBannerSchema = new mongoose.Schema({
     type: String,
     default: null
   },
+  buttonText: {
+    type: String,
+    default: null
+  },
   sectionId: {
     type: String,
     default: null

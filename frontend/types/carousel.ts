@@ -4,6 +4,7 @@ export interface CarouselImage {
   alt?: string
   title?: string
   link?: string
+  buttonText?: string
   order?: number
   isActive?: boolean
   createdAt?: string

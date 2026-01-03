@@ -11,6 +11,7 @@ const CarouselManagement = ({ token }) => {
     title: '',
     description: '',
     link: '',
+    buttonText: '',
     sectionId: '',
     order: 0,
     isActive: true
@@ -64,6 +65,7 @@ const CarouselManagement = ({ token }) => {
       formDataToSend.append('title', formData.title);
       formDataToSend.append('description', formData.description);
       formDataToSend.append('link', formData.link);
+      formDataToSend.append('buttonText', formData.buttonText);
       formDataToSend.append('sectionId', formData.sectionId);
       formDataToSend.append('order', formData.order);
       formDataToSend.append('isActive', formData.isActive);
@@ -115,6 +117,7 @@ const CarouselManagement = ({ token }) => {
         title: '',
         description: '',
         link: '',
+        buttonText: '',
         sectionId: '',
         order: 0,
         isActive: true
@@ -154,8 +157,9 @@ const CarouselManagement = ({ token }) => {
     setEditingBanner(banner);
     setFormData({
       title: banner.title,
-      description: banner.description,
+      description: banner.description || '',
       link: banner.link || '',
+      buttonText: banner.buttonText || '',
       sectionId: banner.sectionId || '',
       order: banner.order,
       isActive: banner.isActive !== false
@@ -238,7 +242,20 @@ const CarouselManagement = ({ token }) => {
                 className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
                 placeholder="https://example.com/page"
               />
+              <p className="mt-1 text-xs text-gray-500">Clicking the banner will navigate to this URL</p>
             </div>
+          </div>
+          
+          <div>
+            <label className="block text-sm font-medium text-gray-700">Button Text</label>
+            <input
+              type="text"
+              value={formData.buttonText}
+              onChange={(e) => setFormData({ ...formData, buttonText: e.target.value })}
+              className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+              placeholder="e.g., Shop Now, Buy Now, Explore"
+            />
+            <p className="mt-1 text-xs text-gray-500">Optional: Button text that appears on the banner. If provided, clicking the button will navigate to the Link URL</p>
           </div>
           
           <div>

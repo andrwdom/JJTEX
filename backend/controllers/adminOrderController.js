@@ -97,7 +97,10 @@ export const updateOrderStatus = async (req, res) => {
                     trackingURL: trackingURL
                 };
                 await sendShippingNotification(shippingEmailData);
-            } else {
+                // IMPORTANT: Don't send general status update email for SHIPPED status when shipping details are provided
+                // The shipping notification email is sufficient and more detailed
+            } else if (status !== 'SHIPPED') {
+                // Only send general status update for non-SHIPPED statuses
                 // Format email data for status update
                 const statusEmailData = {
                     to: customerEmail,
@@ -107,6 +110,18 @@ export const updateOrderStatus = async (req, res) => {
                     items: formattedItems,
                     trackingNumber: order.shippingDetails?.trackingId || order.shippingTracking?.trackingId || null,
                     estimatedDelivery: null // Can be added if available
+                };
+                await sendOrderStatusUpdate(statusEmailData);
+            } else {
+                // SHIPPED status but no shipping details - send general status update
+                const statusEmailData = {
+                    to: customerEmail,
+                    orderId: order.orderId || order._id.toString(),
+                    status: status,
+                    amount: orderTotal,
+                    items: formattedItems,
+                    trackingNumber: null,
+                    estimatedDelivery: null
                 };
                 await sendOrderStatusUpdate(statusEmailData);
             }

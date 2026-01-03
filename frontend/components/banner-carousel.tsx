@@ -171,13 +171,31 @@ export default function BannerCarousel({
                 sizes="100vw"
               />
               
-              {/* Image overlay with title */}
-              {image.title && (
+              {/* Image overlay with title and button */}
+              {(image.title || image.buttonText) && (
                 <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent">
                   <div className="absolute bottom-6 left-6 right-6 text-white">
-                    <h3 className="text-lg md:text-xl lg:text-2xl font-semibold mb-2">
-                      {image.title}
-                    </h3>
+                    {image.title && (
+                      <h3 className="text-lg md:text-xl lg:text-2xl font-semibold mb-2">
+                        {image.title}
+                      </h3>
+                    )}
+                    {image.buttonText && image.link && (
+                      <a
+                        href={image.link}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          // Handle internal navigation if needed
+                          if (image.link.startsWith('/')) {
+                            e.preventDefault();
+                            window.location.href = image.link;
+                          }
+                        }}
+                        className="inline-block mt-3 px-6 py-2 bg-white text-gray-900 font-semibold rounded-lg hover:bg-gray-100 transition-colors shadow-lg"
+                      >
+                        {image.buttonText}
+                      </a>
+                    )}
                   </div>
                 </div>
               )}
@@ -229,12 +247,19 @@ export default function BannerCarousel({
 
 
 
-        {/* Clickable overlay for image links */}
-        {carouselImages[currentIndex]?.link && (
+        {/* Clickable overlay for image links - only if no button text (button handles click) */}
+        {carouselImages[currentIndex]?.link && !carouselImages[currentIndex]?.buttonText && (
           <a
             href={carouselImages[currentIndex].link}
             className="absolute inset-0 z-10 cursor-pointer"
             aria-label={`Navigate to ${carouselImages[currentIndex].title || 'carousel link'}`}
+            onClick={(e) => {
+              // Handle internal navigation if needed
+              if (carouselImages[currentIndex].link?.startsWith('/')) {
+                e.preventDefault();
+                window.location.href = carouselImages[currentIndex].link;
+              }
+            }}
           />
         )}
       </div>

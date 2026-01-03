@@ -586,13 +586,16 @@ const updateStatus = async (req,res) => {
             updatedAt: new Date()
         };
         
+        // Normalize status for consistent checking (do this early)
+        const normalizedStatus = status.toUpperCase();
+        
         // Optionally update paymentStatus if delivered
-        if (status === 'Delivered') {
+        if (normalizedStatus === 'DELIVERED') {
             updateData.paymentStatus = 'paid';
         }
-
-        // Handle shipping tracking data when status is 'Shipped'
-        if (status === 'Shipped') {
+        
+        // Handle shipping tracking data when status is 'SHIPPED'
+        if (normalizedStatus === 'SHIPPED') {
             // Only require shipping details if they're provided
             if (shippingPartner && trackingId) {
                 // Generate tracking URL
@@ -623,7 +626,7 @@ const updateStatus = async (req,res) => {
         }
 
         // If cancelling, add cancellation details
-        if (status === 'Cancelled' && cancelledBy) {
+        if (normalizedStatus === 'CANCELLED' && cancelledBy) {
             updateData.cancelledBy = {
                 name: cancelledBy.name,
                 userId: cancelledBy.userId,
@@ -681,9 +684,7 @@ const updateStatus = async (req,res) => {
                                  updatedOrder.amount || 
                                  0;
 
-                // Normalize status to uppercase for email service
-                const normalizedStatus = status.toUpperCase();
-                
+                // Use already normalized status
                 if (normalizedStatus === 'SHIPPED' && shippingPartner && trackingId) {
                     console.log('🔧 Sending shipping notification email for order:', updatedOrder.orderId);
                     
@@ -712,7 +713,11 @@ const updateStatus = async (req,res) => {
                     };
                     await sendShippingNotification(shippingEmailData);
                     console.log('🔧 Shipping notification email sent successfully');
-                } else {
+                    // IMPORTANT: Don't send general status update email for SHIPPED status when shipping details are provided
+                    // The shipping notification email is sufficient and more detailed
+                } else if (normalizedStatus !== 'SHIPPED') {
+                    // Only send general status update for non-SHIPPED statuses
+                    // For SHIPPED without tracking details, we still send general status update
                     console.log('🔧 Sending general status update email for order:', updatedOrder.orderId, 'Status:', normalizedStatus);
                     // Format email data for status update
                     const statusEmailData = {
@@ -723,6 +728,20 @@ const updateStatus = async (req,res) => {
                         items: formattedItems,
                         trackingNumber: updatedOrder.shippingTracking?.trackingId || updatedOrder.trackingId || null,
                         estimatedDelivery: null // Can be added if available
+                    };
+                    await sendOrderStatusUpdate(statusEmailData);
+                    console.log('🔧 Status update email sent successfully');
+                } else {
+                    // SHIPPED status but no shipping details - send general status update
+                    console.log('🔧 Sending general status update email for SHIPPED order without tracking details:', updatedOrder.orderId);
+                    const statusEmailData = {
+                        to: customerEmail,
+                        orderId: updatedOrder.orderId || updatedOrder._id.toString(),
+                        status: normalizedStatus,
+                        amount: orderTotal,
+                        items: formattedItems,
+                        trackingNumber: null,
+                        estimatedDelivery: null
                     };
                     await sendOrderStatusUpdate(statusEmailData);
                     console.log('🔧 Status update email sent successfully');

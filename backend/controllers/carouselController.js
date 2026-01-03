@@ -1,33 +1,6 @@
 import CarouselBanner from '../models/CarouselBanner.js';
-import { Readable } from 'stream';
 import path from 'path';
-
-// Helper function to upload buffer to Cloudinary
-const uploadBuffer = (buffer) => {
-  return new Promise((resolve, reject) => {
-    const uploadStream = cloudinary.uploader.upload_stream(
-      {
-        folder: 'carousel_banners',
-        width: 1920,
-        height: 800,
-        crop: 'fill'
-      },
-      (error, result) => {
-        if (error) reject(error);
-        else resolve(result);
-      }
-    );
-
-    const readableStream = new Readable({
-      read() {
-        this.push(buffer);
-        this.push(null);
-      }
-    });
-
-    readableStream.pipe(uploadStream);
-  });
-};
+import fs from 'fs';
 
 // Get all carousel banners
 export const getCarouselBanners = async (req, res) => {
@@ -47,10 +20,15 @@ export const getCarouselBanners = async (req, res) => {
     // Transform data to match frontend expectations
     const carouselData = banners.map(banner => ({
       id: banner._id.toString(),
+      _id: banner._id.toString(),
       url: banner.image,
+      image: banner.image,
       alt: banner.title || 'Carousel banner',
       title: banner.title,
+      description: banner.description || '',
       link: banner.link || null,
+      buttonText: banner.buttonText || null,
+      sectionId: banner.sectionId || null,
       order: banner.order || 0,
       isActive: banner.isActive !== false,
       createdAt: banner.createdAt?.toISOString(),
@@ -75,36 +53,51 @@ export const getCarouselBanners = async (req, res) => {
 // Create a new carousel banner
 export const createCarouselBanner = async (req, res) => {
   try {
-    const { title, description, link, sectionId, order, isActive } = req.body;
+    const { title, description, link, buttonText, sectionId, order, isActive } = req.body;
     const imageFile = req.file;
 
     if (!imageFile) {
-      return res.status(400).json({ message: 'Image is required' });
-    }
-
-    try {
-      const baseUrl = process.env.BASE_URL || 'https://jjtextiles.in';
-      const imageUrl = `${baseUrl}/images/carousel/${imageFile.filename}`;
-
-      const banner = new CarouselBanner({
-        image: imageUrl,
-        title,
-        description,
-        link: link || null,
-        sectionId: sectionId || null,
-        order: order || 0,
-        isActive: isActive === 'true' || isActive === true || isActive === undefined
+      return res.status(400).json({ 
+        success: false,
+        message: 'Image is required' 
       });
-
-      await banner.save();
-      res.status(201).json(banner);
-    } catch (cloudinaryError) {
-      console.error('Cloudinary upload error:', cloudinaryError);
-      throw new Error(`Failed to upload image to Cloudinary: ${cloudinaryError.message}`);
     }
+
+    if (!title) {
+      return res.status(400).json({ 
+        success: false,
+        message: 'Title is required' 
+      });
+    }
+
+    // Ensure image is saved to VPS directory
+    // The multer middleware already handles saving to uploads/carousel/
+    // We just need to construct the proper URL
+    const baseUrl = process.env.BASE_URL || process.env.NEXT_PUBLIC_API_URL || 'https://jjtextiles.in';
+    const imageUrl = `${baseUrl}/images/carousel/${imageFile.filename}`;
+
+    const banner = new CarouselBanner({
+      image: imageUrl,
+      title,
+      description: description || '',
+      link: link || null,
+      buttonText: buttonText || null,
+      sectionId: sectionId || null,
+      order: order ? parseInt(order) : 0,
+      isActive: isActive === 'true' || isActive === true || isActive === undefined
+    });
+
+    await banner.save();
+    
+    res.status(201).json({
+      success: true,
+      data: banner,
+      message: 'Banner created successfully'
+    });
   } catch (error) {
     console.error('Banner creation error:', error);
     res.status(400).json({ 
+      success: false,
       message: error.message,
       details: process.env.NODE_ENV === 'development' ? error.stack : undefined
     });
@@ -115,22 +108,29 @@ export const createCarouselBanner = async (req, res) => {
 export const updateCarouselBanner = async (req, res) => {
   try {
     const { id } = req.params;
-    const { title, description, link, sectionId, order, isActive } = req.body;
+    const { title, description, link, buttonText, sectionId, order, isActive } = req.body;
     const imageFile = req.file;
 
-    const updateData = {
-      title,
-      description,
-      link,
-      sectionId,
-      order,
-      isActive: isActive === 'true' || isActive === true
-    };
+    const updateData = {};
+    
+    if (title !== undefined) updateData.title = title;
+    if (description !== undefined) updateData.description = description;
+    if (link !== undefined) updateData.link = link || null;
+    if (buttonText !== undefined) updateData.buttonText = buttonText || null;
+    if (sectionId !== undefined) updateData.sectionId = sectionId || null;
+    if (order !== undefined) updateData.order = parseInt(order) || 0;
+    if (isActive !== undefined) {
+      updateData.isActive = isActive === 'true' || isActive === true;
+    }
 
+    // If new image is uploaded, update the image URL
     if (imageFile) {
-      const baseUrl = process.env.BASE_URL || 'https://jjtextiles.in';
+      const baseUrl = process.env.BASE_URL || process.env.NEXT_PUBLIC_API_URL || 'https://jjtextiles.in';
       const imageUrl = `${baseUrl}/images/carousel/${imageFile.filename}`;
       updateData.image = imageUrl;
+      
+      // Optionally delete old image file from VPS
+      // (You can implement this if needed)
     }
 
     const banner = await CarouselBanner.findByIdAndUpdate(
@@ -140,13 +140,23 @@ export const updateCarouselBanner = async (req, res) => {
     );
 
     if (!banner) {
-      return res.status(404).json({ message: 'Banner not found' });
+      return res.status(404).json({ 
+        success: false,
+        message: 'Banner not found' 
+      });
     }
 
-    res.json(banner);
+    res.json({
+      success: true,
+      data: banner,
+      message: 'Banner updated successfully'
+    });
   } catch (error) {
     console.error('Update banner error:', error);
-    res.status(400).json({ message: error.message });
+    res.status(400).json({ 
+      success: false,
+      message: error.message 
+    });
   }
 };
 
@@ -154,19 +164,44 @@ export const updateCarouselBanner = async (req, res) => {
 export const deleteCarouselBanner = async (req, res) => {
   try {
     const { id } = req.params;
-    const banner = await CarouselBanner.findByIdAndDelete(id);
+    const banner = await CarouselBanner.findById(id);
 
     if (!banner) {
-      return res.status(404).json({ message: 'Banner not found' });
+      return res.status(404).json({ 
+        success: false,
+        message: 'Banner not found' 
+      });
     }
 
-    // Delete image from Cloudinary
-    const publicId = banner.image.split('/').slice(-1)[0].split('.')[0];
-    await cloudinary.uploader.destroy(publicId);
+    // Delete image file from VPS if it exists
+    try {
+      if (banner.image) {
+        const imagePath = banner.image.replace(/^https?:\/\/[^\/]+/, '');
+        const uploadsBase = process.env.UPLOAD_PATH || './uploads';
+        const fullPath = path.join(uploadsBase, 'carousel', path.basename(imagePath));
+        
+        if (fs.existsSync(fullPath)) {
+          fs.unlinkSync(fullPath);
+          console.log('Deleted image file:', fullPath);
+        }
+      }
+    } catch (fileError) {
+      console.error('Error deleting image file:', fileError);
+      // Continue with banner deletion even if file deletion fails
+    }
 
-    res.json({ message: 'Banner deleted successfully' });
+    await CarouselBanner.findByIdAndDelete(id);
+
+    res.json({ 
+      success: true,
+      message: 'Banner deleted successfully' 
+    });
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    console.error('Delete banner error:', error);
+    res.status(500).json({ 
+      success: false,
+      message: error.message 
+    });
   }
 };
 
@@ -175,13 +210,27 @@ export const updateBannerOrder = async (req, res) => {
   try {
     const { orders } = req.body;
 
+    if (!Array.isArray(orders)) {
+      return res.status(400).json({ 
+        success: false,
+        message: 'Orders must be an array' 
+      });
+    }
+
     const updatePromises = orders.map(({ id, order }) =>
-      CarouselBanner.findByIdAndUpdate(id, { order }, { new: true })
+      CarouselBanner.findByIdAndUpdate(id, { order: parseInt(order) || 0 }, { new: true })
     );
 
     await Promise.all(updatePromises);
-    res.json({ message: 'Banner order updated successfully' });
+    res.json({ 
+      success: true,
+      message: 'Banner order updated successfully' 
+    });
   } catch (error) {
-    res.status(400).json({ message: error.message });
+    console.error('Update banner order error:', error);
+    res.status(400).json({ 
+      success: false,
+      message: error.message 
+    });
   }
 }; 
