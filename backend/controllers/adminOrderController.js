@@ -73,6 +73,19 @@ export const updateOrderStatus = async (req, res) => {
                              0;
 
             if (status === 'SHIPPED' && shippingPartner && trackingId) {
+                // Generate tracking URL
+                const courierTrackingUrls = {
+                    'DTDC': `https://www.dtdc.in/trace.asp?strCnno=${encodeURIComponent(trackingId)}`,
+                    'ST Courier': `https://stcourier.com/track/shipment?tracking_id=${encodeURIComponent(trackingId)}`,
+                    'XpressBees': `https://www.xpressbees.com/shipment/tracking?awb=${encodeURIComponent(trackingId)}`,
+                    'India Post': `https://www.indiapost.gov.in/_layouts/15/dop.portal.tracking/trackconsignment.aspx?trackingNumber=${encodeURIComponent(trackingId)}`,
+                    'Delhivery': `https://www.delhivery.com/track/package/${encodeURIComponent(trackingId)}`,
+                    'Blue Dart': `https://www.bluedart.com/tracking?trackingNumber=${encodeURIComponent(trackingId)}`,
+                    'Ecom Express': `https://ecomexpress.in/tracking/?awb_field=${encodeURIComponent(trackingId)}`
+                };
+                
+                const trackingURL = courierTrackingUrls[shippingPartner] || null;
+                
                 // Format email data for shipping notification
                 const shippingEmailData = {
                     to: customerEmail,
@@ -80,7 +93,8 @@ export const updateOrderStatus = async (req, res) => {
                     trackingNumber: trackingId,
                     carrier: shippingPartner,
                     items: formattedItems,
-                    amount: orderTotal
+                    amount: orderTotal,
+                    trackingURL: trackingURL
                 };
                 await sendShippingNotification(shippingEmailData);
             } else {

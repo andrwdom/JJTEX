@@ -304,51 +304,57 @@ export const sendPaymentFailureEmail = async (emailData) => {
 };
 
 /**
- * Generate HTML for order status update email
+ * Generate HTML for order status update email - Premium Brand Design
  */
 const generateOrderStatusHTML = (emailData) => {
   const { orderId, status, amount, items, trackingNumber, estimatedDelivery } = emailData;
   
   const statusMessages = {
     'CONFIRMED': {
-      title: 'Order Confirmed',
-      message: 'Your order has been confirmed and is being prepared for shipment.',
-      color: '#28a745'
+      title: 'Order Confirmed ✓',
+      message: 'Your order has been confirmed and is being prepared for shipment. We\'ll notify you once it\'s on its way!',
+      icon: '✓',
+      bgGradient: 'linear-gradient(135deg, #10B981 0%, #059669 100%)'
     },
     'PROCESSING': {
       title: 'Order Processing',
-      message: 'Your order is being processed and will be shipped soon.',
-      color: '#007bff'
+      message: 'Your order is being processed and will be shipped soon. We\'re working hard to get it ready for you!',
+      icon: '⚙️',
+      bgGradient: 'linear-gradient(135deg, #3B82F6 0%, #2563EB 100%)'
     },
     'SHIPPED': {
-      title: 'Order Shipped',
-      message: 'Your order has been shipped and is on its way to you.',
-      color: '#17a2b8'
+      title: 'Order Shipped 🚚',
+      message: 'Your order has been shipped and is on its way to you. You can track it using the details below.',
+      icon: '🚚',
+      bgGradient: 'linear-gradient(135deg, #8B5CF6 0%, #7C3AED 100%)'
     },
     'DELIVERED': {
-      title: 'Order Delivered',
-      message: 'Your order has been successfully delivered.',
-      color: '#28a745'
+      title: 'Order Delivered ✓',
+      message: 'Your order has been successfully delivered! We hope you love your purchase. Thank you for shopping with us!',
+      icon: '✓',
+      bgGradient: 'linear-gradient(135deg, #10B981 0%, #059669 100%)'
     },
     'CANCELLED': {
       title: 'Order Cancelled',
-      message: 'Your order has been cancelled as requested.',
-      color: '#dc3545'
+      message: 'Your order has been cancelled as requested. If you have any questions, please contact our support team.',
+      icon: '✕',
+      bgGradient: 'linear-gradient(135deg, #EF4444 0%, #DC2626 100%)'
     }
   };
   
   const statusInfo = statusMessages[status] || {
     title: 'Order Update',
     message: 'Your order status has been updated.',
-    color: '#6c757d'
+    icon: '📦',
+    bgGradient: 'linear-gradient(135deg, #473C66 0%, #5a4a7a 100%)'
   };
   
   const itemsHTML = items.map(item => 
     `<tr>
-      <td style="padding: 12px; border-bottom: 1px solid #eee;">${item.name}</td>
-      <td style="padding: 12px; border-bottom: 1px solid #eee; text-align: center;">${item.size}</td>
-      <td style="padding: 12px; border-bottom: 1px solid #eee; text-align: center;">${item.quantity}</td>
-      <td style="padding: 12px; border-bottom: 1px solid #eee; text-align: right;">₹${item.price}</td>
+      <td style="padding: 14px; border-bottom: 1px solid #E1D5F6; font-size: 14px; color: #333;">${item.name}</td>
+      <td style="padding: 14px; border-bottom: 1px solid #E1D5F6; text-align: center; font-size: 14px; color: #666;">${item.size || '-'}</td>
+      <td style="padding: 14px; border-bottom: 1px solid #E1D5F6; text-align: center; font-size: 14px; color: #666;">${item.quantity}</td>
+      <td style="padding: 14px; border-bottom: 1px solid #E1D5F6; text-align: right; font-size: 14px; color: #333; font-weight: 600;">₹${item.price}</td>
     </tr>`
   ).join('');
   
@@ -360,54 +366,91 @@ const generateOrderStatusHTML = (emailData) => {
       <meta name="viewport" content="width=device-width, initial-scale=1.0">
       <title>Order ${status} - ${orderId}</title>
     </head>
-    <body style="font-family: Arial, sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: 0 auto; padding: 20px;">
-      
-      <div style="background: ${statusInfo.color}; color: white; padding: 20px; text-align: center; border-radius: 8px 8px 0 0;">
-        <h1 style="margin: 0; font-size: 24px;">${statusInfo.title}</h1>
-        <p style="margin: 10px 0 0 0; opacity: 0.9;">Order #${orderId}</p>
-      </div>
-      
-      <div style="background: #f8f9fa; padding: 30px; border-radius: 0 0 8px 8px;">
-        <p style="font-size: 16px; margin-bottom: 20px;">Hi there!</p>
-        
-        <p style="font-size: 16px; margin-bottom: 20px;">${statusInfo.message}</p>
-        
-        ${trackingNumber ? `
-          <div style="background: white; padding: 20px; border-radius: 8px; margin: 20px 0;">
-            <h3 style="margin-top: 0; color: #007bff;">Tracking Information</h3>
-            <p><strong>Tracking Number:</strong> ${trackingNumber}</p>
-            ${estimatedDelivery ? `<p><strong>Estimated Delivery:</strong> ${estimatedDelivery}</p>` : ''}
-          </div>
-        ` : ''}
-        
-        <div style="background: white; padding: 20px; border-radius: 8px; margin: 20px 0;">
-          <h3 style="margin-top: 0; color: #007bff;">Order Summary</h3>
-          
-          <table style="width: 100%; border-collapse: collapse; margin: 15px 0;">
-            <thead>
-              <tr style="background: #f8f9fa;">
-                <th style="padding: 12px; text-align: left; border-bottom: 2px solid #dee2e6;">Item</th>
-                <th style="padding: 12px; text-align: center; border-bottom: 2px solid #dee2e6;">Size</th>
-                <th style="padding: 12px; text-align: center; border-bottom: 2px solid #dee2e6;">Qty</th>
-                <th style="padding: 12px; text-align: right; border-bottom: 2px solid #dee2e6;">Price</th>
+    <body style="margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; background-color: #F5F3F9; line-height: 1.6;">
+      <table width="100%" cellpadding="0" cellspacing="0" style="background-color: #F5F3F9; padding: 40px 20px;">
+        <tr>
+          <td align="center">
+            <table width="600" cellpadding="0" cellspacing="0" style="background-color: #FFFFFF; border-radius: 16px; overflow: hidden; box-shadow: 0 4px 20px rgba(71, 60, 102, 0.1);">
+              
+              <!-- Header with Brand Colors -->
+              <tr>
+                <td style="background: ${statusInfo.bgGradient}; padding: 40px 30px; text-align: center;">
+                  <h1 style="margin: 0; font-size: 28px; font-weight: 700; color: #FFFFFF; letter-spacing: -0.5px;">${statusInfo.title}</h1>
+                  <p style="margin: 12px 0 0 0; font-size: 16px; color: rgba(255, 255, 255, 0.9); font-weight: 500;">Order #${orderId}</p>
+                </td>
               </tr>
-            </thead>
-            <tbody>
-              ${itemsHTML}
-            </tbody>
-          </table>
-          
-          <div style="text-align: right; margin-top: 15px; padding-top: 15px; border-top: 2px solid #dee2e6;">
-            <h3 style="margin: 0; color: #007bff;">Total: ₹${amount}</h3>
-          </div>
-        </div>
-        
-        <div style="margin-top: 30px; padding-top: 20px; border-top: 1px solid #dee2e6;">
-          <p style="font-size: 14px; color: #6c757d;">
-            Need help? Contact us at support@jjtextiles.in or WhatsApp +91 9876543210
-          </p>
-        </div>
-      </div>
+              
+              <!-- Main Content -->
+              <tr>
+                <td style="padding: 40px 30px;">
+                  <p style="margin: 0 0 24px 0; font-size: 16px; color: #333; line-height: 1.7;">${statusInfo.message}</p>
+                  
+                  ${trackingNumber ? `
+                    <div style="background: linear-gradient(135deg, #F5F3F9 0%, #E9E6F2 100%); border: 2px solid #473C66; border-radius: 12px; padding: 24px; margin: 30px 0;">
+                      <h3 style="margin: 0 0 16px 0; font-size: 18px; font-weight: 700; color: #473C66;">Tracking Information</h3>
+                      <div style="background: #FFFFFF; border-radius: 8px; padding: 16px; margin-bottom: 12px;">
+                        <p style="margin: 0 0 8px 0; font-size: 13px; color: #666; text-transform: uppercase; letter-spacing: 0.5px; font-weight: 600;">Tracking Number</p>
+                        <p style="margin: 0; font-size: 18px; font-weight: 700; color: #473C66; font-family: 'Courier New', monospace; letter-spacing: 1px;">${trackingNumber}</p>
+                      </div>
+                      ${estimatedDelivery ? `
+                        <p style="margin: 0; font-size: 14px; color: #666;">
+                          <strong style="color: #473C66;">Estimated Delivery:</strong> ${estimatedDelivery}
+                        </p>
+                      ` : ''}
+                    </div>
+                  ` : ''}
+                  
+                  <!-- Order Summary -->
+                  <div style="background: #F9F9F9; border-radius: 12px; padding: 24px; margin: 30px 0;">
+                    <h3 style="margin: 0 0 20px 0; font-size: 18px; font-weight: 700; color: #473C66;">Order Summary</h3>
+                    
+                    <table width="100%" cellpadding="0" cellspacing="0" style="background: #FFFFFF; border-radius: 8px; overflow: hidden;">
+                      <thead>
+                        <tr style="background: #473C66;">
+                          <th style="padding: 14px; text-align: left; color: #FFFFFF; font-size: 13px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px;">Item</th>
+                          <th style="padding: 14px; text-align: center; color: #FFFFFF; font-size: 13px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px;">Size</th>
+                          <th style="padding: 14px; text-align: center; color: #FFFFFF; font-size: 13px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px;">Qty</th>
+                          <th style="padding: 14px; text-align: right; color: #FFFFFF; font-size: 13px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px;">Price</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        ${itemsHTML}
+                      </tbody>
+                      <tfoot>
+                        <tr>
+                          <td colspan="3" style="padding: 16px 14px; text-align: right; font-size: 14px; font-weight: 600; color: #666; border-top: 2px solid #E1D5F6;">Total Amount:</td>
+                          <td style="padding: 16px 14px; text-align: right; font-size: 18px; font-weight: 700; color: #473C66; border-top: 2px solid #E1D5F6;">₹${amount}</td>
+                        </tr>
+                      </tfoot>
+                    </table>
+                  </div>
+                  
+                  <!-- Help Section -->
+                  <div style="background: #F5F3F9; border-radius: 8px; padding: 20px; margin-top: 30px; text-align: center;">
+                    <p style="margin: 0 0 8px 0; font-size: 14px; color: #666; font-weight: 600;">Need Help?</p>
+                    <p style="margin: 0; font-size: 14px; color: #473C66;">
+                      Email: <a href="mailto:info.jjtextiles@gmail.com" style="color: #473C66; text-decoration: underline;">info.jjtextiles@gmail.com</a>
+                    </p>
+                  </div>
+                </td>
+              </tr>
+              
+              <!-- Footer -->
+              <tr>
+                <td style="background: #F5F3F9; padding: 24px 30px; text-align: center; border-top: 1px solid #E1D5F6;">
+                  <p style="margin: 0; font-size: 12px; color: #999;">
+                    <strong style="color: #473C66;">JJTEXTILES</strong> - Quality Clothing for Everyone
+                  </p>
+                  <p style="margin: 8px 0 0 0; font-size: 11px; color: #BBB;">
+                    This is an automated email. Please do not reply directly to this message.
+                  </p>
+                </td>
+              </tr>
+              
+            </table>
+          </td>
+        </tr>
+      </table>
     </body>
     </html>
   `;
@@ -658,16 +701,39 @@ function generateCODOrderConfirmationHTML(order) {
 }
 
 /**
- * Generate HTML for shipping notification email
+ * Generate proper tracking URL for different courier partners
+ */
+const generateTrackingURL = (carrier, trackingNumber) => {
+  if (!carrier || !trackingNumber) return null;
+  
+  const trackingUrls = {
+    'DTDC': `https://www.dtdc.in/trace.asp?strCnno=${encodeURIComponent(trackingNumber)}`,
+    'ST Courier': `https://stcourier.com/track/shipment?tracking_id=${encodeURIComponent(trackingNumber)}`,
+    'XpressBees': `https://www.xpressbees.com/shipment/tracking?awb=${encodeURIComponent(trackingNumber)}`,
+    'India Post': `https://www.indiapost.gov.in/_layouts/15/dop.portal.tracking/trackconsignment.aspx?trackingNumber=${encodeURIComponent(trackingNumber)}`,
+    'Delhivery': `https://www.delhivery.com/track/package/${encodeURIComponent(trackingNumber)}`,
+    'Blue Dart': `https://www.bluedart.com/tracking?trackingNumber=${encodeURIComponent(trackingNumber)}`,
+    'Ecom Express': `https://ecomexpress.in/tracking/?awb_field=${encodeURIComponent(trackingNumber)}`
+  };
+  
+  return trackingUrls[carrier] || null;
+};
+
+/**
+ * Generate HTML for shipping notification email - Premium Brand Design
  */
 const generateShippingNotificationHTML = (emailData) => {
-  const { orderId, trackingNumber, carrier, estimatedDelivery, items, amount } = emailData;
+  const { orderId, trackingNumber, carrier, estimatedDelivery, items, amount, trackingURL } = emailData;
+  
+  // Use provided tracking URL or generate one
+  const finalTrackingURL = trackingURL || generateTrackingURL(carrier, trackingNumber);
   
   const itemsHTML = items.map(item => 
     `<tr>
-      <td style="padding: 12px; border-bottom: 1px solid #eee;">${item.name}</td>
-      <td style="padding: 12px; border-bottom: 1px solid #eee; text-align: center;">${item.size}</td>
-      <td style="padding: 12px; border-bottom: 1px solid #eee; text-align: center;">${item.quantity}</td>
+      <td style="padding: 14px; border-bottom: 1px solid #E1D5F6; font-size: 14px; color: #333;">${item.name}</td>
+      <td style="padding: 14px; border-bottom: 1px solid #E1D5F6; text-align: center; font-size: 14px; color: #666;">${item.size || '-'}</td>
+      <td style="padding: 14px; border-bottom: 1px solid #E1D5F6; text-align: center; font-size: 14px; color: #666;">${item.quantity}</td>
+      <td style="padding: 14px; border-bottom: 1px solid #E1D5F6; text-align: right; font-size: 14px; color: #333; font-weight: 600;">₹${item.price}</td>
     </tr>`
   ).join('');
   
@@ -679,53 +745,112 @@ const generateShippingNotificationHTML = (emailData) => {
       <meta name="viewport" content="width=device-width, initial-scale=1.0">
       <title>Your Order Has Shipped - ${orderId}</title>
     </head>
-    <body style="font-family: Arial, sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: 0 auto; padding: 20px;">
-      
-      <div style="background: #17a2b8; color: white; padding: 20px; text-align: center; border-radius: 8px 8px 0 0;">
-        <h1 style="margin: 0; font-size: 24px;">🚚 Your Order Has Shipped!</h1>
-        <p style="margin: 10px 0 0 0; opacity: 0.9;">Order #${orderId}</p>
-      </div>
-      
-      <div style="background: #f8f9fa; padding: 30px; border-radius: 0 0 8px 8px;">
-        <p style="font-size: 16px; margin-bottom: 20px;">Great news! Your order is on its way to you.</p>
-        
-        <div style="background: white; padding: 20px; border-radius: 8px; margin: 20px 0;">
-          <h3 style="margin-top: 0; color: #17a2b8;">📦 Shipping Details</h3>
-          <p><strong>Tracking Number:</strong> ${trackingNumber}</p>
-          <p><strong>Carrier:</strong> ${carrier || 'Standard Shipping'}</p>
-          ${estimatedDelivery ? `<p><strong>Estimated Delivery:</strong> ${estimatedDelivery}</p>` : ''}
-        </div>
-        
-        <div style="background: white; padding: 20px; border-radius: 8px; margin: 20px 0;">
-          <h3 style="margin-top: 0; color: #17a2b8;">Order Items</h3>
-          
-          <table style="width: 100%; border-collapse: collapse; margin: 15px 0;">
-            <thead>
-              <tr style="background: #f8f9fa;">
-                <th style="padding: 12px; text-align: left; border-bottom: 2px solid #dee2e6;">Item</th>
-                <th style="padding: 12px; text-align: center; border-bottom: 2px solid #dee2e6;">Size</th>
-                <th style="padding: 12px; text-align: center; border-bottom: 2px solid #dee2e6;">Qty</th>
+    <body style="margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; background-color: #F5F3F9; line-height: 1.6;">
+      <table width="100%" cellpadding="0" cellspacing="0" style="background-color: #F5F3F9; padding: 40px 20px;">
+        <tr>
+          <td align="center">
+            <table width="600" cellpadding="0" cellspacing="0" style="background-color: #FFFFFF; border-radius: 16px; overflow: hidden; box-shadow: 0 4px 20px rgba(71, 60, 102, 0.1);">
+              
+              <!-- Header with Brand Colors -->
+              <tr>
+                <td style="background: linear-gradient(135deg, #473C66 0%, #5a4a7a 100%); padding: 40px 30px; text-align: center;">
+                  <h1 style="margin: 0; font-size: 28px; font-weight: 700; color: #FFFFFF; letter-spacing: -0.5px;">🚚 Your Order Has Shipped!</h1>
+                  <p style="margin: 12px 0 0 0; font-size: 16px; color: #B39DDB; font-weight: 500;">Order #${orderId}</p>
+                </td>
               </tr>
-            </thead>
-            <tbody>
-              ${itemsHTML}
-            </tbody>
-          </table>
-        </div>
-        
-        <div style="text-align: center; margin: 30px 0;">
-          <a href="https://jjtextiles.in/track/${trackingNumber}" 
-             style="background: #17a2b8; color: white; padding: 15px 30px; text-decoration: none; border-radius: 6px; font-size: 18px; font-weight: bold; display: inline-block;">
-            Track Your Package
-          </a>
-        </div>
-        
-        <div style="margin-top: 30px; padding-top: 20px; border-top: 1px solid #dee2e6;">
-          <p style="font-size: 14px; color: #6c757d;">
-            Questions about your shipment? Contact us at support@jjtextiles.in
-          </p>
-        </div>
-      </div>
+              
+              <!-- Main Content -->
+              <tr>
+                <td style="padding: 40px 30px;">
+                  <p style="margin: 0 0 24px 0; font-size: 16px; color: #333; line-height: 1.7;">Great news! Your order is on its way to you. We've packed everything with care and it's now in transit.</p>
+                  
+                  <!-- Shipping Details Card - Prominent -->
+                  <div style="background: linear-gradient(135deg, #F5F3F9 0%, #E9E6F2 100%); border: 2px solid #473C66; border-radius: 12px; padding: 28px; margin: 30px 0; text-align: center;">
+                    <div style="margin-bottom: 20px;">
+                      <div style="display: inline-block; background: #473C66; color: #FFFFFF; padding: 8px 20px; border-radius: 20px; font-size: 13px; font-weight: 600; letter-spacing: 0.5px; text-transform: uppercase;">Delivery Partner</div>
+                    </div>
+                    <h2 style="margin: 12px 0; font-size: 24px; font-weight: 700; color: #473C66;">${carrier || 'Standard Shipping'}</h2>
+                    
+                    <div style="background: #FFFFFF; border-radius: 8px; padding: 20px; margin: 20px 0;">
+                      <p style="margin: 0 0 8px 0; font-size: 13px; color: #666; text-transform: uppercase; letter-spacing: 0.5px; font-weight: 600;">Tracking Number</p>
+                      <p style="margin: 0; font-size: 20px; font-weight: 700; color: #473C66; font-family: 'Courier New', monospace; letter-spacing: 1px;">${trackingNumber}</p>
+                    </div>
+                    
+                    ${estimatedDelivery ? `
+                      <p style="margin: 16px 0 0 0; font-size: 14px; color: #666;">
+                        <strong style="color: #473C66;">Estimated Delivery:</strong> ${estimatedDelivery}
+                      </p>
+                    ` : ''}
+                    
+                    ${trackingURL ? `
+                      <div style="margin-top: 24px;">
+                        <a href="${trackingURL}" 
+                           target="_blank"
+                           style="display: inline-block; background: #473C66; color: #FFFFFF; padding: 16px 40px; text-decoration: none; border-radius: 8px; font-size: 16px; font-weight: 700; box-shadow: 0 4px 12px rgba(71, 60, 102, 0.3); transition: all 0.3s;">
+                          📦 Track Your Package Now
+                        </a>
+                      </div>
+                      <p style="margin: 12px 0 0 0; font-size: 12px; color: #999;">Click the button above to track your package on ${carrier}'s website</p>
+                    ` : `
+                      <div style="margin-top: 24px; padding: 16px; background: #FFF9E6; border-radius: 8px; border-left: 4px solid #FFC107;">
+                        <p style="margin: 0; font-size: 14px; color: #856404;">
+                          <strong>To track your package:</strong> Visit ${carrier || 'the courier'}'s website and enter tracking number: <strong>${trackingNumber}</strong>
+                        </p>
+                      </div>
+                    `}
+                  </div>
+                  
+                  <!-- Order Items -->
+                  <div style="background: #F9F9F9; border-radius: 12px; padding: 24px; margin: 30px 0;">
+                    <h3 style="margin: 0 0 20px 0; font-size: 18px; font-weight: 700; color: #473C66;">Order Items</h3>
+                    
+                    <table width="100%" cellpadding="0" cellspacing="0" style="background: #FFFFFF; border-radius: 8px; overflow: hidden;">
+                      <thead>
+                        <tr style="background: #473C66;">
+                          <th style="padding: 14px; text-align: left; color: #FFFFFF; font-size: 13px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px;">Item</th>
+                          <th style="padding: 14px; text-align: center; color: #FFFFFF; font-size: 13px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px;">Size</th>
+                          <th style="padding: 14px; text-align: center; color: #FFFFFF; font-size: 13px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px;">Qty</th>
+                          <th style="padding: 14px; text-align: right; color: #FFFFFF; font-size: 13px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px;">Price</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        ${itemsHTML}
+                      </tbody>
+                      <tfoot>
+                        <tr>
+                          <td colspan="3" style="padding: 16px 14px; text-align: right; font-size: 14px; font-weight: 600; color: #666; border-top: 2px solid #E1D5F6;">Total Amount:</td>
+                          <td style="padding: 16px 14px; text-align: right; font-size: 18px; font-weight: 700; color: #473C66; border-top: 2px solid #E1D5F6;">₹${amount}</td>
+                        </tr>
+                      </tfoot>
+                    </table>
+                  </div>
+                  
+                  <!-- Help Section -->
+                  <div style="background: #F5F3F9; border-radius: 8px; padding: 20px; margin-top: 30px; text-align: center;">
+                    <p style="margin: 0 0 8px 0; font-size: 14px; color: #666; font-weight: 600;">Need Help?</p>
+                    <p style="margin: 0; font-size: 14px; color: #473C66;">
+                      Email: <a href="mailto:info.jjtextiles@gmail.com" style="color: #473C66; text-decoration: underline;">info.jjtextiles@gmail.com</a>
+                    </p>
+                  </div>
+                </td>
+              </tr>
+              
+              <!-- Footer -->
+              <tr>
+                <td style="background: #F5F3F9; padding: 24px 30px; text-align: center; border-top: 1px solid #E1D5F6;">
+                  <p style="margin: 0; font-size: 12px; color: #999;">
+                    <strong style="color: #473C66;">JJTEXTILES</strong> - Quality Clothing for Everyone
+                  </p>
+                  <p style="margin: 8px 0 0 0; font-size: 11px; color: #BBB;">
+                    This is an automated email. Please do not reply directly to this message.
+                  </p>
+                </td>
+              </tr>
+              
+            </table>
+          </td>
+        </tr>
+      </table>
     </body>
     </html>
   `;
