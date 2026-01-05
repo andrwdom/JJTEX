@@ -173,16 +173,16 @@ export default function BannerCarousel({
               
               {/* Image overlay with title, description, and button */}
               {(image.title || image.description || image.buttonText) && (
-                <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent">
-                  <div className="absolute bottom-0 left-0 right-0 p-6 md:p-8 lg:p-12">
+                <div className="absolute inset-0 bg-gradient-to-t from-black/75 via-black/30 to-transparent">
+                  <div className="absolute bottom-0 left-0 right-0 p-4 sm:p-6 md:p-8 lg:p-12">
                     <div className="max-w-2xl">
                       {image.title && (
-                        <h3 className="text-2xl md:text-3xl lg:text-4xl xl:text-5xl font-bold mb-3 md:mb-4 text-white leading-tight tracking-tight">
+                        <h3 className="text-xl sm:text-2xl md:text-3xl lg:text-4xl xl:text-5xl font-bold mb-2 sm:mb-3 md:mb-4 text-white leading-tight tracking-tight drop-shadow-lg">
                           {image.title}
                         </h3>
                       )}
                       {image.description && (
-                        <p className="text-sm md:text-base lg:text-lg mb-4 md:mb-6 text-white/95 leading-relaxed font-light max-w-xl">
+                        <p className="text-xs sm:text-sm md:text-base lg:text-lg mb-3 sm:mb-4 md:mb-6 text-white/95 leading-relaxed sm:leading-relaxed font-light max-w-xl drop-shadow-md">
                           {image.description}
                         </p>
                       )}
@@ -197,7 +197,7 @@ export default function BannerCarousel({
                               window.location.href = image.link;
                             }
                           }}
-                          className="inline-flex items-center justify-center px-6 md:px-8 py-2.5 md:py-3 bg-[#E91E63] hover:bg-[#C2185B] text-white font-semibold rounded-full transition-all duration-300 ease-in-out shadow-[0_4px_20px_rgba(233,30,99,0.4)] hover:shadow-[0_6px_30px_rgba(233,30,99,0.6)] hover:-translate-y-0.5 active:scale-95 text-sm md:text-base"
+                          className="inline-flex items-center justify-center px-5 py-2 sm:px-6 sm:py-2.5 md:px-8 md:py-3 bg-[#E91E63] hover:bg-[#C2185B] active:bg-[#AD1457] text-white font-semibold rounded-full transition-all duration-300 ease-in-out shadow-[0_4px_15px_rgba(233,30,99,0.5)] hover:shadow-[0_6px_25px_rgba(233,30,99,0.7)] hover:-translate-y-0.5 active:scale-95 text-xs sm:text-sm md:text-base whitespace-nowrap"
                         >
                           {image.buttonText}
                         </a>
