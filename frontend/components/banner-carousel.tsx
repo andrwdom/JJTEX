@@ -171,31 +171,38 @@ export default function BannerCarousel({
                 sizes="100vw"
               />
               
-              {/* Image overlay with title and button */}
-              {(image.title || image.buttonText) && (
-                <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent">
-                  <div className="absolute bottom-6 left-6 right-6 text-white">
-                    {image.title && (
-                      <h3 className="text-lg md:text-xl lg:text-2xl font-semibold mb-2">
-                        {image.title}
-                      </h3>
-                    )}
-                    {image.buttonText && image.link && (
-                      <a
-                        href={image.link}
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          // Handle internal navigation if needed
-                          if (image.link.startsWith('/')) {
-                            e.preventDefault();
-                            window.location.href = image.link;
-                          }
-                        }}
-                        className="inline-block mt-3 px-6 py-2 bg-white text-gray-900 font-semibold rounded-lg hover:bg-gray-100 transition-colors shadow-lg"
-                      >
-                        {image.buttonText}
-                      </a>
-                    )}
+              {/* Image overlay with title, description, and button */}
+              {(image.title || image.description || image.buttonText) && (
+                <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent">
+                  <div className="absolute bottom-0 left-0 right-0 p-6 md:p-8 lg:p-12">
+                    <div className="max-w-2xl">
+                      {image.title && (
+                        <h3 className="text-2xl md:text-3xl lg:text-4xl xl:text-5xl font-bold mb-3 md:mb-4 text-white leading-tight tracking-tight">
+                          {image.title}
+                        </h3>
+                      )}
+                      {image.description && (
+                        <p className="text-sm md:text-base lg:text-lg mb-4 md:mb-6 text-white/95 leading-relaxed font-light max-w-xl">
+                          {image.description}
+                        </p>
+                      )}
+                      {image.buttonText && image.link && (
+                        <a
+                          href={image.link}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            // Handle internal navigation if needed
+                            if (image.link?.startsWith('/')) {
+                              e.preventDefault();
+                              window.location.href = image.link;
+                            }
+                          }}
+                          className="inline-flex items-center justify-center px-6 md:px-8 py-2.5 md:py-3 bg-[#E91E63] hover:bg-[#C2185B] text-white font-semibold rounded-full transition-all duration-300 ease-in-out shadow-[0_4px_20px_rgba(233,30,99,0.4)] hover:shadow-[0_6px_30px_rgba(233,30,99,0.6)] hover:-translate-y-0.5 active:scale-95 text-sm md:text-base"
+                        >
+                          {image.buttonText}
+                        </a>
+                      )}
+                    </div>
                   </div>
                 </div>
               )}

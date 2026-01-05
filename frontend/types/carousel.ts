@@ -3,6 +3,7 @@ export interface CarouselImage {
   url: string
   alt?: string
   title?: string
+  description?: string
   link?: string
   buttonText?: string
   order?: number
