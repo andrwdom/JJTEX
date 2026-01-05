@@ -34,6 +34,13 @@ export const getCarouselBanners = async (req, res) => {
       createdAt: banner.createdAt?.toISOString(),
       updatedAt: banner.updatedAt?.toISOString()
     }));
+    
+    console.log('📸 Carousel banners fetched:', {
+      total: banners.length,
+      active: banners.filter(b => b.isActive !== false).length,
+      isAdmin: isAdminRequest,
+      sample: carouselData[0] || null
+    });
 
     res.json({
       success: true,

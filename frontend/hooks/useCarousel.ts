@@ -32,6 +32,16 @@ export function useCarousel(): UseCarouselReturn {
       
       const data: CarouselResponse = await response.json()
       
+      console.log('🎠 Carousel API Response:', {
+        success: data.success,
+        hasData: !!data.data,
+        dataLength: data.data?.length || 0,
+        hasCarousels: !!data.carousels,
+        carouselsLength: data.carousels?.length || 0,
+        isArray: Array.isArray(data),
+        rawData: data
+      })
+      
       let carouselImages: CarouselImage[] = []
       
       if (data.success && data.data && Array.isArray(data.data)) {
@@ -42,10 +52,29 @@ export function useCarousel(): UseCarouselReturn {
         carouselImages = data
       }
       
+      console.log('🎠 Processed carousel images:', {
+        total: carouselImages.length,
+        images: carouselImages.map(img => ({
+          id: img.id,
+          title: img.title,
+          isActive: img.isActive,
+          url: img.url?.substring(0, 50) + '...'
+        }))
+      })
+      
       // Filter active images and sort by order
       const activeImages = carouselImages
         .filter(img => img.isActive !== false)
         .sort((a, b) => (a.order || 0) - (b.order || 0))
+      
+      console.log('🎠 Active carousel images:', {
+        count: activeImages.length,
+        images: activeImages.map(img => ({
+          id: img.id,
+          title: img.title,
+          order: img.order
+        }))
+      })
       
       setImages(activeImages)
     } catch (err) {

@@ -7,6 +7,7 @@ import SiteHeader from "@/components/site-header"
 import { fetchProducts } from "@/lib/api-utils"
 import { getProductUrl } from "@/lib/product-url-utils"
 import { ChevronRight, ChevronDown, FolderTree } from "lucide-react"
+import BannerCarousel from "@/components/banner-carousel"
 
 type Highlight = {
 	title: string
@@ -293,41 +294,16 @@ export default function Home() {
 				</div>
 			</section>
 
-			{/* Hero banner */}
+			{/* Hero banner - Dynamic Carousel */}
 			<section className="bg-gradient-to-b from-[#fce4ec] to-white px-4 pb-6 sm:px-6 lg:px-8">
-				<div className="relative overflow-hidden rounded-2xl max-w-7xl mx-auto shadow-sm">
-					{/* Atmospheric blend background */}
-					<div className="absolute inset-0 bg-gradient-to-b from-[#fce4ec] via-[#fce4ec] to-black/10" />
-
-					<img
-						src="/hero_img.png"
-						alt="Winter editorial"
-						className="h-72 sm:h-[400px] lg:h-[500px] w-full object-cover"
-						style={{
-							WebkitMaskImage: "linear-gradient(to bottom, rgba(0,0,0,0.98), rgba(0,0,0,0.92) 55%, rgba(0,0,0,0.55), rgba(0,0,0,0.2))",
-							maskImage: "linear-gradient(to bottom, rgba(0,0,0,0.98), rgba(0,0,0,0.92) 55%, rgba(0,0,0,0.55), rgba(0,0,0,0.2))",
-						}}
-						loading="eager"
+				<div className="max-w-7xl mx-auto">
+					<BannerCarousel 
+						autoPlay={true}
+						interval={5000}
+						showArrows={true}
+						showDots={true}
+						className="rounded-2xl shadow-sm"
 					/>
-
-					{/* Editorial overlay */}
-					<div className="absolute inset-0 bg-gradient-to-t from-black/35 via-black/10 to-transparent" />
-
-					<div className="absolute left-5 top-6 sm:left-10 sm:top-12 lg:left-16 lg:top-20">
-						<p className="text-[11px] sm:text-xs lg:text-sm uppercase tracking-[0.22em] text-white/90 font-medium">
-							Big Winter Bonanza
-						</p>
-						<h3 className="mt-2 text-2xl sm:text-4xl lg:text-5xl font-semibold text-white font-serif tracking-[0.06em]">
-							40–80% OFF
-						</h3>
-						<button
-							type="button"
-							onClick={() => router.push("/collections/dresses-jumpsuits")}
-							className="mt-4 sm:mt-6 lg:mt-8 inline-flex items-center justify-center rounded-full bg-[#E91E63] px-6 py-2.5 sm:px-8 sm:py-3 text-sm lg:text-base font-semibold text-white transition-all duration-300 ease-in-out hover:shadow-[0_0_32px_rgba(233,30,99,0.45)] hover:-translate-y-1 active:scale-95"
-						>
-							Shop Now
-						</button>
-					</div>
 				</div>
 			</section>
 
