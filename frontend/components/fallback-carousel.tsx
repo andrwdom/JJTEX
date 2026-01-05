@@ -113,7 +113,7 @@ export default function FallbackCarousel({ className = '' }: FallbackCarouselPro
 
   return (
     <div 
-      className={`w-full h-64 md:h-80 lg:h-96 relative overflow-hidden rounded-2xl shadow-lg ${className}`}
+      className={`w-full aspect-[16/9] relative overflow-hidden rounded-2xl shadow-lg ${className}`}
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
       onTouchStart={handleTouchStart}

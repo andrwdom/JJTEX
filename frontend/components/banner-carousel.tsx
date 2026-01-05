@@ -117,7 +117,7 @@ export default function BannerCarousel({
   // Loading state
   if (loading) {
     return (
-      <div className={`w-full h-64 md:h-80 lg:h-96 bg-gray-100 animate-pulse rounded-lg ${className}`}>
+      <div className={`w-full aspect-[16/9] bg-gray-100 animate-pulse rounded-lg ${className}`}>
         <div className="flex items-center justify-center h-full">
           <div className="text-gray-500">Loading carousel...</div>
         </div>
@@ -128,7 +128,7 @@ export default function BannerCarousel({
   // Error state - only show for unexpected errors, not 401/404
   if (error && carouselImages.length === 0) {
     return (
-      <div className={`w-full h-64 md:h-80 lg:h-96 bg-gray-50 rounded-lg flex items-center justify-center ${className}`}>
+      <div className={`w-full aspect-[16/9] bg-gray-50 rounded-lg flex items-center justify-center ${className}`}>
         <div className="text-center text-gray-500">
           <p>Unable to load carousel images</p>
           <p className="text-sm mt-1">{error}</p>
@@ -146,7 +146,7 @@ export default function BannerCarousel({
     <section className={`w-full ${className}`}>
       <div
         ref={carouselRef}
-        className="relative w-full h-64 md:h-80 lg:h-96 overflow-hidden rounded-2xl shadow-lg"
+        className="relative w-full aspect-[16/9] overflow-hidden rounded-2xl shadow-lg"
         onMouseEnter={handleMouseEnter}
         onMouseLeave={handleMouseLeave}
         onTouchStart={handleTouchStart}
