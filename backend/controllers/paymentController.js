@@ -847,8 +847,49 @@ export const phonePeCallback = async (req, res) => {
   
   try {
     console.log(`[${correlationId}] PhonePe callback received:`, req.body);
-    
-    const { merchantTransactionId, state, responseCode, responseMessage } = req.body;
+
+    // Support multiple callback payload shapes (dashboard callbacks, SDK callbacks, gateway wrappers)
+    let normalizedBody = req.body || {};
+    let decodedResponse = null;
+
+    // Some PhonePe callbacks wrap data as base64 under `response`
+    if (normalizedBody && typeof normalizedBody === 'object' && normalizedBody.response && typeof normalizedBody.response === 'string') {
+      try {
+        const jsonStr = Buffer.from(normalizedBody.response, 'base64').toString('utf8');
+        decodedResponse = JSON.parse(jsonStr);
+        // Keep both: original wrapper fields and decoded fields
+        normalizedBody = { ...normalizedBody, decodedResponse };
+      } catch (e) {
+        console.warn(`[${correlationId}] Failed to decode base64 response payload:`, e.message);
+      }
+    }
+
+    const merchantTransactionId =
+      normalizedBody.merchantTransactionId ||
+      normalizedBody.merchantOrderId ||
+      decodedResponse?.data?.merchantTransactionId ||
+      decodedResponse?.data?.merchantOrderId ||
+      decodedResponse?.merchantTransactionId ||
+      decodedResponse?.merchantOrderId ||
+      normalizedBody.transactionId;
+
+    const state =
+      normalizedBody.state ||
+      decodedResponse?.data?.state ||
+      decodedResponse?.state ||
+      normalizedBody.status;
+
+    const responseCode =
+      normalizedBody.responseCode ||
+      decodedResponse?.data?.responseCode ||
+      decodedResponse?.code ||
+      normalizedBody.code;
+
+    const responseMessage =
+      normalizedBody.responseMessage ||
+      decodedResponse?.data?.responseMessage ||
+      decodedResponse?.message ||
+      normalizedBody.message;
     
     if (!merchantTransactionId) {
       return res.status(400).json({
@@ -861,11 +902,93 @@ export const phonePeCallback = async (req, res) => {
     const paymentSession = await PaymentSession.findOne({ phonepeTransactionId: merchantTransactionId });
     
     if (!paymentSession) {
-      console.error('Payment session not found for PhonePe transaction:', merchantTransactionId);
-      return res.status(404).json({
-        success: false,
-        message: 'Payment session not found'
-      });
+      // Fallback: if callback is coming from dashboard, we may not have a PaymentSession record.
+      // In that case, operate directly on the existing draft order (created in createPhonePeSession).
+      const existingOrder = await orderModel.findOne({ phonepeTransactionId: merchantTransactionId });
+
+      if (!existingOrder) {
+        console.error('Payment session and order not found for PhonePe transaction:', merchantTransactionId);
+        return res.status(404).json({
+          success: false,
+          message: 'Payment session not found',
+          correlationId
+        });
+      }
+
+      // Reuse the same success detection logic below
+      const isSuccess = (
+        state === 'PAID' ||
+        state === 'COMPLETED' ||
+        state === 'SUCCESS' ||
+        state === 'SUCCESSFUL' ||
+        state === 'CAPTURED' ||
+        responseCode === 'SUCCESS' ||
+        responseCode === '000' ||
+        responseCode === 'PAYMENT_SUCCESS' ||
+        (responseCode && responseCode.toString().startsWith('00'))
+      );
+
+      const isFailedOrAbandoned = (
+        state === 'FAILED' ||
+        state === 'CANCELLED' ||
+        state === 'TIMEOUT' ||
+        responseCode === 'PAYMENT_ERROR' ||
+        responseCode === 'PAYMENT_CANCELLED' ||
+        responseCode === 'PAYMENT_TIMEOUT' ||
+        (!isSuccess && (state || responseCode))
+      );
+
+      if (isSuccess && existingOrder.status === 'DRAFT') {
+        // Confirm order + stock (same behavior as verify endpoint)
+        const session = await mongoose.startSession();
+        try {
+          await session.withTransaction(async () => {
+            await orderModel.findByIdAndUpdate(existingOrder._id, {
+              status: 'CONFIRMED',
+              orderStatus: 'CONFIRMED',
+              paymentStatus: 'PAID',
+              paidAt: new Date(),
+              confirmedAt: new Date(),
+              phonepeResponse: normalizedBody
+            }, { session });
+
+            const { confirmStockReservation } = await import('../utils/stock.js');
+            const itemsToProcess = existingOrder.cartItems && existingOrder.cartItems.length > 0
+              ? existingOrder.cartItems
+              : existingOrder.items;
+
+            for (const item of itemsToProcess || []) {
+              const productId = item.productId || item._id || item.id || item.product;
+              if (!productId || !item.size || !item.quantity) {
+                throw new Error(`Invalid item data: ${JSON.stringify(item)}`);
+              }
+
+              const stockConfirmed = await confirmStockReservation(
+                productId,
+                item.size,
+                item.quantity,
+                { session }
+              );
+
+              if (!stockConfirmed) {
+                throw new Error(`Stock confirmation failed for ${item.name} (${item.size})`);
+              }
+            }
+
+            await orderModel.findByIdAndUpdate(existingOrder._id, {
+              stockConfirmed: true,
+              stockConfirmedAt: new Date(),
+              updatedAt: new Date()
+            }, { session });
+          });
+        } finally {
+          await session.endSession();
+        }
+      } else if (isFailedOrAbandoned && existingOrder.status === 'DRAFT') {
+        await cancelDraftOrder(existingOrder._id, `Payment failed via callback: ${state || responseCode || 'UNKNOWN'}`);
+      }
+
+      return res.status(200).json({ success: true, message: 'Callback processed (order fallback)', correlationId });
     }
 
     console.log('Found payment session:', paymentSession._id, 'Status:', paymentSession.status);
@@ -928,7 +1051,7 @@ export const phonePeCallback = async (req, res) => {
         orderPayload.orderStatus = 'CONFIRMED';
         orderPayload.status = 'CONFIRMED';
         orderPayload.paidAt = new Date();
-        orderPayload.phonepeResponse = req.body;
+        orderPayload.phonepeResponse = normalizedBody;
         orderPayload.stockConfirmed = false; // Will be set to true after stock confirmation
 
           // 4. Create order atomically
@@ -946,7 +1069,7 @@ export const phonePeCallback = async (req, res) => {
               confirmedAt: new Date(),
               paidAt: new Date(),
               updatedAt: new Date(),
-              phonepeResponse: req.body
+              phonepeResponse: normalizedBody
             },
             { session }
           );
@@ -1021,7 +1144,7 @@ export const phonePeCallback = async (req, res) => {
             {
               status: 'success',
               orderId: createdOrder._id,
-              phonepeResponse: req.body
+              phonepeResponse: normalizedBody
             },
             { session }
           );
@@ -1149,7 +1272,7 @@ export const phonePeCallback = async (req, res) => {
       
       // Update payment session status to failed
       paymentSession.status = 'failed';
-      paymentSession.phonepeResponse = req.body;
+      paymentSession.phonepeResponse = normalizedBody;
       paymentSession.failedAt = new Date();
       await paymentSession.save();
       

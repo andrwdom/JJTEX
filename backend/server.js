@@ -58,6 +58,7 @@ import maintenanceRouter from './routes/maintenance.js'
 import webhookManagementRouter from './routes/webhookManagement.js'
 import atomicPaymentRouter from './routes/atomicPaymentRoute.js'
 import systemMonitoringRouter from './routes/monitoringRoute.js'
+import orderVerifyRouter from './routes/orderVerifyRoute.js'
 // Removed bulletproofWebhookRouter - using enhancedWebhookController instead
 import { maintenanceMode } from './middleware/maintenanceMode.js'
 import { startReconciliationCron } from './utils/reconciliation.js'
@@ -453,6 +454,8 @@ app.use('/api/user', strictLimiter, userRouter)
 app.use('/api/payment', strictLimiter, paymentRouter)
 app.use('/api/checkout', strictLimiter, checkoutRouter)
 app.use('/api/orders', strictLimiter, orderRouter)
+// PhonePe dashboard callback alias (do NOT require auth; gateway needs server-to-server access)
+app.use('/api/order', orderVerifyRouter)
 
 // NEW: Atomic payment system (production-ready)
 app.use('/api/atomic-payment', strictLimiter, atomicPaymentRouter)

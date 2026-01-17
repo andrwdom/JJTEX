@@ -13,8 +13,9 @@ function verifyPhonePeRequest(req) {
       return false;
     }
     
-    const username = process.env.PHONEPE_WEBHOOK_USERNAME;
-    const password = process.env.PHONEPE_WEBHOOK_PASSWORD;
+    // Support both legacy and current env names
+    const username = process.env.PHONEPE_WEBHOOK_USERNAME || process.env.PHONEPE_CALLBACK_USERNAME;
+    const password = process.env.PHONEPE_WEBHOOK_PASSWORD || process.env.PHONEPE_CALLBACK_PASSWORD;
     
     if (!username || !password) {
       EnhancedLogger.warn('PhonePe signature verification missing credentials', { 
