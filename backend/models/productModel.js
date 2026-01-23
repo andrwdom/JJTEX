@@ -55,8 +55,14 @@ const productSchema = new mongoose.Schema({
     updatedAt: { type: Date, default: Date.now },
     stock: { type: Number, default: 0 },
     displayOrder: { type: Number, required: false, default: 0 },
-    color: { type: String, default: "" }, // Hex color code (e.g., #FF5733)
-    colorName: { type: String, default: "" }, // Color name (e.g., "Red", "Navy Blue")
+    color: { type: String, default: "" }, // Hex color code (e.g., #FF5733) - Legacy field
+    colorName: { type: String, default: "" }, // Color name (e.g., "Red", "Navy Blue") - Legacy field
+    colorVariants: [{
+        color: { type: String, required: true }, // Hex color code (e.g., #FF5733)
+        colorName: { type: String, required: true }, // Color name (e.g., "Red", "Navy Blue")
+        images: [{ type: String, required: true }], // Array of image URLs for this variant
+        isDefault: { type: Boolean, default: false } // Mark one variant as default
+    }],
 }, {
     timestamps: true
 });

@@ -295,7 +295,7 @@ export const addProduct = async (req, res) => {
         console.log('Raw sizes value:', req.body.sizes);
         console.log('Raw availableSizes value:', req.body.availableSizes);
 
-        const { customId, name, description, price, category, subCategory, type, sizes, bestseller, originalPrice, categorySlug, features, isNewArrival, isBestSeller, availableSizes, stock, sleeveType, color, colorName } = req.body
+        const { customId, name, description, price, category, subCategory, type, sizes, bestseller, originalPrice, categorySlug, features, isNewArrival, isBestSeller, availableSizes, stock, sleeveType, color, colorName, colorVariants } = req.body
 
         // Validate required fields
         if (!customId) {
@@ -386,6 +386,27 @@ export const addProduct = async (req, res) => {
             }
         }
 
+        // Parse color variants if provided
+        let parsedColorVariants = [];
+        let useColorVariants = false;
+        
+        if (colorVariants) {
+            try {
+                parsedColorVariants = JSON.parse(colorVariants);
+                if (Array.isArray(parsedColorVariants) && parsedColorVariants.length > 0) {
+                    useColorVariants = true;
+                    console.log('Color variants found:', parsedColorVariants.length);
+                }
+            } catch (error) {
+                console.error('Color variants parsing error:', error);
+                return res.status(400).json({
+                    success: false,
+                    message: "Invalid color variants format",
+                    error: error.message
+                });
+            }
+        }
+
         const image1 = req.files?.image1?.[0]
         const image2 = req.files?.image2?.[0]
         const image3 = req.files?.image3?.[0]
@@ -393,69 +414,132 @@ export const addProduct = async (req, res) => {
 
         console.log('Image files:', { image1, image2, image3, image4 });
 
-        const images = [image1, image2, image3, image4].filter((item) => item !== undefined)
+        // If using color variants, process variant images instead
+        let images = [];
+        let imagesUrl = [];
+        let processedColorVariants = [];
 
-        if (images.length === 0) {
-            console.log('No images provided');
-            return res.status(400).json({ 
-                success: false, 
-                message: "At least one image is required" 
-            });
+        if (useColorVariants) {
+            // Process variant images
+            console.log('🔄 Processing color variant images...');
+            const baseUploads = process.env.UPLOAD_PATH || './uploads';
+            const uploadDir = path.join(path.isAbsolute(baseUploads) ? baseUploads : path.resolve(process.cwd(), baseUploads), 'products');
+            const baseUrl = process.env.BASE_URL || 'https://jjtextiles.com';
+
+            for (let variantIndex = 0; variantIndex < parsedColorVariants.length; variantIndex++) {
+                const variant = parsedColorVariants[variantIndex];
+                const variantImages = [];
+                
+                // Get images for this variant
+                for (let imgIndex = 0; imgIndex < 4; imgIndex++) {
+                    const fileKey = `variant_${variantIndex}_image_${imgIndex}`;
+                    const file = req.files?.[fileKey]?.[0];
+                    if (file) {
+                        variantImages.push(file);
+                    }
+                }
+
+                if (variantImages.length === 0) {
+                    return res.status(400).json({
+                        success: false,
+                        message: `Color variant "${variant.colorName || variantIndex + 1}" must have at least one image`
+                    });
+                }
+
+                // Optimize variant images
+                try {
+                    const optimizationResult = await imageOptimizer.optimizeMultipleImages(variantImages, uploadDir);
+                    const variantImageUrls = optimizationResult.optimizedFiles.map(img => 
+                        `${baseUrl}/images/products/${img.filename}`
+                    );
+
+                    processedColorVariants.push({
+                        color: variant.color,
+                        colorName: variant.colorName,
+                        images: variantImageUrls,
+                        isDefault: variant.isDefault || false
+                    });
+                } catch (error) {
+                    console.error(`Error optimizing variant ${variantIndex} images:`, error);
+                    return res.status(500).json({
+                        success: false,
+                        message: `Failed to process images for variant "${variant.colorName}"`,
+                        error: error.message
+                    });
+                }
+            }
+
+            // Use first variant's images as main product images (for backward compatibility)
+            if (processedColorVariants.length > 0) {
+                const defaultVariant = processedColorVariants.find(v => v.isDefault) || processedColorVariants[0];
+                imagesUrl = defaultVariant.images;
+            }
+        } else {
+            // Legacy: use regular image uploads
+            images = [image1, image2, image3, image4].filter((item) => item !== undefined);
+
+            if (images.length === 0) {
+                console.log('No images provided');
+                return res.status(400).json({ 
+                    success: false, 
+                    message: "At least one image is required" 
+                });
+            }
         }
 
-        // Optimize images
-        console.log('🔄 Starting image optimization...');
-        // Resolve uploads/products directory via env/config
-        const baseUploads = process.env.UPLOAD_PATH || './uploads';
-        const uploadDir = path.join(path.isAbsolute(baseUploads) ? baseUploads : path.resolve(process.cwd(), baseUploads), 'products');
-        
+        // Optimize images (only if not using color variants)
         let optimizationResult;
         let optimizedFiles;
         let results;
         let stats;
         
-        try {
-            optimizationResult = await imageOptimizer.optimizeMultipleImages(images, uploadDir);
-            optimizedFiles = optimizationResult.optimizedFiles;
-            results = optimizationResult.results;
-            stats = imageOptimizer.getOptimizationStats(results);
-        } catch (error) {
-            console.error('❌ Image optimization failed:', error);
-            // Use fallback - keep original files
-            optimizedFiles = images;
-            results = images.map(img => ({
-                originalName: img.originalname,
-                optimizedName: img.filename,
-                originalSize: '0 Bytes',
-                optimizedSize: '0 Bytes',
-                compressionRatio: 0,
-                processingTime: 0,
-                success: true,
-                error: null
-            }));
-            stats = {
-                totalFiles: images.length,
-                successful: images.length,
-                failed: 0,
-                avgCompressionRatio: 0,
-                totalProcessingTime: 0
-            };
+        if (!useColorVariants) {
+            console.log('🔄 Starting image optimization...');
+            // Resolve uploads/products directory via env/config
+            const baseUploads = process.env.UPLOAD_PATH || './uploads';
+            const uploadDir = path.join(path.isAbsolute(baseUploads) ? baseUploads : path.resolve(process.cwd(), baseUploads), 'products');
+            
+            try {
+                optimizationResult = await imageOptimizer.optimizeMultipleImages(images, uploadDir);
+                optimizedFiles = optimizationResult.optimizedFiles;
+                results = optimizationResult.results;
+                stats = imageOptimizer.getOptimizationStats(results);
+            } catch (error) {
+                console.error('❌ Image optimization failed:', error);
+                // Use fallback - keep original files
+                optimizedFiles = images;
+                results = images.map(img => ({
+                    originalName: img.originalname,
+                    optimizedName: img.filename,
+                    originalSize: '0 Bytes',
+                    optimizedSize: '0 Bytes',
+                    compressionRatio: 0,
+                    processingTime: 0,
+                    success: true,
+                    error: null
+                }));
+                stats = {
+                    totalFiles: images.length,
+                    successful: images.length,
+                    failed: 0,
+                    avgCompressionRatio: 0,
+                    totalProcessingTime: 0
+                };
+            }
+
+            console.log('📊 FAST Image Optimization Summary:');
+            console.log(`   Total files: ${stats.totalFiles}`);
+            console.log(`   Successful: ${stats.successful}`);
+            console.log(`   Failed: ${stats.failed}`);
+            console.log(`   Average compression: ${stats.avgCompressionRatio}%`);
+            console.log(`   Total processing time: ${stats.totalProcessingTime}ms`);
+
+            // Build image URLs using the actual saved filename.
+            const baseUrl = process.env.BASE_URL || 'https://jjtextiles.com';
+            imagesUrl = optimizedFiles.map(img => `${baseUrl}/images/products/${img.filename}`);
+
+            console.log('📊 Image URLs generated:', imagesUrl);
         }
-
-        console.log('📊 FAST Image Optimization Summary:');
-        console.log(`   Total files: ${stats.totalFiles}`);
-        console.log(`   Successful: ${stats.successful}`);
-        console.log(`   Failed: ${stats.failed}`);
-        console.log(`   Average compression: ${stats.avgCompressionRatio}%`);
-        console.log(`   Total processing time: ${stats.totalProcessingTime}ms`);
-
-        // Build image URLs using the actual saved filename.
-        // Important: optimization can fail, in which case the file may remain .jpg/.png.
-        // If we always force ".webp" URLs, images will 404 or break.
-        const baseUrl = process.env.BASE_URL || 'https://jjtextiles.com';
-        const imagesUrl = optimizedFiles.map(img => `${baseUrl}/images/products/${img.filename}`);
-
-        console.log('📊 Image URLs generated:', imagesUrl);
 
         // Parse features if provided
         let parsedFeatures = [];
@@ -499,6 +583,7 @@ export const addProduct = async (req, res) => {
             images: imagesUrl,
             color: color || "",
             colorName: colorName || "",
+            colorVariants: useColorVariants ? processedColorVariants : [],
             date: Date.now(),
             stock: stock !== undefined ? Number(stock) : 0,
             // Sleeve type is deprecated - not included

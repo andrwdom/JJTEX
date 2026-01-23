@@ -13,6 +13,13 @@ import WishlistButton from "@/components/WishlistButton"
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion"
 import { getDesignerNote, getRomanticizedProductTitle } from "@/lib/product-page-copy"
 
+interface ColorVariant {
+  color: string;
+  colorName: string;
+  images: string[];
+  isDefault?: boolean;
+}
+
 interface Product {
   id?: number
   _id?: string
@@ -32,6 +39,7 @@ interface Product {
   categorySlug?: string;
   color?: string;
   colorName?: string;
+  colorVariants?: ColorVariant[];
 }
 
 interface ProductPageClientProps {
@@ -72,6 +80,7 @@ export default function ProductPageClient({ productId }: ProductPageClientProps)
   const [isWishlisted, setIsWishlisted] = useState(false)
   const [refreshKey, setRefreshKey] = useState(0)
   const [shakeSizes, setShakeSizes] = useState(false)
+  const [selectedColorVariant, setSelectedColorVariant] = useState<ColorVariant | null>(null)
   const { addToCart, openCartSidebar, clearCart } = useCart()
   const { setBuyNowItem } = useBuyNow()
   const { setCheckoutFlow } = useCheckoutFlow();
@@ -132,9 +141,19 @@ export default function ProductPageClient({ productId }: ProductPageClientProps)
           }
           
           setProduct(data.product);
+          // Set default color variant if available
+          if (data.product.colorVariants && data.product.colorVariants.length > 0) {
+            const defaultVariant = data.product.colorVariants.find((v: ColorVariant) => v.isDefault) || data.product.colorVariants[0];
+            setSelectedColorVariant(defaultVariant);
+          }
         } else if (data.success && data.data) {
           console.log('📏 Product sizes from API (data):', data.data.sizes);
           setProduct(data.data);
+          // Set default color variant if available
+          if (data.data.colorVariants && data.data.colorVariants.length > 0) {
+            const defaultVariant = data.data.colorVariants.find((v: ColorVariant) => v.isDefault) || data.data.colorVariants[0];
+            setSelectedColorVariant(defaultVariant);
+          }
         } else {
           setError(data.message || data.error || 'Failed to fetch product');
         }
@@ -446,7 +465,11 @@ export default function ProductPageClient({ productId }: ProductPageClientProps)
             <div className="space-y-4 lg:sticky lg:top-28 lg:self-start">
               <div className="relative aspect-[2/3] w-full max-w-md bg-white rounded-[8px] overflow-hidden shadow-sm ring-1 ring-black/5 mx-auto">
                 <Image
-                  src={product.images[selectedImage] || "/placeholder.svg"}
+                  src={
+                    (selectedColorVariant && selectedColorVariant.images[selectedImage]) 
+                      ? selectedColorVariant.images[selectedImage] 
+                      : product.images[selectedImage] || "/placeholder.svg"
+                  }
                   alt={product.name}
                   fill
                   className="object-cover"
@@ -454,7 +477,12 @@ export default function ProductPageClient({ productId }: ProductPageClientProps)
                 <button
                   className="absolute top-3 right-3 bg-white/80 hover:bg-white text-gray-700 rounded-full p-2 shadow transition-all"
                   title="Expand image"
-                  onClick={() => window.open(product.images[selectedImage] || '/placeholder.svg', '_blank')}
+                  onClick={() => {
+                    const currentImage = (selectedColorVariant && selectedColorVariant.images[selectedImage]) 
+                      ? selectedColorVariant.images[selectedImage] 
+                      : product.images[selectedImage] || '/placeholder.svg';
+                    window.open(currentImage, '_blank');
+                  }}
                 >
                   <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 8V6a2 2 0 012-2h2m8 0h2a2 2 0 012 2v2m0 8v2a2 2 0 01-2 2h-2m-8 0H6a2 2 0 01-2-2v-2" /></svg>
                 </button>
@@ -465,9 +493,14 @@ export default function ProductPageClient({ productId }: ProductPageClientProps)
                 )}
               </div>
 
-              {product.images.length > 1 && (
-                <div className="flex gap-3 overflow-x-auto mt-2">
-                  {product.images.map((image, index) => (
+              {(() => {
+                const displayImages = selectedColorVariant && selectedColorVariant.images.length > 0 
+                  ? selectedColorVariant.images 
+                  : product.images;
+                
+                return displayImages.length > 1 && (
+                  <div className="flex gap-3 overflow-x-auto mt-2">
+                    {displayImages.map((image, index) => (
                     <button
                       key={index}
                       onClick={() => setSelectedImage(index)}
@@ -483,9 +516,10 @@ export default function ProductPageClient({ productId }: ProductPageClientProps)
                         className="object-cover w-full h-full"
                       />
                     </button>
-                  ))}
-                </div>
-              )}
+                    ))}
+                  </div>
+                );
+              })()}
             </div>
 
             {/* Product Details */}
@@ -504,8 +538,42 @@ export default function ProductPageClient({ productId }: ProductPageClientProps)
                   )}
                 </div>
 
-                {/* Color Display */}
-                {(product.color || product.colorName) && (
+                {/* Color Variants Selector */}
+                {product.colorVariants && product.colorVariants.length > 0 ? (
+                  <div className="mb-4">
+                    <div className="flex items-center gap-2 mb-3">
+                      <span className="text-sm font-medium text-gray-700">Color:</span>
+                      {selectedColorVariant && (
+                        <span className="text-sm text-gray-900 font-medium">{selectedColorVariant.colorName}</span>
+                      )}
+                    </div>
+                    <div className="flex flex-wrap gap-3">
+                      {product.colorVariants.map((variant, index) => (
+                        <button
+                          key={index}
+                          type="button"
+                          onClick={() => {
+                            setSelectedColorVariant(variant);
+                            setSelectedImage(0); // Reset to first image when variant changes
+                          }}
+                          className={`flex items-center gap-2 px-4 py-2 rounded-full border-2 transition-all ${
+                            selectedColorVariant?.colorName === variant.colorName
+                              ? "border-gray-900 bg-gray-50"
+                              : "border-gray-300 hover:border-gray-500"
+                          }`}
+                        >
+                          <div
+                            className="w-6 h-6 rounded-full border border-gray-300 shadow-sm"
+                            style={{ backgroundColor: variant.color }}
+                            title={variant.color}
+                          />
+                          <span className="text-sm font-medium text-gray-900">{variant.colorName}</span>
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                ) : (product.color || product.colorName) && (
+                  // Legacy single color display
                   <div className="flex items-center gap-3 mb-4">
                     <span className="text-sm font-medium text-gray-700">Color:</span>
                     {product.color && (
@@ -677,6 +745,10 @@ export default function ProductPageClient({ productId }: ProductPageClientProps)
                           return;
                         }
                         if (!product) return;
+                        const displayImage = selectedColorVariant && selectedColorVariant.images.length > 0
+                          ? selectedColorVariant.images[0]
+                          : product.images[0] || "/placeholder.svg";
+                        
                         addToCart({
                           id: product.id?.toString() || product._id || productId,
                           _id: product.id?.toString() || product._id || productId,
@@ -684,8 +756,9 @@ export default function ProductPageClient({ productId }: ProductPageClientProps)
                           price: product.price,
                           quantity,
                           size: selectedSize,
-                          image: product.images[0] || "/placeholder.svg",
+                          image: displayImage,
                           category: product.category,
+                          colorVariant: selectedColorVariant ? selectedColorVariant.colorName : undefined,
                         }, true);
                       }}
                     >

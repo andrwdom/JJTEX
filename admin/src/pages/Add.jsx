@@ -34,8 +34,11 @@ const Add = ({token}) => {
    // Deprecated: simple categories list (kept for compatibility if needed)
    const [categories, setCategories] = useState([]);
    const [customId, setCustomId] = useState("");
-   const [color, setColor] = useState("#000000"); // Default to black
-   const [colorName, setColorName] = useState("");
+   const [color, setColor] = useState("#000000"); // Legacy - Default to black
+   const [colorName, setColorName] = useState(""); // Legacy
+   const [colorVariants, setColorVariants] = useState([
+     { color: "#000000", colorName: "", images: [null, null, null, null], isDefault: true }
+   ]);
 
    const [loading, setLoading] = useState(false)
    const [uploadProgress, setUploadProgress] = useState(0)
@@ -81,29 +84,48 @@ const Add = ({token}) => {
      });
    };
 
-   // Handle image selection with compression
-   const handleImageChange = async (e, setImageFunction) => {
-     const file = e.target.files[0];
-     if (file) {
-       try {
-         // Show compression message
-         toast.info("Compressing image...");
-         
-         // Compress image if it's larger than 500KB
-         if (file.size > 500 * 1024) {
-           const compressedFile = await compressImage(file);
-           setImageFunction(compressedFile);
-           toast.success(`Image compressed from ${(file.size / 1024).toFixed(1)}KB to ${(compressedFile.size / 1024).toFixed(1)}KB`);
-         } else {
-           setImageFunction(file);
-         }
-       } catch (error) {
-         console.error('Image compression failed:', error);
-         setImageFunction(file); // Fallback to original file
-         toast.warn("Image compression failed, using original file");
-       }
-     }
-   };
+  // Handle image selection with compression
+  const handleImageChange = async (e, setImageFunction) => {
+    const file = e.target.files[0];
+    if (file) {
+      try {
+        // Show compression message
+        toast.info("Compressing image...");
+        
+        // Compress image if it's larger than 500KB
+        if (file.size > 500 * 1024) {
+          const compressedFile = await compressImage(file);
+          setImageFunction(compressedFile);
+          toast.success(`Image compressed from ${(file.size / 1024).toFixed(1)}KB to ${(compressedFile.size / 1024).toFixed(1)}KB`);
+        } else {
+          setImageFunction(file);
+        }
+      } catch (error) {
+        console.error('Image compression failed:', error);
+        setImageFunction(file); // Fallback to original file
+        toast.warn("Image compression failed, using original file");
+      }
+    }
+  };
+
+  // Handle variant image with compression
+  const handleVariantImageChange = async (e, variantIndex, imageIndex) => {
+    const file = e.target.files[0];
+    if (file) {
+      try {
+        // Compress image if it's larger than 500KB
+        if (file.size > 500 * 1024) {
+          const compressedFile = await compressImage(file);
+          updateVariantImage(variantIndex, imageIndex, compressedFile);
+        } else {
+          updateVariantImage(variantIndex, imageIndex, file);
+        }
+      } catch (error) {
+        console.error('Image compression failed:', error);
+        updateVariantImage(variantIndex, imageIndex, file); // Fallback to original file
+      }
+    }
+  };
 
    useEffect(() => {
      // Fetch categories from backend
@@ -176,6 +198,48 @@ const Add = ({token}) => {
   const getSelectedName = () => selectedCategory?.name || "";
   const getSelectedSlug = () => selectedCategory?.slug || "";
 
+  // Color variant management functions
+  const addColorVariant = () => {
+    setColorVariants([...colorVariants, { 
+      color: "#000000", 
+      colorName: "", 
+      images: [null, null, null, null],
+      isDefault: false 
+    }]);
+  };
+
+  const removeColorVariant = (index) => {
+    if (colorVariants.length > 1) {
+      const newVariants = colorVariants.filter((_, i) => i !== index);
+      // If we removed the default, make the first one default
+      if (colorVariants[index].isDefault && newVariants.length > 0) {
+        newVariants[0].isDefault = true;
+      }
+      setColorVariants(newVariants);
+    } else {
+      toast.error("At least one color variant is required");
+    }
+  };
+
+  const updateColorVariant = (index, field, value) => {
+    const newVariants = [...colorVariants];
+    if (field === 'isDefault' && value) {
+      // Unset all other defaults
+      newVariants.forEach((v, i) => {
+        v.isDefault = i === index;
+      });
+    } else {
+      newVariants[index][field] = value;
+    }
+    setColorVariants(newVariants);
+  };
+
+  const updateVariantImage = (variantIndex, imageIndex, file) => {
+    const newVariants = [...colorVariants];
+    newVariants[variantIndex].images[imageIndex] = file;
+    setColorVariants(newVariants);
+  };
+
    // Sleeve type is optional (legacy category-specific requirement removed)
 
    const onSubmitHandler = async (e) => {
@@ -200,10 +264,26 @@ const Add = ({token}) => {
 
     // Sleeve type is optional
 
-    // Validate that at least one image is selected
-    if (!image1 && !image2 && !image3 && !image4) {
-      toast.error("Please select at least one image");
+    // Validate color variants
+    const validVariants = colorVariants.filter(v => v.colorName.trim() !== "");
+    if (validVariants.length === 0) {
+      toast.error("Please add at least one color variant with a color name");
       return;
+    }
+
+    // Validate that each variant has at least one image
+    for (let i = 0; i < validVariants.length; i++) {
+      const variant = validVariants[i];
+      const hasImages = variant.images.some(img => img !== null);
+      if (!hasImages) {
+        toast.error(`Color variant "${variant.colorName || 'Variant ' + (i + 1)}" must have at least one image`);
+        return;
+      }
+    }
+
+    // Ensure at least one variant is marked as default
+    if (!validVariants.some(v => v.isDefault)) {
+      validVariants[0].isDefault = true;
     }
 
     // Validate that at least one size with stock > 0 is selected
@@ -237,12 +317,25 @@ const Add = ({token}) => {
       formData.append("bestseller", bestseller.toString())
       formData.append("sizes", JSON.stringify(sizesWithStock))
       formData.append("availableSizes", JSON.stringify(sizesWithStock.map(s => s.size)))
-      formData.append("color", color)
-      formData.append("colorName", colorName)
-      image1 && formData.append("image1",image1)
-      image2 && formData.append("image2",image2)
-      image3 && formData.append("image3",image3)
-      image4 && formData.append("image4",image4)
+      formData.append("color", color) // Legacy
+      formData.append("colorName", colorName) // Legacy
+      
+      // Add color variants data
+      const validVariants = colorVariants.filter(v => v.colorName.trim() !== "");
+      formData.append("colorVariants", JSON.stringify(validVariants.map(v => ({
+        color: v.color,
+        colorName: v.colorName,
+        isDefault: v.isDefault
+      }))));
+
+      // Add images for each variant
+      validVariants.forEach((variant, variantIndex) => {
+        variant.images.forEach((image, imageIndex) => {
+          if (image) {
+            formData.append(`variant_${variantIndex}_image_${imageIndex}`, image);
+          }
+        });
+      });
       
       // Debug logging
       console.log('Form data being sent:');
@@ -295,6 +388,7 @@ const Add = ({token}) => {
         setCustomId("");
         setColor("#000000");
         setColorName("");
+        setColorVariants([{ color: "#000000", colorName: "", images: [null, null, null, null], isDefault: true }]);
       } else {
         toast.error(response.data.message || "Failed to add product.")
       }
@@ -464,33 +558,96 @@ const Add = ({token}) => {
           <label className='cursor-pointer' htmlFor="bestseller">Add to bestseller</label>
         </div>
 
-        <div className='w-full space-y-3'>
-          <div>
-            <p className='mb-2'>Product Color</p>
-            <div className='flex items-center gap-4'>
-              <div className='flex items-center gap-2'>
-                <label htmlFor="colorPicker" className='text-sm font-medium'>Color:</label>
-                <input
-                  type="color"
-                  id="colorPicker"
-                  value={color}
-                  onChange={(e) => setColor(e.target.value)}
-                  className='w-16 h-10 border border-gray-300 rounded cursor-pointer'
-                />
-                <span className='text-sm text-gray-600'>{color}</span>
+        {/* Color Variants Section */}
+        <div className='w-full space-y-4 border-t pt-4 mt-4'>
+          <div className='flex items-center justify-between'>
+            <p className='text-lg font-semibold mb-2'>Color Variants</p>
+            <button
+              type="button"
+              onClick={addColorVariant}
+              className='px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 text-sm font-medium'
+            >
+              + Add Color Variant
+            </button>
+          </div>
+          
+          {colorVariants.map((variant, variantIndex) => (
+            <div key={variantIndex} className='border border-gray-300 rounded-lg p-4 space-y-4 bg-gray-50'>
+              <div className='flex items-center justify-between'>
+                <div className='flex items-center gap-3'>
+                  <input
+                    type="checkbox"
+                    checked={variant.isDefault}
+                    onChange={(e) => updateColorVariant(variantIndex, 'isDefault', e.target.checked)}
+                    className='w-4 h-4'
+                  />
+                  <label className='text-sm font-medium text-gray-700'>Set as Default Variant</label>
+                </div>
+                {colorVariants.length > 1 && (
+                  <button
+                    type="button"
+                    onClick={() => removeColorVariant(variantIndex)}
+                    className='px-3 py-1 bg-red-600 text-white rounded text-sm hover:bg-red-700'
+                  >
+                    Remove
+                  </button>
+                )}
+              </div>
+
+              <div className='grid grid-cols-2 gap-4'>
+                <div>
+                  <p className='mb-2 text-sm font-medium'>Color</p>
+                  <div className='flex items-center gap-2'>
+                    <input
+                      type="color"
+                      value={variant.color}
+                      onChange={(e) => updateColorVariant(variantIndex, 'color', e.target.value)}
+                      className='w-16 h-10 border border-gray-300 rounded cursor-pointer'
+                    />
+                    <span className='text-sm text-gray-600'>{variant.color}</span>
+                  </div>
+                </div>
+                <div>
+                  <p className='mb-2 text-sm font-medium'>Color Name <span className="text-red-500">*</span></p>
+                  <input
+                    type="text"
+                    value={variant.colorName}
+                    onChange={(e) => updateColorVariant(variantIndex, 'colorName', e.target.value)}
+                    className='w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent'
+                    placeholder='e.g., Red, Navy Blue, Black'
+                    required
+                  />
+                </div>
+              </div>
+
+              <div>
+                <p className='mb-2 text-sm font-medium'>Variant Images (Upload up to 4 images for this color)</p>
+                <div className='flex gap-2'>
+                  {[0, 1, 2, 3].map((imgIndex) => (
+                    <label key={imgIndex} htmlFor={`variant_${variantIndex}_image_${imgIndex}`} className="relative cursor-pointer">
+                      <img 
+                        className='w-20 h-20 object-cover border-2 border-gray-300 rounded-lg hover:border-blue-400 transition-colors' 
+                        src={variant.images[imgIndex] ? URL.createObjectURL(variant.images[imgIndex]) : assets.upload_area} 
+                        alt={`Variant ${variantIndex + 1} Image ${imgIndex + 1}`}
+                      />
+                      <input
+                        onChange={(e) => handleVariantImageChange(e, variantIndex, imgIndex)}
+                        type="file"
+                        id={`variant_${variantIndex}_image_${imgIndex}`}
+                        accept="image/*"
+                        hidden
+                      />
+                      {variant.images[imgIndex] && (
+                        <div className="absolute -bottom-6 left-0 text-xs text-gray-600 bg-white px-1 rounded">
+                          {(variant.images[imgIndex].size / 1024).toFixed(1)}KB
+                        </div>
+                      )}
+                    </label>
+                  ))}
+                </div>
               </div>
             </div>
-          </div>
-          <div>
-            <p className='mb-2'>Color Name</p>
-            <input
-              onChange={(e) => setColorName(e.target.value)}
-              value={colorName}
-              className='w-full max-w-[500px] px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent'
-              type="text"
-              placeholder='e.g., Red, Navy Blue, Black'
-            />
-          </div>
+          ))}
         </div>
 
         {/* Upload Progress Bar */}
