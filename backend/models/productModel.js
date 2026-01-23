@@ -55,6 +55,8 @@ const productSchema = new mongoose.Schema({
     updatedAt: { type: Date, default: Date.now },
     stock: { type: Number, default: 0 },
     displayOrder: { type: Number, required: false, default: 0 },
+    color: { type: String, default: "" }, // Hex color code (e.g., #FF5733)
+    colorName: { type: String, default: "" }, // Color name (e.g., "Red", "Navy Blue")
 }, {
     timestamps: true
 });

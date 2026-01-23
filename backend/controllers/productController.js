@@ -295,7 +295,7 @@ export const addProduct = async (req, res) => {
         console.log('Raw sizes value:', req.body.sizes);
         console.log('Raw availableSizes value:', req.body.availableSizes);
 
-        const { customId, name, description, price, category, subCategory, type, sizes, bestseller, originalPrice, categorySlug, features, isNewArrival, isBestSeller, availableSizes, stock, sleeveType } = req.body
+        const { customId, name, description, price, category, subCategory, type, sizes, bestseller, originalPrice, categorySlug, features, isNewArrival, isBestSeller, availableSizes, stock, sleeveType, color, colorName } = req.body
 
         // Validate required fields
         if (!customId) {
@@ -497,6 +497,8 @@ export const addProduct = async (req, res) => {
             availableSizes: parsedAvailableSizes,
             features: parsedFeatures,
             images: imagesUrl,
+            color: color || "",
+            colorName: colorName || "",
             date: Date.now(),
             stock: stock !== undefined ? Number(stock) : 0,
             // Sleeve type is deprecated - not included
@@ -608,7 +610,7 @@ export const singleProduct = async (req, res) => {
 export const updateProduct = async (req, res) => {
     try {
         const id = req.params.id;
-        const { customId, name, description, price, category, subCategory, type, sizes, bestseller, originalPrice, categorySlug, features, isNewArrival, isBestSeller, stock, sleeveType } = req.body;
+        const { customId, name, description, price, category, subCategory, type, sizes, bestseller, originalPrice, categorySlug, features, isNewArrival, isBestSeller, stock, sleeveType, color, colorName } = req.body;
 
         if (!id) {
             return res.status(400).json({ success: false, message: "Product ID is required" });
@@ -735,6 +737,8 @@ export const updateProduct = async (req, res) => {
             images: imagesUrl,
             updatedAt: new Date(),
             ...(stock !== undefined ? { stock: Number(stock) } : {}),
+            ...(color !== undefined ? { color: color } : {}),
+            ...(colorName !== undefined ? { colorName: colorName } : {}),
             // If sleeveType provided, set it (allow clearing with empty string -> null)
             ...(sleeveType !== undefined
                 ? { sleeveType: sleeveType ? sleeveType : null }

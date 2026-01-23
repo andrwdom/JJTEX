@@ -34,6 +34,8 @@ const Add = ({token}) => {
    // Deprecated: simple categories list (kept for compatibility if needed)
    const [categories, setCategories] = useState([]);
    const [customId, setCustomId] = useState("");
+   const [color, setColor] = useState("#000000"); // Default to black
+   const [colorName, setColorName] = useState("");
 
    const [loading, setLoading] = useState(false)
    const [uploadProgress, setUploadProgress] = useState(0)
@@ -235,6 +237,8 @@ const Add = ({token}) => {
       formData.append("bestseller", bestseller.toString())
       formData.append("sizes", JSON.stringify(sizesWithStock))
       formData.append("availableSizes", JSON.stringify(sizesWithStock.map(s => s.size)))
+      formData.append("color", color)
+      formData.append("colorName", colorName)
       image1 && formData.append("image1",image1)
       image2 && formData.append("image2",image2)
       image3 && formData.append("image3",image3)
@@ -289,6 +293,8 @@ const Add = ({token}) => {
         setSizes([])
         setBestseller(false)
         setCustomId("");
+        setColor("#000000");
+        setColorName("");
       } else {
         toast.error(response.data.message || "Failed to add product.")
       }
@@ -456,6 +462,35 @@ const Add = ({token}) => {
         <div className='flex gap-2 mt-2'>
           <input onChange={() => setBestseller(prev => !prev)} checked={bestseller} type="checkbox" id='bestseller' />
           <label className='cursor-pointer' htmlFor="bestseller">Add to bestseller</label>
+        </div>
+
+        <div className='w-full space-y-3'>
+          <div>
+            <p className='mb-2'>Product Color</p>
+            <div className='flex items-center gap-4'>
+              <div className='flex items-center gap-2'>
+                <label htmlFor="colorPicker" className='text-sm font-medium'>Color:</label>
+                <input
+                  type="color"
+                  id="colorPicker"
+                  value={color}
+                  onChange={(e) => setColor(e.target.value)}
+                  className='w-16 h-10 border border-gray-300 rounded cursor-pointer'
+                />
+                <span className='text-sm text-gray-600'>{color}</span>
+              </div>
+            </div>
+          </div>
+          <div>
+            <p className='mb-2'>Color Name</p>
+            <input
+              onChange={(e) => setColorName(e.target.value)}
+              value={colorName}
+              className='w-full max-w-[500px] px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent'
+              type="text"
+              placeholder='e.g., Red, Navy Blue, Black'
+            />
+          </div>
         </div>
 
         {/* Upload Progress Bar */}

@@ -30,6 +30,8 @@ interface Product {
   stock: number
   availableSizes?: string[]
   categorySlug?: string;
+  color?: string;
+  colorName?: string;
 }
 
 interface ProductPageClientProps {
@@ -501,6 +503,31 @@ export default function ProductPageClient({ productId }: ProductPageClientProps)
                     <span className="text-xl text-gray-500 line-through">₹{product.originalPrice.toLocaleString()}</span>
                   )}
                 </div>
+
+                {/* Color Display */}
+                {(product.color || product.colorName) && (
+                  <div className="flex items-center gap-3 mb-4">
+                    <span className="text-sm font-medium text-gray-700">Color:</span>
+                    {product.color && (
+                      <div className="flex items-center gap-2">
+                        <div
+                          className="w-8 h-8 rounded-full border-2 border-gray-300 shadow-sm"
+                          style={{ backgroundColor: product.color }}
+                          title={product.color}
+                        />
+                        {product.colorName && (
+                          <span className="text-sm text-gray-900 font-medium">{product.colorName}</span>
+                        )}
+                        {!product.colorName && (
+                          <span className="text-sm text-gray-600">{product.color}</span>
+                        )}
+                      </div>
+                    )}
+                    {!product.color && product.colorName && (
+                      <span className="text-sm text-gray-900 font-medium">{product.colorName}</span>
+                    )}
+                  </div>
+                )}
 
                 {/* Scarcity only when low */}
                 {showLowStock && (

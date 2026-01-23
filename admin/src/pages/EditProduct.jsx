@@ -19,6 +19,8 @@ const EditProduct = ({ product, token, onClose, onUpdate }) => {
   const [loading, setLoading] = useState(false)
   const [stock, setStock] = useState(product.stock || 0)
   const [customId, setCustomId] = useState(product.customId || "");
+  const [color, setColor] = useState(product.color || "#000000");
+  const [colorName, setColorName] = useState(product.colorName || "");
 
   // Debug token on component mount
   useEffect(() => {
@@ -100,6 +102,8 @@ const EditProduct = ({ product, token, onClose, onUpdate }) => {
       formData.append("sizes", JSON.stringify(sizes))
       formData.append("stock", stock)
       formData.append("customId", customId)
+      formData.append("color", color)
+      formData.append("colorName", colorName)
 
       if (image1) formData.append("image1", image1)
       if (image2) formData.append("image2", image2)
@@ -365,6 +369,35 @@ const EditProduct = ({ product, token, onClose, onUpdate }) => {
           id='bestseller' 
         />
         <label className='cursor-pointer' htmlFor="bestseller">Add to bestseller</label>
+      </div>
+
+      <div className='space-y-3'>
+        <div>
+          <label className='block text-sm font-medium text-gray-700 mb-2'>Product Color</label>
+          <div className='flex items-center gap-4'>
+            <div className='flex items-center gap-2'>
+              <label htmlFor="colorPicker" className='text-sm font-medium'>Color:</label>
+              <input
+                type="color"
+                id="colorPicker"
+                value={color}
+                onChange={(e) => setColor(e.target.value)}
+                className='w-16 h-10 border border-gray-300 rounded cursor-pointer'
+              />
+              <span className='text-sm text-gray-600'>{color}</span>
+            </div>
+          </div>
+        </div>
+        <div>
+          <label className='block text-sm font-medium text-gray-700 mb-2'>Color Name</label>
+          <input
+            onChange={(e) => setColorName(e.target.value)}
+            value={colorName}
+            className='w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent'
+            type="text"
+            placeholder='e.g., Red, Navy Blue, Black'
+          />
+        </div>
       </div>
 
             </form>
