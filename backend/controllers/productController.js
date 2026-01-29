@@ -439,6 +439,20 @@ export const addProduct = async (req, res) => {
         if (useColorVariants) {
             // Process variant images
             console.log('🔄 Processing color variant images...');
+            
+            // Check if files were received
+            if (!req.files || (Array.isArray(req.files) && req.files.length === 0)) {
+                return res.status(400).json({
+                    success: false,
+                    message: "No image files were received. Please ensure you have uploaded at least one image for each color variant.",
+                    debug: {
+                        filesReceived: false,
+                        reqFilesType: typeof req.files,
+                        reqFilesLength: Array.isArray(req.files) ? req.files.length : 'N/A'
+                    }
+                });
+            }
+            
             console.log('📦 Received files:', req.files ? (Array.isArray(req.files) ? req.files.map(f => ({ fieldname: f.fieldname, originalname: f.originalname })) : Object.keys(req.files)) : 'No files');
             console.log('📦 Color variants to process:', parsedColorVariants.length);
             const baseUploads = process.env.UPLOAD_PATH || './uploads';
@@ -458,39 +472,59 @@ export const addProduct = async (req, res) => {
                     console.log(`  📁 All files for variant ${variantIndex}:`, variantFiles.map(f => f.fieldname));
                 }
                 
-                for (let imgIndex = 0; imgIndex < 4; imgIndex++) {
-                    const fileKey = `variant_${variantIndex}_image_${imgIndex}`;
-                    // Handle both multer.any() (array) and multer.fields() (object) formats
-                    let file;
-                    if (Array.isArray(req.files)) {
-                        file = req.files.find(f => f.fieldname === fileKey);
-                        if (!file) {
-                            console.log(`  ⚠️ File not found: ${fileKey}`);
-                        } else {
-                            console.log(`  ✅ Found file: ${fileKey} (${file.originalname})`);
+                // Try to find files for this variant - check all possible fieldname patterns
+                if (Array.isArray(req.files)) {
+                    // Find all files that match this variant's pattern
+                    const matchingFiles = req.files.filter(f => {
+                        if (!f.fieldname) return false;
+                        // Match variant_X_image_Y pattern
+                        const pattern = new RegExp(`^variant_${variantIndex}_image_(\\d+)$`);
+                        return pattern.test(f.fieldname);
+                    });
+                    
+                    // Sort by image index to maintain order
+                    matchingFiles.sort((a, b) => {
+                        const aMatch = a.fieldname.match(/image_(\d+)/);
+                        const bMatch = b.fieldname.match(/image_(\d+)/);
+                        const aIdx = aMatch ? parseInt(aMatch[1]) : 999;
+                        const bIdx = bMatch ? parseInt(bMatch[1]) : 999;
+                        return aIdx - bIdx;
+                    });
+                    
+                    variantImages.push(...matchingFiles);
+                    console.log(`  📸 Found ${matchingFiles.length} files for variant ${variantIndex}:`, matchingFiles.map(f => f.fieldname));
+                } else if (req.files) {
+                    // Fallback for object format (multer.fields)
+                    for (let imgIndex = 0; imgIndex < 4; imgIndex++) {
+                        const fileKey = `variant_${variantIndex}_image_${imgIndex}`;
+                        const file = req.files[fileKey]?.[0];
+                        if (file) {
+                            variantImages.push(file);
                         }
-                    } else {
-                        file = req.files?.[fileKey]?.[0];
-                    }
-                    if (file) {
-                        variantImages.push(file);
                     }
                 }
                 
                 console.log(`📸 Variant ${variantIndex} has ${variantImages.length} images`);
 
                 if (variantImages.length === 0) {
+                    const allFiles = Array.isArray(req.files) ? req.files.map(f => f.fieldname) : (req.files ? Object.keys(req.files) : []);
+                    const variantFiles = allFiles.filter(f => f && f.startsWith('variant_'));
+                    
                     console.error(`❌ No images found for variant ${variantIndex} (${variant.colorName})`);
                     console.error(`   Looking for files with pattern: variant_${variantIndex}_image_*`);
-                    console.error(`   Available files:`, Array.isArray(req.files) ? req.files.map(f => f.fieldname) : 'No files array');
+                    console.error(`   All variant files received:`, variantFiles);
+                    console.error(`   All files received:`, allFiles);
+                    
                     return res.status(400).json({
                         success: false,
-                        message: `Color variant "${variant.colorName || variantIndex + 1}" must have at least one image. Found 0 images for this variant.`,
+                        message: `Color variant "${variant.colorName || (variantIndex + 1)}" must have at least one image. No images found for this variant.`,
                         debug: {
                             variantIndex,
                             variantName: variant.colorName,
                             expectedPattern: `variant_${variantIndex}_image_*`,
-                            availableFiles: Array.isArray(req.files) ? req.files.map(f => f.fieldname) : []
+                            allVariantFiles: variantFiles,
+                            allFiles: allFiles,
+                            totalFilesReceived: Array.isArray(req.files) ? req.files.length : (req.files ? Object.keys(req.files).length : 0)
                         }
                     });
                 }
