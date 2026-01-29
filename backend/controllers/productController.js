@@ -290,15 +290,13 @@ export const listProducts = async (req, res) => {
 // Add product
 export const addProduct = async (req, res) => {
     try {
-        console.log('Add Product Request Body:', req.body);
-        console.log('Add Product Files:', req.files);
-        console.log('Files type:', Array.isArray(req.files) ? 'Array' : typeof req.files);
-        if (Array.isArray(req.files)) {
-            console.log('Files array length:', req.files.length);
-            console.log('Files fieldnames:', req.files.map(f => f.fieldname));
-        } else if (req.files) {
-            console.log('Files object keys:', Object.keys(req.files));
+        console.log('=== ADD PRODUCT REQUEST ===');
+        console.log('Request Body:', JSON.stringify(req.body, null, 2));
+        console.log('Files:', req.files ? (Array.isArray(req.files) ? `Array[${req.files.length}]` : `Object with keys: ${Object.keys(req.files).join(', ')}`) : 'NULL/UNDEFINED');
+        if (Array.isArray(req.files) && req.files.length > 0) {
+            console.log('Files fieldnames:', req.files.map(f => f.fieldname).join(', '));
         }
+        console.log('Color Variants:', req.body.colorVariants);
         console.log('Raw sizes value:', req.body.sizes);
         console.log('Raw availableSizes value:', req.body.availableSizes);
 
@@ -482,9 +480,18 @@ export const addProduct = async (req, res) => {
                 console.log(`📸 Variant ${variantIndex} has ${variantImages.length} images`);
 
                 if (variantImages.length === 0) {
+                    console.error(`❌ No images found for variant ${variantIndex} (${variant.colorName})`);
+                    console.error(`   Looking for files with pattern: variant_${variantIndex}_image_*`);
+                    console.error(`   Available files:`, Array.isArray(req.files) ? req.files.map(f => f.fieldname) : 'No files array');
                     return res.status(400).json({
                         success: false,
-                        message: `Color variant "${variant.colorName || variantIndex + 1}" must have at least one image`
+                        message: `Color variant "${variant.colorName || variantIndex + 1}" must have at least one image. Found 0 images for this variant.`,
+                        debug: {
+                            variantIndex,
+                            variantName: variant.colorName,
+                            expectedPattern: `variant_${variantIndex}_image_*`,
+                            availableFiles: Array.isArray(req.files) ? req.files.map(f => f.fieldname) : []
+                        }
                     });
                 }
 
@@ -658,7 +665,10 @@ export const addProduct = async (req, res) => {
             }
         });
     } catch (error) {
-        console.error('Add Product Error:', error);
+        console.error('❌ Add Product Error:', error);
+        console.error('Error stack:', error.stack);
+        console.error('Request files:', req.files);
+        console.error('Request body keys:', Object.keys(req.body));
         
         // Provide more specific error messages
         let errorMessage = 'Failed to add product';
