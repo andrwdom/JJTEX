@@ -215,6 +215,28 @@ export class ErrorHandler {
     }
 
     // Handle specific error types
+    // Multer (file upload) errors should be treated as validation errors (400), not 500s
+    // This prevents "SERVER ERROR" in admin when the real issue is "file too large / too many files / invalid type".
+    if (error?.name === 'MulterError') {
+      const code = error.code || 'MULTER_ERROR';
+      let message = error.message || 'File upload error';
+
+      if (code === 'LIMIT_FILE_SIZE') message = 'Uploaded file is too large.';
+      if (code === 'LIMIT_FILE_COUNT') message = 'Too many files uploaded.';
+      if (code === 'LIMIT_UNEXPECTED_FILE') message = 'Unexpected file field in upload.';
+
+      return new ValidationError(message, {
+        ...context,
+        multerCode: code,
+        originalError: error.message
+      });
+    }
+
+    // Our multer fileFilter throws a normal Error with message "File type ... not allowed..."
+    if (typeof error?.message === 'string' && error.message.toLowerCase().includes('file type') && error.message.toLowerCase().includes('not allowed')) {
+      return new ValidationError(error.message, context);
+    }
+
     if (error.name === 'ValidationError') {
       return new ValidationError(error.message, context);
     }
