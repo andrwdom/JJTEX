@@ -407,12 +407,24 @@ export const addProduct = async (req, res) => {
             }
         }
 
-        const image1 = req.files?.image1?.[0]
-        const image2 = req.files?.image2?.[0]
-        const image3 = req.files?.image3?.[0]
-        const image4 = req.files?.image4?.[0]
+        // Helper function to get file by fieldname (works with both multer.fields and multer.any)
+        const getFileByFieldname = (fieldname) => {
+            if (!req.files) return undefined;
+            // If req.files is an array (multer.any), search by fieldname
+            if (Array.isArray(req.files)) {
+                return req.files.find(f => f.fieldname === fieldname);
+            }
+            // If req.files is an object (multer.fields), access directly
+            return req.files[fieldname]?.[0];
+        };
+
+        const image1 = getFileByFieldname('image1');
+        const image2 = getFileByFieldname('image2');
+        const image3 = getFileByFieldname('image3');
+        const image4 = getFileByFieldname('image4');
 
         console.log('Image files:', { image1, image2, image3, image4 });
+        console.log('All files:', req.files);
 
         // If using color variants, process variant images instead
         let images = [];
@@ -433,7 +445,13 @@ export const addProduct = async (req, res) => {
                 // Get images for this variant
                 for (let imgIndex = 0; imgIndex < 4; imgIndex++) {
                     const fileKey = `variant_${variantIndex}_image_${imgIndex}`;
-                    const file = req.files?.[fileKey]?.[0];
+                    // Handle both multer.any() (array) and multer.fields() (object) formats
+                    let file;
+                    if (Array.isArray(req.files)) {
+                        file = req.files.find(f => f.fieldname === fileKey);
+                    } else {
+                        file = req.files?.[fileKey]?.[0];
+                    }
                     if (file) {
                         variantImages.push(file);
                     }
@@ -751,11 +769,22 @@ export const updateProduct = async (req, res) => {
         let imagesUrl = product.images;
         let imageOptimizationStats = null;
         
-        if (req.files && Object.keys(req.files).length > 0) {
-            const image1 = req.files?.image1?.[0]
-            const image2 = req.files?.image2?.[0]
-            const image3 = req.files?.image3?.[0]
-            const image4 = req.files?.image4?.[0]
+        // Helper function to get file by fieldname (works with both multer.fields and multer.any)
+        const getFileByFieldname = (fieldname) => {
+            if (!req.files) return undefined;
+            // If req.files is an array (multer.any), search by fieldname
+            if (Array.isArray(req.files)) {
+                return req.files.find(f => f.fieldname === fieldname);
+            }
+            // If req.files is an object (multer.fields), access directly
+            return req.files[fieldname]?.[0];
+        };
+        
+        if (req.files && (Array.isArray(req.files) ? req.files.length > 0 : Object.keys(req.files).length > 0)) {
+            const image1 = getFileByFieldname('image1');
+            const image2 = getFileByFieldname('image2');
+            const image3 = getFileByFieldname('image3');
+            const image4 = getFileByFieldname('image4');
 
             const newImages = [image1, image2, image3, image4].filter((item) => item !== undefined)
 
