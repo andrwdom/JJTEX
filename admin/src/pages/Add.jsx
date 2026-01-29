@@ -417,7 +417,11 @@ const Add = ({token}) => {
         toast.error("Access denied. You don't have permission to perform this action.");
       } else if (error.response?.status >= 500) {
         toast.error("Server error. Please try again later.");
+      } else if (error.response?.data?.error?.message) {
+        // Our production error handler format: { success:false, error:{ message, ... } }
+        toast.error(error.response.data.error.message);
       } else if (error.response?.data?.message) {
+        // Legacy controller format: { success:false, message, ... }
         toast.error(error.response.data.message);
       } else {
         toast.error(error.message || "Unknown error occurred.");
