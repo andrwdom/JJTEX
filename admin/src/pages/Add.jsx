@@ -330,9 +330,14 @@ const Add = ({token}) => {
 
       // Add images for each variant
       validVariants.forEach((variant, variantIndex) => {
+        console.log(`📤 Sending images for variant ${variantIndex} (${variant.colorName}):`, variant.images.map((img, idx) => img ? `image_${idx}: ${img.name || 'file'}` : `image_${idx}: null`));
         variant.images.forEach((image, imageIndex) => {
           if (image) {
-            formData.append(`variant_${variantIndex}_image_${imageIndex}`, image);
+            const fieldName = `variant_${variantIndex}_image_${imageIndex}`;
+            console.log(`  ✅ Appending file: ${fieldName} (${image.name || 'file'})`);
+            formData.append(fieldName, image);
+          } else {
+            console.log(`  ⏭️ Skipping null image at index ${imageIndex}`);
           }
         });
       });

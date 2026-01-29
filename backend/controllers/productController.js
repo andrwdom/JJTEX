@@ -292,6 +292,13 @@ export const addProduct = async (req, res) => {
     try {
         console.log('Add Product Request Body:', req.body);
         console.log('Add Product Files:', req.files);
+        console.log('Files type:', Array.isArray(req.files) ? 'Array' : typeof req.files);
+        if (Array.isArray(req.files)) {
+            console.log('Files array length:', req.files.length);
+            console.log('Files fieldnames:', req.files.map(f => f.fieldname));
+        } else if (req.files) {
+            console.log('Files object keys:', Object.keys(req.files));
+        }
         console.log('Raw sizes value:', req.body.sizes);
         console.log('Raw availableSizes value:', req.body.availableSizes);
 
@@ -434,6 +441,8 @@ export const addProduct = async (req, res) => {
         if (useColorVariants) {
             // Process variant images
             console.log('🔄 Processing color variant images...');
+            console.log('📦 Received files:', req.files ? (Array.isArray(req.files) ? req.files.map(f => ({ fieldname: f.fieldname, originalname: f.originalname })) : Object.keys(req.files)) : 'No files');
+            console.log('📦 Color variants to process:', parsedColorVariants.length);
             const baseUploads = process.env.UPLOAD_PATH || './uploads';
             const uploadDir = path.join(path.isAbsolute(baseUploads) ? baseUploads : path.resolve(process.cwd(), baseUploads), 'products');
             const baseUrl = process.env.BASE_URL || 'https://jjtextiles.com';
@@ -442,13 +451,26 @@ export const addProduct = async (req, res) => {
                 const variant = parsedColorVariants[variantIndex];
                 const variantImages = [];
                 
+                console.log(`🔍 Looking for images for variant ${variantIndex} (${variant.colorName})...`);
+                
                 // Get images for this variant
+                // First, find all files that start with variant_X_ to see what we have
+                if (Array.isArray(req.files)) {
+                    const variantFiles = req.files.filter(f => f.fieldname && f.fieldname.startsWith(`variant_${variantIndex}_image_`));
+                    console.log(`  📁 All files for variant ${variantIndex}:`, variantFiles.map(f => f.fieldname));
+                }
+                
                 for (let imgIndex = 0; imgIndex < 4; imgIndex++) {
                     const fileKey = `variant_${variantIndex}_image_${imgIndex}`;
                     // Handle both multer.any() (array) and multer.fields() (object) formats
                     let file;
                     if (Array.isArray(req.files)) {
                         file = req.files.find(f => f.fieldname === fileKey);
+                        if (!file) {
+                            console.log(`  ⚠️ File not found: ${fileKey}`);
+                        } else {
+                            console.log(`  ✅ Found file: ${fileKey} (${file.originalname})`);
+                        }
                     } else {
                         file = req.files?.[fileKey]?.[0];
                     }
@@ -456,6 +478,8 @@ export const addProduct = async (req, res) => {
                         variantImages.push(file);
                     }
                 }
+                
+                console.log(`📸 Variant ${variantIndex} has ${variantImages.length} images`);
 
                 if (variantImages.length === 0) {
                     return res.status(400).json({
