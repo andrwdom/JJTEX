@@ -24,21 +24,12 @@ productRouter.get('/', getAllProducts); // GET /api/products
 productRouter.get('/category/:category', getAllProducts); // GET /api/products/category/:category
 
 // Admin routes with authentication
-productRouter.post('/', verifyToken, multer.fields([
-    { name: 'image1', maxCount: 1 },
-    { name: 'image2', maxCount: 1 },
-    { name: 'image3', maxCount: 1 },
-    { name: 'image4', maxCount: 1 }
-]), addProduct);
+// Use multer.any() here to support legacy image1-4 fields AND dynamic variant_* image fields
+productRouter.post('/', verifyToken, multer.any(), addProduct);
 
 // These ID routes must come last to avoid conflicts with named routes
 productRouter.get('/:id', getProductById);
 productRouter.delete('/:id', verifyToken, removeProduct);
-productRouter.put('/:id', verifyToken, multer.fields([
-    { name: 'image1', maxCount: 1 },
-    { name: 'image2', maxCount: 1 },
-    { name: 'image3', maxCount: 1 },
-    { name: 'image4', maxCount: 1 }
-]), updateProduct);
+productRouter.put('/:id', verifyToken, multer.any(), updateProduct);
 
 export default productRouter

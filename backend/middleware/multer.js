@@ -71,12 +71,13 @@ const fileFilter = (req, file, cb) => {
 };
 
 // SECURITY: Configure multer with security limits
+// Note: We allow more files to support color variant images (multiple colors x images)
 const upload = multer({ 
     storage,
     fileFilter,
     limits: {
         fileSize: 100 * 1024 * 1024, // 100MB limit
-        files: 4 // Maximum 4 files per request
+        files: 24 // Allow up to 24 images per request (legacy + variants)
     }
 });
 

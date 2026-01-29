@@ -21,10 +21,7 @@ const cleanupAbandonedOrders = async () => {
   try {
     console.log(`🚨 [${correlationId}] Starting abandoned order cleanup...`);
     
-    // Start a MongoDB transaction for atomicity
-    const session = await mongoose.startSession();
-    await session.startTransaction();
-    
+    // Note: MongoDB transactions require replica set, using non-transactional mode for standalone instance
     try {
       // 1. Clean up reservations older than 20 minutes (PhonePe session timeout)
       // 🔧 HOTFIX #2: Increased from 14min to 20min (PhonePe processing time)
@@ -40,7 +37,7 @@ const cleanupAbandonedOrders = async () => {
           { items: null },
           { expiresAt: { $exists: false } }
         ]
-      }).session(session);
+      });
       
       console.log(`[${correlationId}] Found ${oldReservations.length} old reservations to clean`);
       
@@ -72,8 +69,7 @@ const cleanupAbandonedOrders = async () => {
               expiredAt: new Date(),
               reason: 'Timeout cleanup',
               updatedAt: new Date()
-            },
-            { session }
+            }
           );
           
           reservationsCleaned++;
@@ -105,7 +101,7 @@ const cleanupAbandonedOrders = async () => {
           { items: null },
           { timeoutAt: { $exists: false } }
         ]
-      }).session(session);
+      });
       
       console.log(`[${correlationId}] Found ${oldSessions.length} old checkout sessions to clean`);
       
@@ -123,7 +119,7 @@ const cleanupAbandonedOrders = async () => {
               { 'metadata.phonepeTransactionId': checkoutSession.phonepeTransactionId }
             ],
             status: { $in: ['DRAFT', 'PENDING', 'CONFIRMED'] }
-          }).session(session);
+          });
           
           if (draftOrder) {
             console.log(`[${correlationId}] ⚠️ Order ${draftOrder.orderId} (status: ${draftOrder.status}) exists for session ${checkoutSession.sessionId} - NOT releasing stock`);
@@ -142,8 +138,7 @@ const cleanupAbandonedOrders = async () => {
                 stockReserved: true, // Keep this true since order owns the reservation
                 expiredAt: new Date(),
                 updatedAt: new Date()
-              },
-              { session }
+              }
             );
             continue; // Skip to next session
           }
@@ -160,7 +155,7 @@ const cleanupAbandonedOrders = async () => {
               { orderStatus: 'CONFIRMED' },  // ✅ Check orderStatus field
               { paymentStatus: 'PAID' }  // ✅ Check paymentStatus field
             ]
-          }).session(session);
+          });
           
           if (paidOrder) {
             console.log(`[${correlationId}] 🚨 Order ${paidOrder.orderId} is PAID/CONFIRMED for session ${checkoutSession.sessionId} - NOT releasing stock`);
@@ -171,8 +166,7 @@ const cleanupAbandonedOrders = async () => {
                 stockReserved: true,
                 expiredAt: new Date(),
                 updatedAt: new Date()
-              },
-              { session }
+              }
             );
             continue; // Skip to next session
           }
@@ -183,7 +177,7 @@ const cleanupAbandonedOrders = async () => {
           // Get associated payment session
           const paymentSession = await PaymentSession.findOne({
             sessionId: checkoutSession.sessionId
-          }).session(session);
+          });
           
           // Release stock for each item atomically (atomic function will verify reserved > 0)
           if (checkoutSession.items && checkoutSession.items.length > 0) {
@@ -191,8 +185,7 @@ const cleanupAbandonedOrders = async () => {
               const released = await releaseStockReservation(
                 item.productId,
                 item.size,
-                item.quantity,
-                { session }
+                item.quantity
               );
               
               if (!released) {
@@ -212,8 +205,7 @@ const cleanupAbandonedOrders = async () => {
               expiredAt: new Date(),
               updatedAt: new Date(),
               reason: 'Timeout cleanup'
-            },
-            { session }
+            }
           );
           
           // Update payment session if it exists
@@ -224,8 +216,7 @@ const cleanupAbandonedOrders = async () => {
                 status: 'expired',
                 expiredAt: new Date(),
                 updatedAt: new Date()
-              },
-              { session }
+              }
             );
           }
           
@@ -239,7 +230,7 @@ const cleanupAbandonedOrders = async () => {
       // 3. Verify and fix any inconsistencies (emergency fallback)
       const productsWithReserved = await productModel.find({
         'sizes.reserved': { $gt: 0 }
-      }).session(session);
+      });
       
       if (productsWithReserved.length > 0) {
         console.log(`[${correlationId}] Found ${productsWithReserved.length} products with reserved stock - verifying...`);
@@ -252,21 +243,20 @@ const cleanupAbandonedOrders = async () => {
                 status: 'active',
                 'items.productId': product._id,
                 'items.size': size.size
-              }).session(session);
+              });
               
               const activeCheckoutSessions = await CheckoutSession.find({
                 stockReserved: true,
                 status: { $in: ['pending', 'awaiting_payment'] },
                 'items.productId': product._id,
                 'items.size': size.size
-              }).session(session);
+              });
               
               // If no active reservations or sessions, reset reserved count
               if (activeReservations.length === 0 && activeCheckoutSessions.length === 0) {
                 await productModel.updateOne(
                   { _id: product._id, 'sizes.size': size.size },
-                  { $set: { 'sizes.$.reserved': 0 } },
-                  { session }
+                  { $set: { 'sizes.$.reserved': 0 } }
                 );
                 console.log(`[${correlationId}] Reset reserved count for ${product.name} size ${size.size} (no active reservations)`);
               }
@@ -275,8 +265,6 @@ const cleanupAbandonedOrders = async () => {
         }
       }
       
-      // Commit transaction
-      await session.commitTransaction();
       console.log(`✅ [${correlationId}] Cleanup completed: ${reservationsCleaned} reservations, ${sessionsCleaned} sessions cleaned`);
       
       return {
@@ -287,11 +275,7 @@ const cleanupAbandonedOrders = async () => {
       };
       
     } catch (error) {
-      // Rollback transaction on any error
-      await session.abortTransaction();
       throw error;
-    } finally {
-      await session.endSession();
     }
     
   } catch (error) {
