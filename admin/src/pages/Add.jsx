@@ -271,10 +271,10 @@ const Add = ({token}) => {
       return;
     }
 
-    // Validate that each variant has at least one image
+    // Validate that each variant has at least one real File image
     for (let i = 0; i < validVariants.length; i++) {
       const variant = validVariants[i];
-      const hasImages = variant.images.some(img => img !== null);
+      const hasImages = Array.isArray(variant.images) && variant.images.some(img => img instanceof File);
       if (!hasImages) {
         toast.error(`Color variant "${variant.colorName || 'Variant ' + (i + 1)}" must have at least one image`);
         return;
@@ -332,7 +332,7 @@ const Add = ({token}) => {
       validVariants.forEach((variant, variantIndex) => {
         console.log(`📤 Sending images for variant ${variantIndex} (${variant.colorName}):`, variant.images.map((img, idx) => img ? `image_${idx}: ${img.name || 'file'}` : `image_${idx}: null`));
         variant.images.forEach((image, imageIndex) => {
-          if (image) {
+          if (image instanceof File) {
             const fieldName = `variant_${variantIndex}_image_${imageIndex}`;
             console.log(`  ✅ Appending file: ${fieldName} (${image.name || 'file'})`);
             formData.append(fieldName, image);
