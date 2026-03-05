@@ -306,6 +306,15 @@ export const addProduct = async (req, res) => {
         if (!customId) {
             return res.status(400).json({ success: false, message: "Custom product ID is required" });
         }
+        // Fast uniqueness check for customId (avoid heavy image processing then failing with E11000)
+        const existingByCustomId = await productModel.findOne({ customId }).select('_id').lean();
+        if (existingByCustomId) {
+            return res.status(400).json({
+                success: false,
+                message: "Product ID already exists. Please use a unique ID.",
+                error: { message: "Product ID already exists. Please use a unique ID." }
+            });
+        }
         if (!name || !description || !price || !category) {
             console.log('Missing fields:', {
                 customId: !customId,
@@ -435,6 +444,9 @@ export const addProduct = async (req, res) => {
         let images = [];
         let imagesUrl = [];
         let processedColorVariants = [];
+        // Ensure these exist for the response payload even when using variants
+        let results = [];
+        let stats = null;
 
         if (useColorVariants) {
             // Process variant images
@@ -532,6 +544,10 @@ export const addProduct = async (req, res) => {
                 // Optimize variant images
                 try {
                     const optimizationResult = await imageOptimizer.optimizeMultipleImages(variantImages, uploadDir);
+                    // accumulate results for reporting
+                    if (optimizationResult?.results && Array.isArray(optimizationResult.results)) {
+                        results.push(...optimizationResult.results);
+                    }
                     const variantImageUrls = optimizationResult.optimizedFiles.map(img => 
                         `${baseUrl}/images/products/${img.filename}`
                     );
@@ -557,6 +573,11 @@ export const addProduct = async (req, res) => {
                 const defaultVariant = processedColorVariants.find(v => v.isDefault) || processedColorVariants[0];
                 imagesUrl = defaultVariant.images;
             }
+
+            // Build basic stats for response payload
+            stats = imageOptimizer.getOptimizationStats(
+                Array.isArray(results) ? results.map(r => ({ success: !!r.success, processingTime: r.processingTime || 0 })) : []
+            );
         } else {
             // Legacy: use regular image uploads
             images = [image1, image2, image3, image4].filter((item) => item !== undefined);
@@ -573,8 +594,6 @@ export const addProduct = async (req, res) => {
         // Optimize images (only if not using color variants)
         let optimizationResult;
         let optimizedFiles;
-        let results;
-        let stats;
         
         if (!useColorVariants) {
             console.log('🔄 Starting image optimization...');
@@ -686,17 +705,23 @@ export const addProduct = async (req, res) => {
         // Return response with optimization stats
         res.status(201).json({ 
             product,
-            imageOptimization: {
-                stats,
-                details: results.map(result => ({
-                    originalName: result.originalName,
-                    optimizedName: result.optimizedName,
-                    originalSize: imageOptimizer.formatFileSize(result.originalSize),
-                    optimizedSize: imageOptimizer.formatFileSize(result.optimizedSize),
-                    compressionRatio: result.compressionRatio,
-                    processingTime: result.processingTime
-                }))
-            }
+            ...(stats
+                ? {
+                    imageOptimization: {
+                        stats,
+                        details: Array.isArray(results)
+                            ? results.map(result => ({
+                                originalName: result.originalName,
+                                optimizedName: result.optimizedName,
+                                originalSize: result.originalSize,
+                                optimizedSize: result.optimizedSize,
+                                compressionRatio: result.compressionRatio,
+                                processingTime: result.processingTime
+                            }))
+                            : []
+                    }
+                }
+                : {})
         });
     } catch (error) {
         console.error('❌ Add Product Error:', error);
@@ -724,7 +749,8 @@ export const addProduct = async (req, res) => {
         
         res.status(statusCode).json({ 
             success: false,
-            error: errorMessage,
+            message: errorMessage,
+            error: { message: errorMessage },
             details: process.env.NODE_ENV === 'development' ? error.message : undefined
         });
     }

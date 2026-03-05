@@ -418,8 +418,11 @@ const Add = ({token}) => {
       } else if (error.response?.status >= 500) {
         toast.error("Server error. Please try again later.");
       } else if (error.response?.data?.error?.message) {
-        // Our production error handler format: { success:false, error:{ message, ... } }
+        // New format: { success:false, error:{ message, ... } }
         toast.error(error.response.data.error.message);
+      } else if (typeof error.response?.data?.error === 'string') {
+        // Legacy controller format: { success:false, error: "..." }
+        toast.error(error.response.data.error);
       } else if (error.response?.data?.message) {
         // Legacy controller format: { success:false, message, ... }
         toast.error(error.response.data.message);
