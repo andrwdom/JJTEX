@@ -12,7 +12,7 @@ interface FallbackCarouselProps {
 export default function FallbackCarousel({ className = '' }: FallbackCarouselProps) {
   const [currentIndex, setCurrentIndex] = useState(0)
   const [isPlaying, setIsPlaying] = useState(true)
-  
+
   const intervalRef = useRef<NodeJS.Timeout | null>(null)
   const touchStartRef = useRef<number>(0)
   const touchEndRef = useRef<number>(0)
@@ -28,7 +28,7 @@ export default function FallbackCarousel({ className = '' }: FallbackCarouselPro
       link: '/collections/maternity-feeding-wear'
     },
     {
-      id: 'fallback-2', 
+      id: 'fallback-2',
       url: '/prink-dress.JPG',
       alt: 'Zipless Feeding Lounge Wear',
       title: 'Revolutionary Zipless Design',
@@ -37,7 +37,7 @@ export default function FallbackCarousel({ className = '' }: FallbackCarouselPro
     },
     {
       id: 'fallback-3',
-      url: '/leopard-dress.jpg', 
+      url: '/leopard-dress.jpg',
       alt: 'Non-Feeding Lounge Wear',
       title: 'Comfortable Everyday Wear',
       subtitle: 'Perfect for expecting mothers',
@@ -112,7 +112,7 @@ export default function FallbackCarousel({ className = '' }: FallbackCarouselPro
   }, [goToNext, goToPrevious])
 
   return (
-    <div 
+    <div
       className={`w-full aspect-[16/9] relative overflow-hidden rounded-2xl shadow-lg ${className}`}
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
@@ -125,9 +125,8 @@ export default function FallbackCarousel({ className = '' }: FallbackCarouselPro
         {fallbackImages.map((image, index) => (
           <div
             key={image.id}
-            className={`absolute inset-0 transition-all duration-700 ease-in-out ${
-              index === currentIndex ? 'opacity-100 z-10' : 'opacity-0 z-0'
-            }`}
+            className={`absolute inset-0 transition-all duration-700 ease-in-out ${index === currentIndex ? 'opacity-100 z-10' : 'opacity-0 z-0'
+              }`}
           >
             <OptimizedImage
               src={image.url}
@@ -137,7 +136,7 @@ export default function FallbackCarousel({ className = '' }: FallbackCarouselPro
               className="object-cover"
               sizes="100vw"
             />
-            
+
             {/* Overlay with title and CTA */}
             <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent">
               <div className="absolute bottom-6 left-6 right-6 text-white">
@@ -151,7 +150,7 @@ export default function FallbackCarousel({ className = '' }: FallbackCarouselPro
                   href={image.link}
                   className="inline-block bg-white text-gray-900 px-6 py-2 rounded-full font-medium hover:bg-gray-100 transition-colors"
                 >
-                  Shop Now
+                  Shop New Arrivals
                 </a>
               </div>
             </div>
@@ -185,11 +184,10 @@ export default function FallbackCarousel({ className = '' }: FallbackCarouselPro
           <button
             key={index}
             onClick={() => goToSlide(index)}
-            className={`w-2 h-2 rounded-full transition-all duration-300 ${
-              index === currentIndex
+            className={`w-2 h-2 rounded-full transition-all duration-300 ${index === currentIndex
                 ? 'bg-white scale-125 shadow-lg'
                 : 'bg-white/50 hover:bg-white/75'
-            }`}
+              }`}
             aria-label={`Go to slide ${index + 1}`}
           />
         ))}

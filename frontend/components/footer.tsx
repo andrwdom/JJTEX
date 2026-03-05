@@ -121,6 +121,13 @@ export default function Footer() {
                 </li>
               ))}
             </ul>
+            <Link
+              href="/collections"
+              className="inline-flex items-center gap-2 rounded-full bg-[#3b2b52] px-4 py-2 text-sm font-semibold text-white shadow-sm hover:opacity-95 transition mt-2"
+            >
+              Browse all collections
+              <ChevronRight className="h-4 w-4" />
+            </Link>
           </div>
 
           {/* Help */}
@@ -149,34 +156,36 @@ export default function Footer() {
                 </li>
               ))}
             </ul>
-
-            <div className="pt-2">
-              <Link
-                href="/collections"
-                className="inline-flex items-center gap-2 rounded-full bg-[#3b2b52] px-4 py-2 text-sm font-semibold text-white shadow-sm hover:opacity-95 transition"
-              >
-                Browse all collections
-                <ChevronRight className="h-4 w-4" />
-              </Link>
-            </div>
           </div>
         </div>
 
-        <div className="mx-auto max-w-6xl mt-10 border-t border-black/10 pt-6 flex flex-col sm:flex-row items-center justify-between gap-3">
-          <p className="text-xs text-gray-600">
-            © {new Date().getFullYear()} JJTextiles. All rights reserved.
-          </p>
-          <a 
-            href="https://www.instagram.com/andrewwdominic" 
-            target="_blank" 
-            rel="noopener noreferrer"
-            className="text-[11px] font-medium text-pink-500/80 hover:text-pink-600 transition-colors"
-          >
-            site by @andrewwdominic
-          </a>
-          <p className="text-xs text-gray-500">
-            Payments secured • Fast support • Easy browsing
-          </p>
+        {/* Payment method icons */}
+        <div className="mx-auto max-w-6xl mt-8 border-t border-black/10 pt-6">
+          <div className="flex items-center justify-center gap-4 mb-4">
+            {/* Visa */}
+            <svg className="h-6 w-auto text-gray-400" viewBox="0 0 48 16" fill="currentColor"><path d="M19.2 1l-3 14h-3.6l3-14h3.6zm14.4 9.1l1.9-5.2 1.1 5.2h-3zm4 4.9h3.3L38 1h-3c-.7 0-1.3.4-1.5 1l-5.4 13h3.8l.7-2.1h4.6l.4 2.1zm-9.8-4.6c0-3.6-5-3.8-5-5.4 0-.5.5-1 1.5-1.1 1.5-.1 2.8.4 3.6.9l.6-3C28 1.4 26.8 1 25.4 1c-3.6 0-6.1 1.9-6.1 4.6 0 2 1.8 3.1 3.2 3.8 1.4.7 1.9 1.1 1.9 1.7 0 .9-1.1 1.3-2.2 1.4-1.8 0-2.9-.5-3.7-.9l-.7 3c.8.4 2.4.7 4 .7 3.8-.1 6.2-1.9 6.2-4.8zM16.3 1l-6 14H6.5L3.6 4c-.2-.7-.4-.9-.9-1.2C1.8 2.3.2 1.8-.1 1.7L0 1h6.2c.8 0 1.5.5 1.7 1.4l1.5 8.1L13 1h3.3z" /></svg>
+            {/* Mastercard */}
+            <svg className="h-6 w-auto text-gray-400" viewBox="0 0 32 20" fill="currentColor"><circle cx="12" cy="10" r="9" opacity="0.6" /><circle cx="20" cy="10" r="9" opacity="0.4" /></svg>
+            {/* RuPay */}
+            <span className="text-[10px] font-bold text-gray-400 border border-gray-300 rounded px-1.5 py-0.5 tracking-wide">RuPay</span>
+            {/* UPI */}
+            <span className="text-[10px] font-bold text-gray-400 border border-gray-300 rounded px-1.5 py-0.5 tracking-wide">UPI</span>
+            {/* PhonePe / GPay */}
+            <span className="text-[10px] font-bold text-gray-400 border border-gray-300 rounded px-1.5 py-0.5 tracking-wide">GPay</span>
+          </div>
+          <div className="flex flex-col sm:flex-row items-center justify-between gap-2">
+            <p className="text-xs text-gray-600">
+              © {new Date().getFullYear()} JJTextiles. All rights reserved.
+            </p>
+            <a
+              href="https://www.instagram.com/andrewwdominic"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-[9px] text-gray-400 hover:text-gray-500 transition-colors"
+            >
+              site by @andrewwdominic
+            </a>
+          </div>
         </div>
       </div>
     </footer>

@@ -265,7 +265,7 @@ const TestimonialsSection = () => {
         >
           <div className="relative inline-block">
             <WashiTape className="-top-3 -left-6" rotation={-12} color="pink" />
-            <h2 className="text-3xl md:text-5xl lg:text-6xl font-serif text-[#473C66] mb-4 md:mb-6 relative">Moms Who Chose Shithaa 💕</h2>
+            <h2 className="text-3xl md:text-5xl lg:text-6xl font-serif text-[#473C66] mb-4 md:mb-6 relative">What Our Customers Say 💕</h2>
             <div className="absolute -bottom-2 right-8 w-3 md:w-4 h-3 md:h-4 bg-pink-300/60 rounded-full"></div>
             <div className="absolute -top-4 right-12 w-2 md:w-3 h-2 md:h-3 bg-purple-300/60 rounded-full"></div>
           </div>
@@ -275,7 +275,7 @@ const TestimonialsSection = () => {
             whileInView={{ opacity: 1 }}
             transition={{ delay: 0.3, duration: 0.6 }}
           >
-            Here's what they shared with us on Instagram
+            Real messages from happy customers on Instagram
           </motion.p>
         </motion.div>
 
@@ -345,8 +345,7 @@ const TestimonialsSection = () => {
                 }
                 requestAnimationFrame(step);
               }}
-              className={`w-2.5 h-2.5 md:w-3 md:h-3 rounded-full transition-all duration-500 ${
-                (() => {
+              className={`w-2.5 h-2.5 md:w-3 md:h-3 rounded-full transition-all duration-500 ${(() => {
                   const container = containerRef.current;
                   if (!container) return false;
                   const transform = container.style.transform;
@@ -355,7 +354,7 @@ const TestimonialsSection = () => {
                 })()
                   ? "bg-[#473C66] scale-125 shadow-lg"
                   : "bg-gray-300/60 hover:bg-gray-400/80 hover:scale-110"
-              }`}
+                }`}
               whileHover={{ scale: 1.2 }}
               whileTap={{ scale: 0.9 }}
             />

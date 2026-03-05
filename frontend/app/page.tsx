@@ -6,8 +6,9 @@ import { useRouter } from "next/navigation"
 import SiteHeader from "@/components/site-header"
 import { fetchProducts } from "@/lib/api-utils"
 import { getProductUrl } from "@/lib/product-url-utils"
-import { ChevronRight, ChevronDown, FolderTree } from "lucide-react"
+import { ChevronRight, ChevronDown, FolderTree, Truck, RotateCcw, ShieldCheck } from "lucide-react"
 import BannerCarousel from "@/components/banner-carousel"
+import TestimonialsSection from "@/components/testimonials-section"
 
 type Highlight = {
 	title: string
@@ -22,7 +23,7 @@ function CategoryTreeNode({ node, level = 0 }: { node: CategoryTree, level?: num
 
 	return (
 		<div className="w-full">
-			<div 
+			<div
 				className={`group flex items-center justify-between py-5 cursor-pointer border-b border-pink-50/50 hover:bg-pink-50/40 transition-all`}
 				style={{ paddingLeft: `${level * 2 + 1.5}rem`, paddingRight: '1.5rem' }}
 				onClick={() => {
@@ -39,10 +40,10 @@ function CategoryTreeNode({ node, level = 0 }: { node: CategoryTree, level?: num
 						{node.name}
 					</span>
 				</div>
-				
+
 				{hasChildren ? (
 					<div className="flex items-center gap-4">
-						<button 
+						<button
 							onClick={(e) => {
 								e.stopPropagation()
 								router.push(`/collections/${node.slug}`)
@@ -83,12 +84,12 @@ const getCategoryImage = (slug: string, index: number): string => {
 		'zipless-feeding-dupatta-lounge-wear': '/images/categories/dupatta-lounge.webp',
 		'non-feeding-lounge-wear': '/images/categories/non-feeding.webp',
 	}
-	
+
 	// If category has a specific image, use it
 	if (categoryImageMap[slug]) {
 		return categoryImageMap[slug]
 	}
-	
+
 	// Otherwise, cycle through available p_img files (p_img1 through p_img52)
 	// Use index to ensure different categories get different images
 	const imageNumber = ((index % 52) + 1) // Cycle through 1-52
@@ -125,7 +126,7 @@ function useRevealOnScroll(dependency: any) {
 
 	useEffect(() => {
 		if (typeof IntersectionObserver === "undefined") return
-		
+
 		const obs = new IntersectionObserver(
 			(entries) => {
 				entries.forEach((e) => {
@@ -179,7 +180,7 @@ export default function Home() {
 			try {
 				const tree = await fetchCategoryTree()
 				setCategoryTree(tree)
-				
+
 				// Map leaf categories to highlights (take first 7 or use fallback)
 				const leafCategories = getLeafCategories(tree)
 				if (leafCategories.length > 0) {
@@ -264,7 +265,7 @@ export default function Home() {
 
 	return (
 		<div className="min-h-screen bg-white font-sans text-gray-900 overflow-x-hidden">
-      <SiteHeader seamless sticky glassOnScroll />
+			<SiteHeader seamless sticky glassOnScroll />
 
 			{/* Category rail */}
 			<section className="bg-[#fce4ec] pt-3 pb-4 border-b border-pink-100/50 flex justify-center">
@@ -297,13 +298,53 @@ export default function Home() {
 			{/* Hero banner - Dynamic Carousel */}
 			<section className="bg-gradient-to-b from-[#fce4ec] to-white px-4 pb-6 sm:px-6 lg:px-8">
 				<div className="max-w-7xl mx-auto">
-					<BannerCarousel 
+					<BannerCarousel
 						autoPlay={true}
 						interval={5000}
 						showArrows={true}
 						showDots={true}
 						className="rounded-2xl shadow-sm"
 					/>
+				</div>
+			</section>
+
+			{/* Promotional banner strip */}
+			<section className="bg-[#3b2b52] py-2.5 px-4">
+				<p className="text-center text-[11px] sm:text-[12px] text-white/90 tracking-wide font-medium">
+					🚚 Free delivery on orders above ₹999 &nbsp;·&nbsp; ↩️ Easy returns &nbsp;·&nbsp; 🔒 Secure payments
+				</p>
+			</section>
+
+			{/* Trust badges strip */}
+			<section className="bg-white border-b border-gray-100 py-5 px-4 sm:px-6">
+				<div className="max-w-5xl mx-auto grid grid-cols-3 gap-3 sm:gap-6">
+					<div className="flex flex-col sm:flex-row items-center gap-1.5 sm:gap-3 text-center sm:text-left">
+						<span className="h-9 w-9 sm:h-10 sm:w-10 rounded-xl bg-gradient-to-br from-pink-500/15 to-purple-500/10 flex items-center justify-center shrink-0">
+							<Truck className="h-4 w-4 sm:h-5 sm:w-5 text-pink-600" />
+						</span>
+						<div>
+							<p className="font-semibold text-[12px] sm:text-[13px] text-[#3b2b52]">Fast Delivery</p>
+							<p className="text-[10px] sm:text-[11px] text-gray-500 hidden sm:block">3–4 working days</p>
+						</div>
+					</div>
+					<div className="flex flex-col sm:flex-row items-center gap-1.5 sm:gap-3 text-center sm:text-left">
+						<span className="h-9 w-9 sm:h-10 sm:w-10 rounded-xl bg-gradient-to-br from-pink-500/15 to-purple-500/10 flex items-center justify-center shrink-0">
+							<RotateCcw className="h-4 w-4 sm:h-5 sm:w-5 text-pink-600" />
+						</span>
+						<div>
+							<p className="font-semibold text-[12px] sm:text-[13px] text-[#3b2b52]">Easy Support</p>
+							<p className="text-[10px] sm:text-[11px] text-gray-500 hidden sm:block">Quick help via email</p>
+						</div>
+					</div>
+					<div className="flex flex-col sm:flex-row items-center gap-1.5 sm:gap-3 text-center sm:text-left">
+						<span className="h-9 w-9 sm:h-10 sm:w-10 rounded-xl bg-gradient-to-br from-pink-500/15 to-purple-500/10 flex items-center justify-center shrink-0">
+							<ShieldCheck className="h-4 w-4 sm:h-5 sm:w-5 text-pink-600" />
+						</span>
+						<div>
+							<p className="font-semibold text-[12px] sm:text-[13px] text-[#3b2b52]">Secure Checkout</p>
+							<p className="text-[10px] sm:text-[11px] text-gray-500 hidden sm:block">Safe & trusted payments</p>
+						</div>
+					</div>
 				</div>
 			</section>
 
@@ -319,6 +360,14 @@ export default function Home() {
 				<p className="mt-3 text-center text-[12px] sm:text-[13px] text-gray-600 max-w-2xl mx-auto leading-relaxed">
 					{seasonalSubtitle}
 				</p>
+				<div className="mt-3 text-center">
+					<button
+						onClick={() => router.push('/collections')}
+						className="text-[12px] sm:text-[13px] font-semibold text-pink-600 hover:text-pink-700 transition-colors inline-flex items-center gap-1"
+					>
+						View All <ChevronRight className="h-3.5 w-3.5" />
+					</button>
+				</div>
 			</section>
 
 			{/* Product grid */}
@@ -336,7 +385,7 @@ export default function Home() {
 
 						// Fallback: If not using reveal, or for skeletons, just show.
 						const show = isVisible || productsLoading
-						
+
 						return (
 							<article
 								key={id}
@@ -370,6 +419,12 @@ export default function Home() {
 											</span>
 										</div>
 									)}
+									{/* Discount badge */}
+									{originalPrice && originalPrice > price && (
+										<div className="absolute top-2 left-2 bg-[#E91E63] text-white px-2 py-0.5 rounded-full text-[10px] sm:text-[11px] font-bold shadow-md z-10">
+											{Math.round(((originalPrice - price) / originalPrice) * 100)}% OFF
+										</div>
+									)}
 								</div>
 
 								{/* Minimalist-modern info: transparent background, bottom border only */}
@@ -390,8 +445,11 @@ export default function Home() {
 				</div>
 			</section>
 
+			{/* Social Proof - Testimonials */}
+			<TestimonialsSection />
+
 			{/* Shop more by Category */}
-			<section className="px-4 sm:px-6 pb-32 max-w-4xl mx-auto w-full">
+			<section className="px-4 sm:px-6 pb-16 max-w-4xl mx-auto w-full">
 				<div className="flex items-center mb-12 lg:mb-16">
 					<div className="h-px flex-1 bg-gradient-to-r from-transparent to-black/10" />
 					<div className="flex flex-col items-center mx-8 text-center">
@@ -399,10 +457,10 @@ export default function Home() {
 							<FolderTree className="h-7 w-7 text-pink-500" />
 						</div>
 						<h2 className="text-[16px] sm:text-[18px] lg:text-[20px] font-bold tracking-[0.25em] text-[#3b2b52] uppercase font-serif">
-							THE COLLECTION DIRECTORY
+							Shop by Category
 						</h2>
 						<p className="mt-2 text-[12px] text-gray-500 italic tracking-widest uppercase">
-							Explore our curated hierarchy
+							Browse our curated collections
 						</p>
 					</div>
 					<div className="h-px flex-1 bg-gradient-to-l from-transparent to-black/10" />
@@ -429,7 +487,7 @@ export default function Home() {
 						</div>
 					)}
 				</div>
-				
+
 				{!categoriesLoading && categoryTree.length === 0 && (
 					<div className="text-center py-16 bg-gray-50 rounded-[2rem] border border-dashed border-gray-200">
 						<p className="text-sm text-gray-400">Our collection catalog is being updated.</p>
