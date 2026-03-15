@@ -41,7 +41,7 @@ type SiteHeaderProps = {
 export default function SiteHeader({
   searchValue,
   onSearchChange,
-  searchPlaceholder = "Search for brands and products",
+  searchPlaceholder = "Search Kurtis, Dresses, Ethnic Wear",
   showSearch = true,
   seamless = false,
   sticky = false,
@@ -116,7 +116,7 @@ export default function SiteHeader({
     }
 
     const searchTerm = effectiveSearchValue.trim()
-    
+
     if (!searchTerm) {
       return
     }
@@ -192,7 +192,7 @@ export default function SiteHeader({
           {/* Search bar inside pink header */}
           {showSearch && (
             <div className={["px-0", seamless ? "pb-1" : "pb-2"].join(" ")}>
-              <form 
+              <form
                 onSubmit={handleSearchSubmit}
                 className="relative max-w-2xl mx-auto"
               >

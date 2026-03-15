@@ -6,7 +6,7 @@ import { useRouter } from "next/navigation"
 import SiteHeader from "@/components/site-header"
 import { fetchProducts } from "@/lib/api-utils"
 import { getProductUrl } from "@/lib/product-url-utils"
-import { ChevronRight, ChevronDown, FolderTree, Truck, RotateCcw, ShieldCheck } from "lucide-react"
+import { ChevronRight, ChevronDown, FolderTree, Truck, RotateCcw, MessageSquare } from "lucide-react"
 import BannerCarousel from "@/components/banner-carousel"
 import TestimonialsSection from "@/components/testimonials-section"
 
@@ -324,7 +324,7 @@ export default function Home() {
 						</span>
 						<div>
 							<p className="font-semibold text-[12px] sm:text-[13px] text-[#3b2b52]">Fast Delivery</p>
-							<p className="text-[10px] sm:text-[11px] text-gray-500 hidden sm:block">3–4 working days</p>
+							<p className="text-[10px] sm:text-[11px] text-gray-500 block">Delivered in 3-4 working days</p>
 						</div>
 					</div>
 					<div className="flex flex-col sm:flex-row items-center gap-1.5 sm:gap-3 text-center sm:text-left">
@@ -332,17 +332,17 @@ export default function Home() {
 							<RotateCcw className="h-4 w-4 sm:h-5 sm:w-5 text-pink-600" />
 						</span>
 						<div>
-							<p className="font-semibold text-[12px] sm:text-[13px] text-[#3b2b52]">Easy Support</p>
-							<p className="text-[10px] sm:text-[11px] text-gray-500 hidden sm:block">Quick help via email</p>
+							<p className="font-semibold text-[12px] sm:text-[13px] text-[#3b2b52]">Easy Returns</p>
+							<p className="text-[10px] sm:text-[11px] text-gray-500 block">Hassle-free 7 day return</p>
 						</div>
 					</div>
 					<div className="flex flex-col sm:flex-row items-center gap-1.5 sm:gap-3 text-center sm:text-left">
 						<span className="h-9 w-9 sm:h-10 sm:w-10 rounded-xl bg-gradient-to-br from-pink-500/15 to-purple-500/10 flex items-center justify-center shrink-0">
-							<ShieldCheck className="h-4 w-4 sm:h-5 sm:w-5 text-pink-600" />
+							<MessageSquare className="h-4 w-4 sm:h-5 sm:w-5 text-pink-600" />
 						</span>
 						<div>
-							<p className="font-semibold text-[12px] sm:text-[13px] text-[#3b2b52]">Secure Checkout</p>
-							<p className="text-[10px] sm:text-[11px] text-gray-500 hidden sm:block">Safe & trusted payments</p>
+							<p className="font-semibold text-[12px] sm:text-[13px] text-[#3b2b52]">Instant Support</p>
+							<p className="text-[10px] sm:text-[11px] text-gray-500 block">Email & Instagram help</p>
 						</div>
 					</div>
 				</div>
