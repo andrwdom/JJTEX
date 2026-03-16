@@ -17,10 +17,10 @@ const mongoUri = process.env.MONGODB_URI || 'mongodb://localhost:27017/shithaa-e
 
 const cleanupAbandonedOrders = async () => {
   const correlationId = `cleanup_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
-  
+
   try {
     console.log(`🚨 [${correlationId}] Starting abandoned order cleanup...`);
-    
+
     // Note: MongoDB transactions require replica set, using non-transactional mode for standalone instance
     try {
       // 1. Clean up reservations older than 20 minutes (PhonePe session timeout)
@@ -38,9 +38,9 @@ const cleanupAbandonedOrders = async () => {
           { expiresAt: { $exists: false } }
         ]
       });
-      
+
       console.log(`[${correlationId}] Found ${oldReservations.length} old reservations to clean`);
-      
+
       let reservationsCleaned = 0;
       for (const reservation of oldReservations) {
         try {
@@ -50,17 +50,16 @@ const cleanupAbandonedOrders = async () => {
               const released = await releaseStockReservation(
                 item.productId,
                 item.size,
-                item.quantity,
-                { session }
+                item.quantity
               );
-              
+
               if (!released) {
                 console.error(`[${correlationId}] Failed to release stock for item in reservation ${reservation._id}`);
                 continue;
               }
             }
           }
-          
+
           // Mark as expired
           await Reservation.findByIdAndUpdate(
             reservation._id,
@@ -71,14 +70,14 @@ const cleanupAbandonedOrders = async () => {
               updatedAt: new Date()
             }
           );
-          
+
           reservationsCleaned++;
           console.log(`[${correlationId}] Cleaned reservation: ${reservation._id}`);
         } catch (error) {
           console.error(`[${correlationId}] Error cleaning reservation ${reservation._id}:`, error);
         }
       }
-      
+
       // 2. Clean up checkout sessions
       const now = new Date();
       const oldSessions = await CheckoutSession.find({
@@ -102,16 +101,16 @@ const cleanupAbandonedOrders = async () => {
           { timeoutAt: { $exists: false } }
         ]
       });
-      
+
       console.log(`[${correlationId}] Found ${oldSessions.length} old checkout sessions to clean`);
-      
+
       let sessionsCleaned = 0;
       for (const checkoutSession of oldSessions) {
         try {
           // 🔧 CRITICAL FIX: Check if there's a draft order with this session
           // If there is, DON'T release stock because the order owns it now
           // Check multiple possible linking fields
-          const draftOrder = await orderModel.findOne({ 
+          const draftOrder = await orderModel.findOne({
             $or: [
               { checkoutSessionId: checkoutSession.sessionId },
               { 'metadata.checkoutSessionId': checkoutSession.sessionId },
@@ -120,16 +119,16 @@ const cleanupAbandonedOrders = async () => {
             ],
             status: { $in: ['DRAFT', 'PENDING', 'CONFIRMED'] }
           });
-          
+
           if (draftOrder) {
             console.log(`[${correlationId}] ⚠️ Order ${draftOrder.orderId} (status: ${draftOrder.status}) exists for session ${checkoutSession.sessionId} - NOT releasing stock`);
             console.log(`[${correlationId}] Order linked by: checkoutSessionId=${draftOrder.checkoutSessionId}, metadata=${draftOrder.metadata?.checkoutSessionId}`);
-            
+
             // 🚨 CRITICAL: If order is already CONFIRMED/PAID, DEFINITELY don't release stock
             if (draftOrder.status === 'CONFIRMED' || draftOrder.paymentStatus === 'PAID') {
               console.log(`[${correlationId}] ✅ Order is CONFIRMED/PAID - stock was already deducted, NOT releasing`);
             }
-            
+
             // Just mark session as expired, but DON'T release stock
             await CheckoutSession.findByIdAndUpdate(
               checkoutSession._id,
@@ -142,21 +141,27 @@ const cleanupAbandonedOrders = async () => {
             );
             continue; // Skip to next session
           }
-          
+
           // 🚨 CRITICAL FIX: Also check for PAID/CONFIRMED orders (not just DRAFT/PENDING)
-          const paidOrder = await orderModel.findOne({ 
-            $or: [
-              { checkoutSessionId: checkoutSession.sessionId },
-              { 'metadata.checkoutSessionId': checkoutSession.sessionId },
-              { phonepeTransactionId: checkoutSession.phonepeTransactionId }
-            ],
-            $or: [
-              { status: 'CONFIRMED' },  // ✅ Check status field
-              { orderStatus: 'CONFIRMED' },  // ✅ Check orderStatus field
-              { paymentStatus: 'PAID' }  // ✅ Check paymentStatus field
+          const paidOrder = await orderModel.findOne({
+            $and: [
+              {
+                $or: [
+                  { checkoutSessionId: checkoutSession.sessionId },
+                  { 'metadata.checkoutSessionId': checkoutSession.sessionId },
+                  { phonepeTransactionId: checkoutSession.phonepeTransactionId }
+                ]
+              },
+              {
+                $or: [
+                  { status: 'CONFIRMED' },
+                  { orderStatus: 'CONFIRMED' },
+                  { paymentStatus: 'PAID' }
+                ]
+              }
             ]
           });
-          
+
           if (paidOrder) {
             console.log(`[${correlationId}] 🚨 Order ${paidOrder.orderId} is PAID/CONFIRMED for session ${checkoutSession.sessionId} - NOT releasing stock`);
             await CheckoutSession.findByIdAndUpdate(
@@ -170,15 +175,15 @@ const cleanupAbandonedOrders = async () => {
             );
             continue; // Skip to next session
           }
-          
+
           // No paid order exists, safe to release stock
           console.log(`[${correlationId}] No paid order found for session ${checkoutSession.sessionId} - releasing stock`);
-          
+
           // Get associated payment session
           const paymentSession = await PaymentSession.findOne({
             sessionId: checkoutSession.sessionId
           });
-          
+
           // Release stock for each item atomically (atomic function will verify reserved > 0)
           if (checkoutSession.items && checkoutSession.items.length > 0) {
             for (const item of checkoutSession.items) {
@@ -187,7 +192,7 @@ const cleanupAbandonedOrders = async () => {
                 item.size,
                 item.quantity
               );
-              
+
               if (!released) {
                 // If release failed, it likely means no reserved stock (already confirmed)
                 console.log(`[${correlationId}] Stock release skipped for ${item.productId} size ${item.size} - likely already confirmed`);
@@ -195,7 +200,7 @@ const cleanupAbandonedOrders = async () => {
               }
             }
           }
-          
+
           // Mark checkout session as expired
           await CheckoutSession.findByIdAndUpdate(
             checkoutSession._id,
@@ -207,7 +212,7 @@ const cleanupAbandonedOrders = async () => {
               reason: 'Timeout cleanup'
             }
           );
-          
+
           // Update payment session if it exists
           if (paymentSession) {
             await PaymentSession.findByIdAndUpdate(
@@ -219,22 +224,22 @@ const cleanupAbandonedOrders = async () => {
               }
             );
           }
-          
+
           sessionsCleaned++;
           console.log(`[${correlationId}] Cleaned session: ${checkoutSession.sessionId}`);
         } catch (error) {
           console.error(`[${correlationId}] Error cleaning session ${checkoutSession.sessionId}:`, error);
         }
       }
-      
+
       // 3. Verify and fix any inconsistencies (emergency fallback)
       const productsWithReserved = await productModel.find({
         'sizes.reserved': { $gt: 0 }
       });
-      
+
       if (productsWithReserved.length > 0) {
         console.log(`[${correlationId}] Found ${productsWithReserved.length} products with reserved stock - verifying...`);
-        
+
         for (const product of productsWithReserved) {
           for (const size of product.sizes) {
             if (size.reserved > 0) {
@@ -244,14 +249,14 @@ const cleanupAbandonedOrders = async () => {
                 'items.productId': product._id,
                 'items.size': size.size
               });
-              
+
               const activeCheckoutSessions = await CheckoutSession.find({
                 stockReserved: true,
                 status: { $in: ['pending', 'awaiting_payment'] },
                 'items.productId': product._id,
                 'items.size': size.size
               });
-              
+
               // If no active reservations or sessions, reset reserved count
               if (activeReservations.length === 0 && activeCheckoutSessions.length === 0) {
                 await productModel.updateOne(
@@ -264,20 +269,20 @@ const cleanupAbandonedOrders = async () => {
           }
         }
       }
-      
+
       console.log(`✅ [${correlationId}] Cleanup completed: ${reservationsCleaned} reservations, ${sessionsCleaned} sessions cleaned`);
-      
+
       return {
         success: true,
         reservationsCleaned,
         sessionsCleaned,
         productsWithReserved: productsWithReserved.length
       };
-      
+
     } catch (error) {
       throw error;
     }
-    
+
   } catch (error) {
     console.error(`❌ [${correlationId}] Cleanup failed:`, error);
     return { success: false, error: error.message };
@@ -299,13 +304,13 @@ const runWorker = async () => {
 mongoose.connect(mongoUri)
   .then(() => {
     console.log('✅ [Stock Cleanup Worker] Connected to MongoDB');
-    
+
     // Run immediately on startup
     runWorker();
-    
+
     // Then run every 5 minutes (300000ms)
     setInterval(runWorker, 5 * 60 * 1000);
-    
+
     console.log('🔄 [Stock Cleanup Worker] Started - will run every 5 minutes');
   })
   .catch((error) => {
