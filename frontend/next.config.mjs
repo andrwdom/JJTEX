@@ -9,9 +9,7 @@ const __dirname = path.dirname(__filename);
 const nextConfig = {
   // Set workspace root to silence pnpm-lock.yaml warning
   outputFileTracingRoot: __dirname,
-  eslint: {
-    ignoreDuringBuilds: true,
-  },
+  // Removed eslint configuration as it is no longer supported here
   typescript: {
     ignoreBuildErrors: true,
   },
@@ -151,15 +149,15 @@ const nextConfig = {
           },
         },
       };
-      
+
       // Tree shaking for production
       config.optimization.usedExports = true;
       config.optimization.sideEffects = false; // Enable aggressive tree shaking
-      
+
       // Mobile-specific optimizations
       config.optimization.splitChunks.maxSize = 244000; // ~240KB max chunk size for mobile
       config.optimization.splitChunks.minSize = 20000; // 20KB min chunk size
-      
+
       // More aggressive compression
       if (process.env.NODE_ENV === 'production') {
         config.optimization.minimize = true;
@@ -268,7 +266,6 @@ const sentryWebpackPluginOptions = {
   // Only upload source maps in production
   widenClientFileUpload: true,
   hideSourceMaps: true,
-  disableLogger: true,
 };
 
 export default withSentryConfig(nextConfig, sentryWebpackPluginOptions);
